@@ -264,7 +264,7 @@ local function createPlanner()
   header:SetScript("OnDragStart", function() frame:StartMoving() end)
   header:SetScript("OnDragStop", function() frame:StopMovingOrSizing() end)
   local title = label(header, "GameFontNormalLarge", 16, 13, 420)
-  title:SetText("Forever Profession Planner")
+  title:SetText("Forever Profession Trainer")
   paint(title, colors.gold)
 
   local close = CreateFrame("Button", nil, frame, "UIPanelCloseButton")
@@ -492,9 +492,9 @@ local function createPlanner()
   frame:Hide()
 end
 
-SLASH_FOREVERPROFESSIONPLANNER1 = "/foreverprof"
-SLASH_FOREVERPROFESSIONPLANNER2 = "/fpp"
-SlashCmdList.FOREVERPROFESSIONPLANNER = function(message)
+SLASH_FOREVERPROFESSIONTRAINER1 = "/fpt"
+SLASH_FOREVERPROFESSIONTRAINER2 = "/foreverprofessiontrainer"
+SlashCmdList.FOREVERPROFESSIONTRAINER = function(message)
   if not frame then
     if type(ForeverProfessionPlannerSettings) ~= "table" then ForeverProfessionPlannerSettings = {} end
     settings = ForeverProfessionPlannerSettings

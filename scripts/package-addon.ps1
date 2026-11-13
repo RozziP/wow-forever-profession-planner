@@ -5,6 +5,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
+# Keep the installed folder and TOC names so WoW can load existing saved settings.
 $addonName = 'ForeverProfessionPlanner'
 $addonDirectory = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot "../addon/$addonName")).Path
 $tocName = "$addonName.toc"
@@ -35,7 +36,7 @@ foreach ($line in ($toc -split '\r?\n')) {
 }
 
 $output = (New-Item -ItemType Directory -Path $OutputDirectory -Force).FullName
-$zipPath = Join-Path $output "$addonName-$version-forever.zip"
+$zipPath = Join-Path $output "ForeverProfessionTrainer-$version-forever.zip"
 $archiveFile = [IO.File]::Open($zipPath, [IO.FileMode]::Create)
 try {
     $archive = [IO.Compression.ZipArchive]::new($archiveFile, [IO.Compression.ZipArchiveMode]::Create)

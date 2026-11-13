@@ -1,4 +1,4 @@
-# Forever Profession Planner
+# Forever Profession Trainer
 
 Plan your profession leveling in WoW Forever. The addon reads your character’s current skill and shows what to craft, which materials to buy, and how much the remaining route is estimated to cost (based on Auctionator data)
 
@@ -9,7 +9,7 @@ Supports Alchemy, Blacksmithing, Enchanting, Engineering, Leatherworking, and Ta
 
 ## Plan a route
 
-1. Type `/fpp` and choose a profession. You can also jump straight to one with a command like `/fpp tailoring`.
+1. Type `/fpt` (or `/foreverprofessiontrainer`) and choose a profession. Use `/fpt tailoring` to jump straight to Tailoring.
 2. Set your **Target skill** with the slider or number field. The plan starts at your current skill, or at 1 for a profession you haven’t learned.
 3. Use **Overview** for the full remaining route, or select a skill range to see just those steps and materials. Save any crafted items marked **Keep ×N** for later steps.
 
