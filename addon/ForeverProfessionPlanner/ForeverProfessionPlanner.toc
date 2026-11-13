@@ -1,7 +1,7 @@
 ## Interface: 16001
 ## Title: Forever Profession Planner
 ## Notes: Six profession routes through 150 or 300, material costs, and Auctionator imports.
-## Version: 0.3.4
+## Version: 0.3.5
 ## OptionalDeps: Auctionator
 ## SavedVariables: ForeverProfessionPlannerSettings
 

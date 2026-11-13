@@ -24,6 +24,6 @@ The export covers Auction House items. Vendor supplies appear separately in the 
 
 **Shopping cost** is the estimated cost of buying the materials. **After vendor sales** shows what the route is expected to cost after selling the finished items you don’t need to keep. Training and vendor recipe fees are separate.
 
-The planner uses cached Auctionator prices when available and falls back to bundled prices. Click **Refresh prices** to recalculate from the cache. Items with missing prices are flagged, and craft counts can vary with skill gains.
+Cost estimates require Auctionator to have a cached price for every Auction House item in the list. If prices are missing, scan the Auction House with Auctionator, then click **Refresh prices**. The leveling steps and shopping list work without price data. Craft counts can vary with skill gains.
 
 The default routes are based on [WoW Professions’ WoW Forever guides](https://www.wow-professions.com/forever). Use **Copy guide link** to get the guide for the selected profession.

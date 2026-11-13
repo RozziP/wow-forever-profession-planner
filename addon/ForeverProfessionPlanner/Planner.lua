@@ -80,18 +80,14 @@ end
 
 local function patternEstimate(choice)
   local cost = choice.cost
-  local partial = #cost.missing > 0
+  if cost.net == nil then return choice.name .. " (unpriced)" end
   local amount = signedNet(cost.net)
   if cost.net > 0 then
     amount = "|cffff736b" .. amount .. "|r"
-  elseif cost.net < 0 and not partial then
+  elseif cost.net < 0 then
     amount = "|cff8fdbad" .. amount .. "|r"
   end
-  local suffix = ""
-  if partial then
-    suffix = #cost.missing == 1 and cost.missing[1]:find("^Pattern:") and ", pattern unpriced" or ", missing prices"
-  end
-  return choice.name .. " (" .. amount .. suffix .. ")"
+  return choice.name .. " (" .. amount .. ")"
 end
 
 local function addStepRow()
@@ -143,24 +139,27 @@ local function showRoute(index, keepScroll)
     end
   end
   local cost = route.cost
-  local partial = #cost.missing > 0
-  local source = cost.source .. "  |  Training and vendor recipe fees separate"
-  if partial then
-    local missing = #cost.missing == 1 and cost.missing[1] or (#cost.missing .. " items")
-    source = cost.source .. "  |  Unpriced: " .. missing
+  local source = ""
+  local netColor = colors.muted
+  if cost.net ~= nil then
+    source = "Auctionator cached prices  |  Training and vendor recipe fees separate"
+    netColor = cost.net > 0 and colors.red or (cost.net < 0 and colors.green or colors.text)
+  elseif #route.auction > 0 then
+    if cost.available then
+      local missing = #cost.missing == 1 and cost.missing[1] or (#cost.missing .. " items")
+      source = "Missing Auctionator prices: " .. missing .. "  |  Scan the Auction House, then refresh"
+    else
+      source = "Auctionator required for prices"
+    end
   end
-  if plan.comparison then source = plan.comparison.route .. "  |  " .. source end
-  if plan.tailoringRoute and not reached then source = plan.tailoringRoute .. "  |  " .. source end
+  local routeLabel = plan.comparison and plan.comparison.route or plan.tailoringRoute
+  if routeLabel and not reached then
+    source = source ~= "" and (routeLabel .. "  |  " .. source) or routeLabel
+  end
   frame.priceSource:SetText(source)
-  local suffix = partial and " + unpriced items" or ""
-  frame.costs[1]:SetText(money(cost.gross) .. suffix)
-  frame.costs[2]:SetText(signedNet(cost.net) .. (partial and " before missing costs" or ""))
-  local netColor = colors.text
-  if cost.net > 0 then
-    netColor = colors.red
-  elseif cost.net < 0 and not partial then
-    netColor = colors.green
-  end
+  frame.costs[1]:SetText(cost.gross and money(cost.gross) or "—")
+  frame.costs[2]:SetText(cost.net and signedNet(cost.net) or "—")
+  paint(frame.costs[1], cost.gross and colors.red or colors.muted)
   paint(frame.costs[2], netColor)
   if reached then
     frame.notes:SetText(rank and "You’ve reached this target. Raise it to see the next steps."
@@ -176,13 +175,13 @@ local function showRoute(index, keepScroll)
   if plan.comparison then
     local comparison = plan.comparison
     local function amount(cost)
-      return signedNet(cost.net) .. (#cost.missing > 0 and " + unpriced items" or "")
+      return cost.net and signedNet(cost.net) or "unpriced"
     end
     frame.patterns:SetText("Net to " .. plan.cap .. "  |  Optimized: " .. amount(comparison.optimized) ..
       "  |  WoW Professions: " .. amount(comparison.guide))
   elseif route.alternative then
-    local incomplete = #route.selected.cost.missing + #route.alternative.cost.missing > 0
-    local reason = incomplete and "Lower cost using known prices" or "Lower net cost"
+    local net, alternativeNet = route.selected.cost.net, route.alternative.cost.net
+    local reason = net and alternativeNet and net < alternativeNet and "Lower net cost" or "Selected route"
     frame.patterns:SetText(reason .. " for 265–" .. route.cap .. ": " .. patternEstimate(route.selected) ..
       "\nAlternative: " .. patternEstimate(route.alternative))
   else
@@ -380,7 +379,7 @@ local function createPlanner()
   targetInput:SetScript("OnEscapePressed", function(self) self:ClearFocus() end)
   targetInput:SetScript("OnEditFocusLost", function(self) self:SetNumber(targetSlider:GetValue()) end)
   local training = label(body, "GameFontHighlightSmall", 14, 419, 120)
-  training:SetText("Rush 150 picks the lower net cost. Buy extras allows up to 10% above ingredient cost.")
+  training:SetText("Rush 150 compares priced routes. Buy extras allows up to 10% above ingredient cost.")
   paint(training, colors.muted)
   frame.currentSkill = label(body, "GameFontNormal", 14, 484, 120)
   local inventoryNote = label(body, "GameFontHighlightSmall", 14, 505, 120)
