@@ -32,14 +32,8 @@ function distro(r,a,b) {
   return d;
 }
 function sum(d){return d.reduce((a,p,n)=>a+p*n,0)}
-function percentile(d,q){
-  let m=0;
-  for(let i=0;i<d.length;i++){m+=d[i];if(m+1e-10>=q)return i}
-  throw new Error(q+' no percentile');
-}
-function blend(a,b){const c=Array(1301).fill(0);for(let j=0;j<a.length&&j<c.length;j++)if(a[j]>1e-13)for(let k=0;k<b.length&&j+k<c.length;k++)if(b[k]>1e-13)c[j+k]+=a[j]*b[k];return c}
 const totals={};
-const linenBagsWithBoltSkill={mean:40.89748,buffer:61};
+const linenBagsWithBoltSkill=40.89748;
 const engRecipes=Object.fromEntries(prep.engineering.map(r=>[r.name,r]));
 const dynamiteSimulation=[];
 let seed=11998;
@@ -64,8 +58,8 @@ for(let i=0;i<60000;i++){
  dynamiteSimulation.push({stone,dynamite,roughBombs,linen:dynamite+roughBombs});
 }
 const engExpected=Object.fromEntries(Object.keys(dynamiteSimulation[0]).map(k=>{
- const a=dynamiteSimulation.map(row=>row[k]).sort((a,b)=>a-b);
- return [k,{mean:a.reduce((s,v)=>s+v,0)/a.length,buffer:a[Math.ceil(a.length*.99)-1]}];
+ const mean=dynamiteSimulation.reduce((sum,row)=>sum+row[k],0)/dynamiteSimulation.length;
+ return [k,mean];
 }));
 for(const [p,path] of Object.entries(paths)){
  const recipes=prep[p.toLowerCase()];
@@ -73,14 +67,13 @@ for(const [p,path] of Object.entries(paths)){
   const r=recipes.find(r=>r.name===name);
   if(r.start>a)throw new Error('early '+name);
   const d=distro(r,a,b),m=sum(d);
-  return {a,b,name,r,d,m,buffer:percentile(d,.99)};
+  return {a,b,name,r,m};
  });
- const combined={};
- for(const s of plans)combined[s.name]=combined[s.name]?blend(combined[s.name],s.d):s.d;
- const consumables=(budget)=>{
+ const stock={};
+ for(const step of plans)add(stock,step.name,step.m);
+ const consumables=()=>{
   const mat={...optionalVendorTools[p]};
-  const stock=Object.fromEntries(Object.entries(combined).map(([n,d])=>[n,budget?percentile(d,.99):sum(d)]));
-  if(p==='Tailoring')stock['Linen Bag']=budget?linenBagsWithBoltSkill.buffer:linenBagsWithBoltSkill.mean;
+  if(p==='Tailoring')stock['Linen Bag']=linenBagsWithBoltSkill;
   function use(n,q) {
     if(embedded[n])for(const [k,a] of embedded[n])use(k,a*q);
     else add(mat,n,q);
@@ -93,36 +86,30 @@ for(const [p,path] of Object.entries(paths)){
   if(p==='Engineering'){
     delete mat['Rough Blasting Powder'];
     delete mat['Rough Stone'];
-    const field=budget?'buffer':'mean';
-    mat['Rough Stone']=engExpected.stone[field];
-    mat['Copper Bar']+=2*(engExpected.roughBombs[field]-stock['Rough Copper Bomb']);
-    mat['Linen Cloth']+=engExpected.linen[field]-stock['Rough Copper Bomb']-stock['Rough Dynamite'];
+    mat['Rough Stone']=engExpected.stone;
+    mat['Copper Bar']+=2*(engExpected.roughBombs-stock['Rough Copper Bomb']);
+    mat['Linen Cloth']+=engExpected.linen-stock['Rough Copper Bomb']-stock['Rough Dynamite'];
   }
-  if(budget&&p==='Alchemy')mat.Mageroyal=Math.max(100,mat.Mageroyal);
-  if(budget&&p==='Alchemy')mat['Empty Vial']=5*Math.ceil(mat['Empty Vial']/5);
-  if(p==='Enchanting')mat['Greater Magic Essence']=Math.ceil(mat['Greater Magic Essence']-1e-6);
-  for(const [k,q] of Object.entries(mat))if(q>0&&q<1)throw Error(k+' has '+q);
-  return mat;
+  return Object.fromEntries(Object.entries(mat).map(([name,quantity])=>[name,Math.ceil(quantity-1e-9)]));
  };
  const quote=mat=>Object.entries(mat).reduce((t,[n,q])=>{const val=vend[n]??prices[n];if(!Number.isFinite(val))throw Error('missing '+n);return t+q*val;},0);
- const typical=consumables(false),cart=consumables(true);
+ const cart=consumables();
  if(p==='Tailoring'){
   const bags=plans.find(s=>s.name==='Linen Bag');
-  bags.m=linenBagsWithBoltSkill.mean;
-  bags.buffer=linenBagsWithBoltSkill.buffer;
+  bags.m=linenBagsWithBoltSkill;
  }
  if(p==='Engineering')for(const [name,key] of [['Rough Dynamite','dynamite'],['Rough Copper Bomb','roughBombs']]){
   const step=plans.find(s=>s.name===name);
-  step.m=engExpected[key].mean;
-  step.buffer=engExpected[key].buffer;
+  step.m=engExpected[key];
  }
  const revenue=plans.reduce((t,s)=>t+(retained.has(s.name)?0:s.m*(sales[s.name]??0)*(yields[s.name]??1)),0);
- const gross=quote(typical),net=gross-revenue;
- const buffer=quote(cart);
+ const gross=quote(cart),net=gross-revenue;
  const vendor=Object.fromEntries(Object.entries(cart).filter(([n])=>n in vend));
  const ah=Object.fromEntries(Object.entries(cart).filter(([n])=>!(n in vend)));
  const importString=[p+' 1-150 Trainer',...Object.entries(ah).map(([k,q])=>'"'+k+'"'+ ';'.repeat(11)+'#;;'+q)].join('^');
- output[p]={plans:plans.map(({a,b,name,m,buffer})=>({a,b,name,m,buffer})),cart,vendor,ah,importString,typical,gross,revenue,net,buffer};
- for(const [n,val] of Object.entries({gross,revenue,net,buffer}))add(totals,n,val);
+ const vendorSpend=quote(vendor);
+ output[p]={plans:plans.map(({a,b,name,m})=>({a,b,name,m})),cart,vendor,ah,importString,gross,revenue,net,vendorSpend};
+ for(const [n,val] of Object.entries({gross,revenue,net}))add(totals,n,val);
 }
-console.log(JSON.stringify({output,totals},null,2));
+if (require.main === module) console.log(JSON.stringify({output,totals},null,2));
+module.exports = { output, vend, sales, retained, yields };

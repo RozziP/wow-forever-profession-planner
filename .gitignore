@@ -4,3 +4,4 @@ prices.json
 *.local.csv
 *.local.json
 route-results.json
+/dist/

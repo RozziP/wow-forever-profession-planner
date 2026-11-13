@@ -1,0 +1,25 @@
+name: Release WoW Forever addon
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          persist-credentials: false
+
+      - name: Package and publish addon
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $package = ./scripts/package-addon.ps1 -Tag $env:GITHUB_REF_NAME
+          gh release create $env:GITHUB_REF_NAME $package --verify-tag --generate-notes
