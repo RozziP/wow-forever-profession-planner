@@ -197,7 +197,8 @@ module.exports = {
       ['Coarse Thread', 28, 10], ['Fine Thread', 159, 100], ['Red Dye', 92, 50],
       ['Silken Thread', 161, 500], ['Heavy Silken Thread', 10, 2000], ['Rune Thread', 67, 5000],
     ],
-    notes: 'Make 153 wool, 184 silk, 157 mageweave, and 244 runecloth bolts through 265. Buy Pattern: Runecloth Gloves from Qia in Winterspring. The planner estimates crafts for the 265–300 world-drop patterns.',
+    notes: 'Follow the bolt quantities in the recipe and shopping lists. Buy Pattern: Runecloth Gloves from Qia in Winterspring if needed.',
+    beltOption: [215, 225, 'Runecloth Belt', 10, 5112],
     finishes: [
       {
         name: 'Runecloth Shoulders',

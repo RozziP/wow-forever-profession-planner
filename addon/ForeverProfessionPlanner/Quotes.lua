@@ -77,6 +77,12 @@ local function newSection(from, cap)
   return { from = from, cap = cap, steps = {}, auction = {}, vendor = {}, vendorSpend = 0, revenue = 0 }
 end
 
+local function lowerCost(candidate, reference)
+  local candidateMissing, referenceMissing = #candidate.missing, #reference.missing
+  return candidateMissing < referenceMissing
+    or (candidateMissing == referenceMissing and candidate.net < reference.net)
+end
+
 local buyExtraLeather = { ["Light Leather"] = true, ["Medium Leather"] = true, ["Heavy Leather"] = true }
 local keepTools = {
   ["Runed Copper Rod"] = true, ["Runed Silver Rod"] = true, ["Runed Golden Rod"] = true,
@@ -84,12 +90,17 @@ local keepTools = {
   ["Arclight Spanner"] = true, ["Gyromatic Micro-Adjustor"] = true,
 }
 
-local function sectionPlans(base, target, readPrice, preferBuying)
+local function sectionPlans(base, start, target, readPrice, preferBuying)
   local sections, prices, vendorPrices = {}, {}, {}
   local recipes, stock = {}, {}
   for _, item in ipairs(base.intermediates) do prices[item.name] = item end
   for _, item in ipairs(base.auction) do prices[item.name] = item end
   for _, item in ipairs(base.vendor) do vendorPrices[item.name] = item end
+  -- Earlier recipes can supply materials, but the player's previous outputs are unknown.
+  for _, step in ipairs(base.steps) do
+    if step.from >= start then break end
+    recipes[step.recipe] = step
+  end
 
   local function priceOf(name)
     if vendorPrices[name] then return vendorPrices[name].price end
@@ -100,8 +111,8 @@ local function sectionPlans(base, target, readPrice, preferBuying)
   local section, shopping
   local function prepFor(name)
     if buyExtraLeather[name] then return end
-    local recipe = recipes[name]
-    if recipe then return recipe.mat, recipe.yield end
+    local recipe = recipes[name] or (base.prep and base.prep[name])
+    if recipe then return recipe.mat, recipe.yield, recipe.action end
   end
 
   local function unitCost(name)
@@ -130,7 +141,7 @@ local function sectionPlans(base, target, readPrice, preferBuying)
       if remaining <= 0 then return end
     end
 
-    local ingredients, yield = prepFor(name)
+    local ingredients, yield, action = prepFor(name)
     local buying = priceOf(name)
     local making = 0
     if ingredients then
@@ -144,12 +155,13 @@ local function sectionPlans(base, target, readPrice, preferBuying)
     for material, units in pairs(ingredients) do consume(material, units * crafts) end
     local previous = section.steps[#section.steps]
     local prep
-    if previous and previous.prep and previous.recipe == name then
+    local caption = action or name
+    if previous and previous.prep and previous.recipe == caption then
       previous.crafts = previous.crafts + crafts
       previous.keep = previous.keep + remaining
       prep = previous
     else
-      prep = { recipe = name, crafts = crafts, prep = true, keep = remaining }
+      prep = { recipe = caption, crafts = crafts, prep = true, keep = remaining }
       section.steps[#section.steps + 1] = prep
     end
     addStock(name, prep, crafts * yield - remaining)
@@ -163,8 +175,8 @@ local function sectionPlans(base, target, readPrice, preferBuying)
   end
 
   for _, bounds in ipairs({ { 1, 75 }, { 75, 150 }, { 150, 225 }, { 225, 300 } }) do
-    local from, to = bounds[1], math.min(bounds[2], target)
-    if to > from or from == target and target == 1 then
+    local from, to = math.max(bounds[1], start), math.min(bounds[2], target)
+    if to > from then
       section, shopping = newSection(from, to), {}
       sections[#sections + 1] = section
       for _, step in ipairs(base.steps) do
@@ -173,7 +185,7 @@ local function sectionPlans(base, target, readPrice, preferBuying)
           local stepFrom, stepTo = math.max(from, step.from), math.min(to, step.to)
           if crafts > 0 then
             for material, units in pairs(step.mat) do consume(material, units * crafts) end
-            if step.from >= from then
+            if step.from >= from or from == start then
               for material, units in pairs(step.turnIn or {}) do consume(material, units) end
             end
             local row = { from = stepFrom, to = stepTo, recipe = step.recipe, crafts = crafts }
@@ -207,10 +219,10 @@ local function sectionPlans(base, target, readPrice, preferBuying)
   return sections
 end
 
-local function finishFor(recipe, target, bolt, readPrice, preferBuying)
-  local crafts = expectedCrafts(265, target, 275, 305)
+local function finishFor(recipe, start, target, bolt, readPrice, preferBuying)
+  local crafts = expectedCrafts(start, target, 275, 305)
   local finish = {
-    name = recipe.name, step = { from = 265, to = target, recipe = recipe.name, crafts = crafts },
+    name = recipe.name, step = { from = start, to = target, recipe = recipe.name, crafts = crafts },
     auction = { recipe.pattern }, vendor = {}, vendorSpend = 0, revenue = crafts * recipe.sell,
   }
   for _, item in ipairs(recipe.auction) do
@@ -234,23 +246,18 @@ local function finishFor(recipe, target, bolt, readPrice, preferBuying)
   return finish
 end
 
-function addon.GetPlan(index, stopAt150, target, preferBuying)
-  local profession = addon.routes[index]
-  local source = profession.full
-  local maximum = stopAt150 and 150 or 300
-  local cap = math.min(maximum, math.max(1, math.floor(target or maximum)))
-  local readPrice = makePriceReader()
-  local sections = sectionPlans(source, cap, readPrice, preferBuying)
-  local plan = newSection(1, cap)
+local function buildPlan(profession, source, start, cap, readPrice, preferBuying, usePublished)
+  local sections = sectionPlans(source, start, cap, readPrice, preferBuying)
+  local plan = newSection(start, cap)
   plan.name, plan.url, plan.notes, plan.sections = profession.name, profession.url, source.notes, sections
   local selected, alternative
-  if source.finishes and cap > 265 then
-    local first = finishFor(source.finishes[1], cap, source.finishBolt, readPrice, preferBuying)
-    local second = finishFor(source.finishes[2], cap, source.finishBolt, readPrice, preferBuying)
+  if source.finishes and cap > 265 and start < cap then
+    local finishStart = math.max(start, 265)
+    local first = finishFor(source.finishes[1], finishStart, cap, source.finishBolt, readPrice, preferBuying)
+    local second = finishFor(source.finishes[2], finishStart, cap, source.finishBolt, readPrice, preferBuying)
     local firstQuote, secondQuote = quote(first, readPrice), quote(second, readPrice)
     selected, alternative = first, second
-    if secondQuote.net < firstQuote.net
-      or (secondQuote.net == firstQuote.net and #secondQuote.missing < #firstQuote.missing) then
+    if lowerCost(secondQuote, firstQuote) then
       selected, alternative = second, first
       firstQuote, secondQuote = secondQuote, firstQuote
     end
@@ -274,14 +281,76 @@ function addon.GetPlan(index, stopAt150, target, preferBuying)
     plan.vendorSpend = plan.vendorSpend + section.vendorSpend
     plan.revenue = plan.revenue + section.revenue
   end
-  local published = source.published[cap]
-  if source.finishes and cap >= 265 then published = source.published[265] end
-  if published and not preferBuying then
+  local published = source.published and source.published[cap]
+  if source.published and source.finishes and cap >= 265 then published = source.published[265] end
+  if published and usePublished then
     plan.auction = mergeItems(published, selected and selected.auction)
     plan.published = true
   end
   plan.cost = quote(plan, readPrice)
   return plan
+end
+
+local function tailoringPlan(profession, start, cap, readPrice, preferBuying, usePublished)
+  local full, rush = profession.full, profession.rush
+  local belt = full.beltOption
+  local canUseRush = start < 150 and start < cap
+  local canUseBelt = start < belt.to and cap > belt.from and start < cap
+  local best = buildPlan(profession, full, start, cap, readPrice, preferBuying,
+    usePublished and not (canUseRush or canUseBelt))
+  best.tailoringRoute = "WoW Professions"
+  if not canUseRush and not canUseBelt then return best end
+
+  local function compare(useRush, useBelt, label)
+    local route = {
+      steps = {}, notes = full.notes, finishes = full.finishes, finishBolt = full.finishBolt,
+      auction = useRush and mergeItems(full.auction, rush.auction) or full.auction,
+      vendor = useRush and mergeItems(full.vendor, rush.vendor) or full.vendor,
+      intermediates = useRush and mergeItems(full.intermediates, rush.intermediates) or full.intermediates,
+    }
+    if useRush then
+      for _, step in ipairs(rush.steps) do route.steps[#route.steps + 1] = step end
+    end
+    for _, step in ipairs(full.steps) do
+      if not useRush or step.from >= 150 then
+        route.steps[#route.steps + 1] = useBelt and step.from == belt.from and step.to == belt.to and belt or step
+      end
+    end
+    local candidate = buildPlan(profession, route, start, cap, readPrice, preferBuying)
+    if lowerCost(candidate.cost, best.cost) then
+      candidate.tailoringRoute = label
+      best = candidate
+    end
+  end
+
+  if canUseRush then compare(true, false, "Optimized early route") end
+  if canUseBelt then compare(false, true, "Runecloth Belt at 215") end
+  if canUseRush and canUseBelt then compare(true, true, "Optimized early route + Runecloth Belt at 215") end
+  return best
+end
+
+function addon.GetPlan(index, rush150, target, preferBuying, currentSkill)
+  local profession = addon.routes[index]
+  local maximum = rush150 and 150 or 300
+  local cap = math.min(maximum, math.max(1, math.floor(target or maximum)))
+  local start = math.max(1, math.floor(currentSkill or 1))
+  local readPrice = makePriceReader()
+  if not rush150 and profession.full.beltOption then
+    return tailoringPlan(profession, start, cap, readPrice, preferBuying, start == 1 and not preferBuying)
+  end
+  local guide = buildPlan(profession, profession.full, start, cap, readPrice, preferBuying,
+    start == 1 and not rush150 and not preferBuying)
+  if not rush150 or start >= cap then return guide end
+
+  local optimized = buildPlan(profession, profession.rush, start, cap, readPrice, false)
+  local useOptimized = lowerCost(optimized.cost, guide.cost)
+  local chosen = useOptimized and optimized or guide
+  chosen.comparison = {
+    route = useOptimized and "Optimized route" or "WoW Professions",
+    guide = guide.cost,
+    optimized = optimized.cost,
+  }
+  return chosen
 end
 
 function addon.ImportString(plan)

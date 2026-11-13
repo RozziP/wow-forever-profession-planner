@@ -6,11 +6,17 @@ Estimate the material cost of leveling Alchemy, Blacksmithing, Enchanting, Engin
 
 For a local install, copy `addon/ForeverProfessionPlanner` into your WoW installation's `_forever_/Interface/AddOns` directory. Once the addon has a public GitHub release, select **WoW Forever** in WowUp and paste the repository URL into **Get Addons → Install from URL**. Restart the game, enable **Forever Profession Planner**, and type `/fpp` or `/foreverprof`. Use `/fpp tailoring` to open a specific profession.
 
-The header has a **Target skill** slider from 1 to 300, a number field, and presets for 75, 150, 225, and 300. The planner remembers the selected target. **Overview** shows the entire plan. Each skill tab shows its own steps, costs, and shopping list. **Keep ×N** marks recipe outputs used later in the selected plan or tools you should retain.
+Set your target with the **Target skill** slider or number field. The planner remembers the selected target. **Overview** shows the entire plan. Each skill tab shows its own steps, costs, and shopping list. **Keep ×N** marks recipe outputs used later in the selected plan or tools you should retain.
+
+The planner starts at the current character’s profession skill and updates when that skill changes. For professions the character hasn’t learned, it starts at 1. The shopping list estimates materials for the remaining route without subtracting items already in your bags.
+
+Turning on **Rush 150** opens the full 1–150 overview. It compares the bundled optimized route with the WoW Professions route and uses the lower estimated net cost after vendor sales. When prices are missing, it favors the more completely priced route. You can lower the target while Rush 150 is on. Turning it off restores your regular target.
 
 **Buy extras** is on by default. It builds the shopping list from the WoW Professions recipes and buys extra components when they cost at most 10% more than their ingredients. Turn it off to use the published shopping list in Overview at the guide’s checkpoints. Skill-up recipes stay in the route. Leatherworking converts leather during its leveling stretches and buys any additional leather. Tailoring estimates up to 62 crafts to finish from 265. It compares Runecloth Shoulders and Wizardweave Turban using the pattern cost, materials, and vendor resale.
 
-The **Auctionator import** button selects a quantity-aware shopping list for copying into **Auctionator → Shopping → Import**. **Refresh prices** rereads Auctionator's cache and re-evaluates the Tailoring finish. The planner falls back to bundled prices per item and flags partial quotes. Costs exclude training and vendor recipe fees. The leveling quantities are estimates and contain no added shopping buffer.
+Tailoring compares the optimized early route with the guide by default, then checks Mageweave Bags against Runecloth Belts for 215–225. It recalculates the shopping list when it compares routes.
+
+**Export shopping list** selects the list for copying and shows how to import it from Auctionator’s Shopping tab. **Refresh prices** rereads Auctionator's cache and re-evaluates Tailoring options. The planner falls back to bundled prices per item and flags partial quotes. Costs exclude training and vendor recipe fees. The leveling quantities are estimates and contain no added shopping buffer.
 
 Rebuild the addon data from another local export with:
 

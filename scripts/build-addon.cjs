@@ -27,6 +27,7 @@ if (!exportPath) {
 }
 
 const prices = readPrices(exportPath);
+const { output: rushRoutes, vend, sales, retained, yields } = require('../finalroutes.cjs');
 
 function auctionItem([name, id, quantity]) {
   if (!id) throw new Error('Missing WoW item ID for ' + name);
@@ -84,7 +85,7 @@ const questThorium = {
   'Imperial Plate Leggings': 60,
 };
 
-function stepsFor(name, rows) {
+function stepsFor(name, rows, yieldsByRecipe = outputs, modeledSteps = []) {
   const professionRecipes = recipes[name.toLowerCase()];
   return rows.map(([from, to, recipe, estimate, sell]) => {
     const data = professionRecipes.find(row => row.name === recipe);
@@ -92,9 +93,9 @@ function stepsFor(name, rows) {
     if (!mat) throw new Error('Missing materials for ' + recipe);
     const step = {
       from, to, recipe, crafts: Math.ceil(estimate - 1e-9),
-      mat, yield: outputs[recipe] ?? 1, sell,
+      mat, yield: yieldsByRecipe[recipe] ?? 1, sell,
     };
-    if (data && data.skill[3] >= to) {
+    if (data && data.skill[3] >= to && !modeledSteps.includes(recipe)) {
       step.yellow = data.skill[1];
       step.gray = data.skill[3];
     }
@@ -109,6 +110,19 @@ function intermediates(route) {
     .filter(([name]) => used.has(name))
     .map(([name, id]) => auctionItem([name, id, 0]));
 }
+
+const rushItemIds = {
+  'Oily Blackmouth': 6358,
+  'Greater Magic Essence': 10939,
+  Tigerseye: 818,
+  'Light Leather': 2318,
+  'Heavy Leather': 4234,
+};
+const rushPrep = {
+  Enchanting: { 'Lesser Magic Essence': { mat: { 'Greater Magic Essence': 1 }, yield: 3, action: 'Split Greater Magic Essence' } },
+  Engineering: { 'Handful of Copper Bolts': { mat: { 'Copper Bar': 1 }, yield: 1 } },
+  Leatherworking: { 'Cured Medium Hide': { mat: { 'Medium Hide': 1, Salt: 1 }, yield: 1 } },
+};
 
 const publishedCheckpoints = {
   Alchemy: { 225: { Liferoot: 36, Stranglekelp: 82, "Khadgar's Whisker": 0, Sungrass: 0, Blindweed: 0, 'Stonescale Oil': 0 } },
@@ -143,14 +157,28 @@ const professions = Object.entries(guides).map(([name, guide]) => {
     full.finishes = tailoringFinishes(guide.finishes);
     full.finishBolt = auctionItem(['Bolt of Runecloth', intermediateIds['Bolt of Runecloth'], 0]);
   }
+  if (guide.beltOption) [full.beltOption] = stepsFor(name, [guide.beltOption]);
   full.intermediates = intermediates(full);
   full.published = Object.fromEntries(Object.entries({ ...publishedCheckpoints[name], 300: {} })
     .map(([cap, counts]) => [cap, guide.auction.map(([item, id, quantity]) =>
       [item, id, counts[item] ?? quantity]).filter(([, , quantity]) => quantity > 0).map(auctionItem)]));
+  const ids = { ...intermediateIds, ...Object.fromEntries(guide.auction.map(([item, id]) => [item, id])), ...rushItemIds };
+  const rushRoute = rushRoutes[name];
+  const rush = {
+    steps: stepsFor(name, rushRoute.plans.map(({ a, b, name: recipe, m }) => [
+      a, b, recipe, m, retained.has(recipe) ? 0 : (sales[recipe] ?? 0) * (yields[recipe] ?? 1),
+    ]), { ...outputs, ...yields }, ['Rough Dynamite', 'Rough Copper Bomb', 'Linen Bag']),
+    auction: Object.entries(rushRoute.ah).map(([item, quantity]) => auctionItem([item, ids[item], quantity])),
+    vendor: Object.entries(rushRoute.vendor).map(([item, quantity]) => vendorItem([item, quantity, vend[item]])),
+    prep: rushPrep[name] ?? {},
+    notes: 'Use the estimated craft counts to shop, then switch recipes when you reach the next skill range.',
+  };
+  rush.intermediates = intermediates(rush);
   return {
     name,
     url: 'https://www.wow-professions.com/forever/' + name.toLowerCase() + '-leveling-guide',
     full,
+    rush,
   };
 });
 
