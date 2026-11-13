@@ -1,0 +1,846 @@
+{
+  "Minor Mana Potion": [
+    10,
+    "287968"
+  ],
+  "Sulfuric Acid": [
+    125,
+    "249410"
+  ],
+  "Minor Troll's Blood Elixir": [
+    10,
+    "3382"
+  ],
+  "Greater Magic Wand": [
+    200,
+    "11288"
+  ],
+  "Elixir of Minor Strength": [
+    20,
+    "2454"
+  ],
+  "Lesser Magic Wand": [
+    110,
+    "11287"
+  ],
+  "Enchanted Lute": [
+    0,
+    "279976"
+  ],
+  "Mana Well": [
+    0,
+    "279956"
+  ],
+  "Minor Rejuvenation Potion": [
+    15,
+    "2456"
+  ],
+  "Cerulean Dye": [
+    75,
+    "249409"
+  ],
+  "Elixir of Minor Defense": [
+    5,
+    "5997"
+  ],
+  "Fire Oil": [
+    12,
+    "6371"
+  ],
+  "Elixir of Minor Fortitude": [
+    15,
+    "2458"
+  ],
+  "Swim Speed Potion": [
+    35,
+    "6372"
+  ],
+  "Lesser Troll's Blood Elixir": [
+    40,
+    "3388"
+  ],
+  "Magenta Dye": [
+    250,
+    "249430"
+  ],
+  "Elixir of Wisdom": [
+    100,
+    "3383"
+  ],
+  "Lesser Mana Potion": [
+    30,
+    "287969"
+  ],
+  "Draught of Water Breathing": [
+    95,
+    "5996"
+  ],
+  "Blackmouth Oil": [
+    10,
+    "6370"
+  ],
+  "Light Leather": [
+    15,
+    "2318"
+  ],
+  "Elixir of Fire Power": [
+    35,
+    "6373"
+  ],
+  "Elixir of Lesser Defense": [
+    40,
+    "3389"
+  ],
+  "Light Armor Kit": [
+    15,
+    "2304"
+  ],
+  "Handstitched Leather Vest": [
+    40,
+    "5957"
+  ],
+  "Handstitched Leather Bracers": [
+    28,
+    "7277"
+  ],
+  "Embossed Leather Vest": [
+    192,
+    "2300"
+  ],
+  "Small Leather Ammo Pouch": [
+    25,
+    "7279"
+  ],
+  "Handstitched Leather Cloak": [
+    34,
+    "7276"
+  ],
+  "Handstitched Leather Belt": [
+    34,
+    "4237"
+  ],
+  "Murloc Scale Shoes": [
+    0,
+    "252426"
+  ],
+  "Handstitched Leather Boots": [
+    29,
+    "2302"
+  ],
+  "Embossed Leather Gloves": [
+    71,
+    "4239"
+  ],
+  "Embossed Leather Cloak": [
+    112,
+    "2310"
+  ],
+  "Handstitched Leather Pants": [
+    71,
+    "2303"
+  ],
+  "Camp Tent": [
+    0,
+    "279978"
+  ],
+  "Light Leather Bracers": [
+    84,
+    "7281"
+  ],
+  "Light Leather Quiver": [
+    25,
+    "7278"
+  ],
+  "Cured Light Hide": [
+    110,
+    "4231"
+  ],
+  "Dark Leather Belt": [
+    703,
+    "4249"
+  ],
+  "Fine Leather Cloak": [
+    267,
+    "2308"
+  ],
+  "Fine Leather Tunic": [
+    461,
+    "4243"
+  ],
+  "Nimble Leather Gloves": [
+    588,
+    "7285"
+  ],
+  "Light Leather Pants": [
+    599,
+    "7282"
+  ],
+  "Fine Leather Belt": [
+    125,
+    "4246"
+  ],
+  "Toughened Leather Armor": [
+    743,
+    "2314"
+  ],
+  "Dark Leather Pants": [
+    1089,
+    "5961"
+  ],
+  "Gray Leather Boots": [
+    307,
+    "2315"
+  ],
+  "Medium Armor Kit": [
+    200,
+    "2313"
+  ],
+  "Medium Leather": [
+    50,
+    "2319"
+  ],
+  "Dark Leather Cloak": [
+    408,
+    "2316"
+  ],
+  "Embossed Leather Boots": [
+    217,
+    "2309"
+  ],
+  "Cured Medium Hide": [
+    200,
+    "4233"
+  ],
+  "Embossed Leather Pants": [
+    347,
+    "4242"
+  ],
+  "Heavy Leather": [
+    150,
+    "4234"
+  ],
+  "Heavy Quiver": [
+    500,
+    "7371"
+  ],
+  "Heavy Leather Ammo Pouch": [
+    500,
+    "7372"
+  ],
+  "Hillman's Leather Gloves": [
+    1049,
+    "4247"
+  ],
+  "Rough Blasting Powder": [
+    4,
+    "4357"
+  ],
+  "Cured Heavy Hide": [
+    225,
+    "4236"
+  ],
+  "Heavy Armor Kit": [
+    650,
+    "4265"
+  ],
+  "Fletcher's Gloves": [
+    690,
+    "7348"
+  ],
+  "Toughened Leather Gloves": [
+    962,
+    "4253"
+  ],
+  "Green Leather Belt": [
+    1311,
+    "4257"
+  ],
+  "Hillman's Cloak": [
+    1027,
+    "3719"
+  ],
+  "Guardian Pants": [
+    2794,
+    "5962"
+  ],
+  "Crafted Light Shot": [
+    0,
+    "8067"
+  ],
+  "Hillman's Shoulders": [
+    659,
+    "4251"
+  ],
+  "Rough Dynamite": [
+    30,
+    "4358"
+  ],
+  "Reagent Bot": [
+    0,
+    "279950"
+  ],
+  "Copper Tube": [
+    120,
+    "4361"
+  ],
+  "Crafted Heavy Shot": [
+    0,
+    "8068"
+  ],
+  "Crude Scope": [
+    125,
+    "4405"
+  ],
+  "Arclight Spanner": [
+    144,
+    "6219"
+  ],
+  "Flying Tiger Goggles": [
+    408,
+    "4368"
+  ],
+  "Coarse Blasting Powder": [
+    12,
+    "4364"
+  ],
+  "Silver Contact": [
+    25,
+    "4404"
+  ],
+  "Rough Boomstick": [
+    187,
+    "4362"
+  ],
+  "Target Dummy": [
+    75,
+    "4366"
+  ],
+  "Coarse Dynamite": [
+    75,
+    "4365"
+  ],
+  "Handful of Copper Bolts": [
+    12,
+    "4359"
+  ],
+  "Rough Copper Bomb": [
+    60,
+    "4360"
+  ],
+  "Copper Modulator": [
+    50,
+    "4363"
+  ],
+  "Practice Lock": [
+    12,
+    "6712"
+  ],
+  "Bronze Tube": [
+    200,
+    "4371"
+  ],
+  "Small Bronze Bomb": [
+    200,
+    "4374"
+  ],
+  "Large Copper Bomb": [
+    175,
+    "4370"
+  ],
+  "Deadly Blunderbuss": [
+    790,
+    "4369"
+  ],
+  "Sandpaper": [
+    250,
+    "249432"
+  ],
+  "Heavy Dynamite": [
+    350,
+    "4378"
+  ],
+  "Standard Scope": [
+    600,
+    "4406"
+  ],
+  "Bronze Framework": [
+    600,
+    "4382"
+  ],
+  "Whirring Bronze Gizmo": [
+    115,
+    "4375"
+  ],
+  "Ornate Spyglass": [
+    600,
+    "5507"
+  ],
+  "Crafted Solid Shot": [
+    0,
+    "8069"
+  ],
+  "Silver-plated Shotgun": [
+    2357,
+    "4379"
+  ],
+  "Copper Rod": [
+    24,
+    "6217"
+  ],
+  "Big Bronze Bomb": [
+    500,
+    "4380"
+  ],
+  "Heavy Blasting Powder": [
+    150,
+    "4377"
+  ],
+  "Rough Copper Vest": [
+    32,
+    "10421"
+  ],
+  "Rough Grinding Stone": [
+    5,
+    "3470"
+  ],
+  "Rough Weightstone": [
+    3,
+    "3239"
+  ],
+  "Copper Claymore": [
+    241,
+    "7955"
+  ],
+  "Copper Bracers": [
+    17,
+    "2853"
+  ],
+  "Sharpening Wheel": [
+    0,
+    "279944"
+  ],
+  "Copper Mace": [
+    106,
+    "2844"
+  ],
+  "Rough Sharpening Stone": [
+    3,
+    "2862"
+  ],
+  "Copper Shortsword": [
+    110,
+    "2847"
+  ],
+  "Copper Chain Boots": [
+    49,
+    "3469"
+  ],
+  "Copper Chain Pants": [
+    67,
+    "2852"
+  ],
+  "Copper Dagger": [
+    194,
+    "7166"
+  ],
+  "Copper Battle Axe": [
+    480,
+    "3488"
+  ],
+  "Copper Chain Belt": [
+    56,
+    "2851"
+  ],
+  "Copper Axe": [
+    109,
+    "2845"
+  ],
+  "Glowing Copper Boots": [
+    256,
+    "250482"
+  ],
+  "Coarse Weightstone": [
+    10,
+    "3240"
+  ],
+  "Gemmed Copper Boots": [
+    401,
+    "250620"
+  ],
+  "Coarse Sharpening Stone": [
+    10,
+    "2863"
+  ],
+  "Thick War Axe": [
+    715,
+    "3489"
+  ],
+  "Runed Copper Belt": [
+    198,
+    "2857"
+  ],
+  "Heavy Copper Broadsword": [
+    1135,
+    "3487"
+  ],
+  "Runed Copper Gauntlets": [
+    71,
+    "3472"
+  ],
+  "Silver Skeleton Key": [
+    50,
+    "15869"
+  ],
+  "Coarse Grinding Stone": [
+    10,
+    "3478"
+  ],
+  "Strange Copper Boots": [
+    243,
+    "250621"
+  ],
+  "Rough Bronze Boots": [
+    295,
+    "6350"
+  ],
+  "Runed Copper Bracers": [
+    225,
+    "2854"
+  ],
+  "Runed Copper Pants": [
+    299,
+    "3473"
+  ],
+  "Heavy Copper Maul": [
+    466,
+    "6214"
+  ],
+  "Silver Rod": [
+    125,
+    "6338"
+  ],
+  "Big Bronze Knife": [
+    915,
+    "3848"
+  ],
+  "Rough Bronze Shoulders": [
+    532,
+    "3480"
+  ],
+  "Rough Bronze Cuirass": [
+    601,
+    "2866"
+  ],
+  "Bronze Mace": [
+    898,
+    "2848"
+  ],
+  "Bronze Greatsword": [
+    2205,
+    "7957"
+  ],
+  "Patterned Bronze Bracers": [
+    507,
+    "2868"
+  ],
+  "Bronze Warhammer": [
+    1544,
+    "7956"
+  ],
+  "Heavy Weightstone": [
+    40,
+    "3241"
+  ],
+  "Pearl-handled Dagger": [
+    2107,
+    "5540"
+  ],
+  "Rough Bronze Leggings": [
+    577,
+    "2865"
+  ],
+  "Heavy Sharpening Stone": [
+    40,
+    "2871"
+  ],
+  "Bronze Axe": [
+    917,
+    "2849"
+  ],
+  "Bronze Shortsword": [
+    1136,
+    "2850"
+  ],
+  "Heavy Grinding Stone": [
+    100,
+    "3486"
+  ],
+  "Golden Skeleton Key": [
+    300,
+    "15870"
+  ],
+  "Iron Buckle": [
+    100,
+    "7071"
+  ],
+  "Linen Bag": [
+    200,
+    "4238"
+  ],
+  "Silvered Bronze Gauntlets": [
+    965,
+    "3483"
+  ],
+  "Heavy Bronze Mace": [
+    2741,
+    "3491"
+  ],
+  "Bolt of Linen Cloth": [
+    40,
+    "2996"
+  ],
+  "Brown Linen Shirt": [
+    11,
+    "4344"
+  ],
+  "Green Iron Helm": [
+    3053,
+    "3836"
+  ],
+  "Shining Silver Breastplate": [
+    2935,
+    "2870"
+  ],
+  "Silvered Bronze Boots": [
+    918,
+    "3482"
+  ],
+  "Bronze Battle Axe": [
+    2435,
+    "7958"
+  ],
+  "Green Iron Bracers": [
+    1106,
+    "3835"
+  ],
+  "Golden Rod": [
+    500,
+    "11128"
+  ],
+  "Green Iron Leggings": [
+    2906,
+    "3842"
+  ],
+  "Linen Cloak": [
+    11,
+    "2570"
+  ],
+  "Red Linen Shirt": [
+    25,
+    "2575"
+  ],
+  "Faction Banner": [
+    0,
+    "279972"
+  ],
+  "Brown Linen Pants": [
+    60,
+    "4343"
+  ],
+  "White Linen Robe": [
+    99,
+    "6241"
+  ],
+  "Simple Linen Boots": [
+    32,
+    "10046"
+  ],
+  "Simple Dress": [
+    59,
+    "6786"
+  ],
+  "Simple Linen Pants": [
+    23,
+    "10045"
+  ],
+  "Novice Arcanist's Sash": [
+    174,
+    "253885"
+  ],
+  "Blue Linen Shirt": [
+    75,
+    "2577"
+  ],
+  "Brown Linen Vest": [
+    31,
+    "2568"
+  ],
+  "Brown Linen Robe": [
+    98,
+    "6238"
+  ],
+  "Linen Belt": [
+    22,
+    "7026"
+  ],
+  "Heavy Linen Gloves": [
+    29,
+    "4307"
+  ],
+  "Novice Ardent's Sash": [
+    176,
+    "253887"
+  ],
+  "Woolen Cape": [
+    142,
+    "2584"
+  ],
+  "Green Linen Shirt": [
+    37,
+    "2579"
+  ],
+  "Handstitched Linen Britches": [
+    226,
+    "4309"
+  ],
+  "Green Linen Bracers": [
+    45,
+    "4308"
+  ],
+  "Soft-soled Linen Boots": [
+    237,
+    "4312"
+  ],
+  "Reinforced Linen Cape": [
+    67,
+    "2580"
+  ],
+  "Woolen Bag": [
+    300,
+    "4240"
+  ],
+  "Green Woolen Vest": [
+    216,
+    "2582"
+  ],
+  "Pearl-clasped Cloak": [
+    370,
+    "5542"
+  ],
+  "Simple Kilt": [
+    164,
+    "10047"
+  ],
+  "White Linen Shirt": [
+    75,
+    "2576"
+  ],
+  "Woolen Boots": [
+    359,
+    "2583"
+  ],
+  "Linen Boots": [
+    87,
+    "2569"
+  ],
+  "Bolt of Woolen Cloth": [
+    100,
+    "2997"
+  ],
+  "Heavy Woolen Pants": [
+    743,
+    "4316"
+  ],
+  "Lesser Wizard's Robe": [
+    1338,
+    "5766"
+  ],
+  "White Woolen Dress": [
+    466,
+    "6787"
+  ],
+  "Azure Silk Pants": [
+    1494,
+    "7046"
+  ],
+  "Gray Woolen Shirt": [
+    200,
+    "2587"
+  ],
+  "Heavy Woolen Gloves": [
+    180,
+    "4310"
+  ],
+  "Barbaric Linen Vest": [
+    224,
+    "2578"
+  ],
+  "Spidersilk Boots": [
+    979,
+    "4320"
+  ],
+  "Double-Stitched Woolen Shoulders": [
+    331,
+    "4314"
+  ],
+  "Bolt of Silk Cloth": [
+    600,
+    "4305"
+  ],
+  "Stylish Red Shirt": [
+    250,
+    "4330"
+  ],
+  "Gloves of Meditation": [
+    610,
+    "4318"
+  ],
+  "Azure Silk Hood": [
+    745,
+    "7048"
+  ],
+  "Formal White Shirt": [
+    550,
+    "4334"
+  ],
+  "Green Silken Shoulders": [
+    2323,
+    "7057"
+  ],
+  "Crimson Silk Belt": [
+    1503,
+    "7055"
+  ],
+  "Silk Headband": [
+    999,
+    "7050"
+  ],
+  "Red Swashbuckler's Shirt": [
+    750,
+    "6796"
+  ],
+  "White Swashbuckler's Shirt": [
+    500,
+    "6795"
+  ],
+  "Bolt of Mageweave": [
+    1250,
+    "4339"
+  ],
+  "Azure Silk Vest": [
+    1874,
+    "4324"
+  ],
+  "Azure Silk Belt": [
+    1488,
+    "7052"
+  ],
+  "Small Silk Pack": [
+    2000,
+    "4245"
+  ],
+  "Earthen Vest": [
+    2696,
+    "7051"
+  ]
+}

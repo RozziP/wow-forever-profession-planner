@@ -1,0 +1,5472 @@
+{
+  "enchanting": [
+    {
+      "name": "Runed Copper Rod",
+      "start": 1,
+      "src": "Trainer",
+      "skill": [
+        1,
+        5,
+        7,
+        10
+      ],
+      "mat": [
+        [
+          "Copper Rod",
+          1
+        ],
+        [
+          "Mote of Magic",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Mote of Magic",
+      "start": 1,
+      "src": "Trainer",
+      "skill": [
+        1,
+        10,
+        12,
+        15
+      ],
+      "mat": [
+        [
+          "Strange Dust",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Novice's Practice Wand",
+      "start": 1,
+      "src": "Trainer",
+      "skill": [
+        1,
+        10,
+        12,
+        15
+      ],
+      "mat": [
+        [
+          "Simple Wood",
+          1
+        ],
+        [
+          "Mote of Magic",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Enchant Bracer - Inferior Stamina",
+      "start": 1,
+      "src": "Trainer",
+      "skill": [
+        1,
+        20,
+        22,
+        25
+      ],
+      "mat": [
+        [
+          "Mote of Magic",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Enchant Bracer - Minor Deflect",
+      "start": 1,
+      "src": "Trainer",
+      "skill": [
+        1,
+        80,
+        100,
+        120
+      ],
+      "mat": [
+        [
+          "Lesser Magic Essence",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Lesser Magic Wand",
+      "start": 10,
+      "src": "Trainer",
+      "skill": [
+        10,
+        75,
+        95,
+        115
+      ],
+      "mat": [
+        [
+          "Simple Wood",
+          1
+        ],
+        [
+          "Lesser Magic Essence",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Enchant Chest - Inferior Stamina",
+      "start": 15,
+      "src": "Trainer",
+      "skill": [
+        15,
+        70,
+        90,
+        110
+      ],
+      "mat": [
+        [
+          "Strange Dust",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Enchanted Lute",
+      "start": 20,
+      "src": "Trainer",
+      "skill": [
+        20,
+        20,
+        20,
+        20
+      ],
+      "mat": [
+        [
+          "Simple Wood",
+          1
+        ],
+        [
+          "Strange Dust",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Enchant Chest - Minor Absorption",
+      "start": 40,
+      "src": "Trainer",
+      "skill": [
+        40,
+        90,
+        110,
+        130
+      ],
+      "mat": [
+        [
+          "Lesser Magic Essence",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Enchant Cloak - Minor Resistance",
+      "start": 45,
+      "src": "Trainer",
+      "skill": [
+        45,
+        95,
+        115,
+        135
+      ],
+      "mat": [
+        [
+          "Strange Dust",
+          1
+        ],
+        [
+          "Lesser Magic Essence",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Enchant Bracer - Minor Stamina",
+      "start": 50,
+      "src": "Trainer",
+      "skill": [
+        50,
+        100,
+        120,
+        140
+      ],
+      "mat": [
+        [
+          "Strange Dust",
+          2
+        ]
+      ]
+    },
+    {
+      "name": "Enchant Chest - Lesser Stamina",
+      "start": 60,
+      "src": "Trainer",
+      "skill": [
+        60,
+        105,
+        125,
+        145
+      ],
+      "mat": [
+        [
+          "Strange Dust",
+          1
+        ],
+        [
+          "Lesser Magic Essence",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Enchant Cloak - Minor Protection",
+      "start": 70,
+      "src": "Trainer",
+      "skill": [
+        70,
+        110,
+        130,
+        150
+      ],
+      "mat": [
+        [
+          "Strange Dust",
+          2
+        ]
+      ]
+    },
+    {
+      "name": "Greater Magic Wand",
+      "start": 70,
+      "src": "Trainer",
+      "skill": [
+        70,
+        110,
+        130,
+        150
+      ],
+      "mat": [
+        [
+          "Simple Wood",
+          1
+        ],
+        [
+          "Lesser Magic Essence",
+          2
+        ]
+      ]
+    },
+    {
+      "name": "Enchant Bracer - Minor Agility",
+      "start": 80,
+      "src": "Trainer",
+      "skill": [
+        80,
+        115,
+        135,
+        155
+      ],
+      "mat": [
+        [
+          "Strange Dust",
+          1
+        ],
+        [
+          "Lesser Magic Essence",
+          2
+        ]
+      ]
+    },
+    {
+      "name": "Enchant Weapon - Minor Striking",
+      "start": 90,
+      "src": "Trainer",
+      "skill": [
+        90,
+        120,
+        140,
+        160
+      ],
+      "mat": [
+        [
+          "Strange Dust",
+          1
+        ],
+        [
+          "Lesser Magic Essence",
+          1
+        ],
+        [
+          "Small Glimmering Shard",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Enchant 2H Weapon - Minor Impact",
+      "start": 100,
+      "src": "Trainer",
+      "skill": [
+        100,
+        130,
+        150,
+        170
+      ],
+      "mat": [
+        [
+          "Strange Dust",
+          1
+        ],
+        [
+          "Small Glimmering Shard",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Runed Silver Rod",
+      "start": 100,
+      "src": "Trainer",
+      "skill": [
+        100,
+        130,
+        150,
+        170
+      ],
+      "mat": [
+        [
+          "Silver Rod",
+          1
+        ],
+        [
+          "Strange Dust",
+          3
+        ],
+        [
+          "Lesser Magic Essence",
+          4
+        ],
+        [
+          "Shadowgem",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Enchant Shield - Minor Stamina",
+      "start": 105,
+      "src": "Trainer",
+      "skill": [
+        105,
+        130,
+        150,
+        170
+      ],
+      "mat": [
+        [
+          "Lesser Astral Essence",
+          1
+        ],
+        [
+          "Strange Dust",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Enchant Cloak - Lesser Protection",
+      "start": 115,
+      "src": "Trainer",
+      "skill": [
+        115,
+        140,
+        160,
+        180
+      ],
+      "mat": [
+        [
+          "Strange Dust",
+          3
+        ],
+        [
+          "Small Glimmering Shard",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Enchant Chest - Stamina",
+      "start": 120,
+      "src": "Trainer",
+      "skill": [
+        120,
+        145,
+        165,
+        185
+      ],
+      "mat": [
+        [
+          "Strange Dust",
+          2
+        ],
+        [
+          "Lesser Astral Essence",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Enchant Boots - Minor Stamina",
+      "start": 125,
+      "src": "Trainer",
+      "skill": [
+        125,
+        150,
+        170,
+        190
+      ],
+      "mat": [
+        [
+          "Strange Dust",
+          4
+        ]
+      ]
+    },
+    {
+      "name": "Enchant Cloak - Lesser Fire Resistance",
+      "start": 125,
+      "src": "Trainer",
+      "skill": [
+        125,
+        150,
+        170,
+        190
+      ],
+      "mat": [
+        [
+          "Fire Oil",
+          1
+        ],
+        [
+          "Lesser Astral Essence",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Enchant Bracer - Lesser Stamina",
+      "start": 130,
+      "src": "Trainer",
+      "skill": [
+        130,
+        155,
+        175,
+        195
+      ],
+      "mat": [
+        [
+          "Soul Dust",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Enchant Shield - Lesser Spirit",
+      "start": 130,
+      "src": "Trainer",
+      "skill": [
+        130,
+        155,
+        175,
+        195
+      ],
+      "mat": [
+        [
+          "Lesser Astral Essence",
+          1
+        ],
+        [
+          "Strange Dust",
+          2
+        ]
+      ]
+    },
+    {
+      "name": "Enchant Chest - Lesser Absorption",
+      "start": 140,
+      "src": "Trainer",
+      "skill": [
+        140,
+        165,
+        185,
+        205
+      ],
+      "mat": [
+        [
+          "Strange Dust",
+          1
+        ],
+        [
+          "Lesser Astral Essence",
+          1
+        ],
+        [
+          "Large Glimmering Shard",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Enchant Weapon - Lesser Striking",
+      "start": 140,
+      "src": "Trainer",
+      "skill": [
+        140,
+        165,
+        185,
+        205
+      ],
+      "mat": [
+        [
+          "Soul Dust",
+          1
+        ],
+        [
+          "Large Glimmering Shard",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Enchant 2H Weapon - Lesser Impact",
+      "start": 145,
+      "src": "Trainer",
+      "skill": [
+        145,
+        170,
+        190,
+        210
+      ],
+      "mat": [
+        [
+          "Soul Dust",
+          1
+        ],
+        [
+          "Large Glimmering Shard",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Enchant Chest - Intellect",
+      "start": 145,
+      "src": "Trainer",
+      "skill": [
+        145,
+        170,
+        190,
+        210
+      ],
+      "mat": [
+        [
+          "Greater Astral Essence",
+          1
+        ]
+      ]
+    }
+  ],
+  "alchemy": [
+    {
+      "name": "Elixir of Minor Force",
+      "start": 1,
+      "src": "Trainer",
+      "skill": [
+        1,
+        10,
+        12,
+        15
+      ],
+      "mat": [
+        [
+          "Silverleaf",
+          1
+        ],
+        [
+          "Empty Vial",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Minor Arcane Elixir",
+      "start": 1,
+      "src": "Trainer",
+      "skill": [
+        1,
+        10,
+        12,
+        15
+      ],
+      "mat": [
+        [
+          "Peacebloom",
+          1
+        ],
+        [
+          "Empty Vial",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Elixir of Minor Defense",
+      "start": 1,
+      "src": "Trainer",
+      "skill": [
+        1,
+        55,
+        75,
+        95
+      ],
+      "mat": [
+        [
+          "Silverleaf",
+          1
+        ],
+        [
+          "Peacebloom",
+          1
+        ],
+        [
+          "Empty Vial",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Elixir of Minor Strength",
+      "start": 15,
+      "src": "Trainer",
+      "skill": [
+        15,
+        55,
+        75,
+        95
+      ],
+      "mat": [
+        [
+          "Earthroot",
+          1
+        ],
+        [
+          "Silverleaf",
+          1
+        ],
+        [
+          "Empty Vial",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Minor Troll's Blood Elixir",
+      "start": 15,
+      "src": "Trainer",
+      "skill": [
+        15,
+        60,
+        80,
+        100
+      ],
+      "mat": [
+        [
+          "Peacebloom",
+          1
+        ],
+        [
+          "Earthroot",
+          2
+        ],
+        [
+          "Empty Vial",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Mana Well",
+      "start": 20,
+      "src": "Trainer",
+      "skill": [
+        20,
+        20,
+        20,
+        20
+      ],
+      "mat": [
+        [
+          "Peacebloom",
+          1
+        ],
+        [
+          "Empty Vial",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Minor Mana Potion",
+      "start": 25,
+      "src": "Trainer",
+      "skill": [
+        25,
+        65,
+        85,
+        105
+      ],
+      "mat": [
+        [
+          "Mageroyal",
+          1
+        ],
+        [
+          "Peacebloom",
+          1
+        ],
+        [
+          "Empty Vial",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Cerulean Dye",
+      "start": 40,
+      "src": "Trainer",
+      "skill": [
+        40,
+        50,
+        70,
+        90
+      ],
+      "mat": [
+        [
+          "Frilled Lichen",
+          2
+        ],
+        [
+          "Empty Vial",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Sulfuric Acid",
+      "start": 40,
+      "src": "Trainer",
+      "skill": [
+        40,
+        50,
+        70,
+        90
+      ],
+      "mat": [
+        [
+          "Pyrite",
+          2
+        ],
+        [
+          "Empty Vial",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Minor Rejuvenation Potion",
+      "start": 40,
+      "src": "Trainer",
+      "skill": [
+        40,
+        70,
+        90,
+        110
+      ],
+      "mat": [
+        [
+          "Mageroyal",
+          2
+        ],
+        [
+          "Peacebloom",
+          1
+        ],
+        [
+          "Empty Vial",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Elixir of Minor Fortitude",
+      "start": 50,
+      "src": "Trainer",
+      "skill": [
+        50,
+        80,
+        100,
+        120
+      ],
+      "mat": [
+        [
+          "Earthroot",
+          2
+        ],
+        [
+          "Peacebloom",
+          1
+        ],
+        [
+          "Empty Vial",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Lesser Discolored Healing Potion",
+      "start": 55,
+      "src": "Trainer",
+      "skill": [
+        55,
+        85,
+        105,
+        125
+      ],
+      "mat": [
+        [
+          "Empty Vial",
+          1
+        ],
+        [
+          "Briarthorn",
+          1
+        ],
+        [
+          "Murloc Eye",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Blackmouth Oil",
+      "start": 80,
+      "src": "Trainer",
+      "skill": [
+        80,
+        80,
+        90,
+        100
+      ],
+      "mat": [
+        [
+          "Oily Blackmouth",
+          2
+        ],
+        [
+          "Empty Vial",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Draught of Water Breathing",
+      "start": 90,
+      "src": "Trainer",
+      "skill": [
+        90,
+        120,
+        140,
+        160
+      ],
+      "mat": [
+        [
+          "Stranglekelp",
+          1
+        ],
+        [
+          "Blackmouth Oil",
+          2
+        ],
+        [
+          "Empty Vial",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Elixir of Wisdom",
+      "start": 90,
+      "src": "Trainer",
+      "skill": [
+        90,
+        120,
+        140,
+        160
+      ],
+      "mat": [
+        [
+          "Mageroyal",
+          1
+        ],
+        [
+          "Briarthorn",
+          2
+        ],
+        [
+          "Empty Vial",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Swim Speed Potion",
+      "start": 100,
+      "src": "Trainer",
+      "skill": [
+        100,
+        130,
+        150,
+        170
+      ],
+      "mat": [
+        [
+          "Swiftthistle",
+          1
+        ],
+        [
+          "Blackmouth Oil",
+          1
+        ],
+        [
+          "Empty Vial",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Discolored Healing Potion",
+      "start": 110,
+      "src": "Trainer",
+      "skill": [
+        110,
+        135,
+        155,
+        175
+      ],
+      "mat": [
+        [
+          "Leaded Vial",
+          1
+        ],
+        [
+          "Bruiseweed",
+          1
+        ],
+        [
+          "Murloc Eye",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Magenta Dye",
+      "start": 120,
+      "src": "Trainer",
+      "skill": [
+        120,
+        130,
+        142,
+        155
+      ],
+      "mat": [
+        [
+          "Rosecap",
+          2
+        ],
+        [
+          "Leaded Vial",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Lesser Mana Potion",
+      "start": 120,
+      "src": "Trainer",
+      "skill": [
+        120,
+        145,
+        165,
+        185
+      ],
+      "mat": [
+        [
+          "Mageroyal",
+          1
+        ],
+        [
+          "Stranglekelp",
+          1
+        ],
+        [
+          "Empty Vial",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Lesser Troll's Blood Elixir",
+      "start": 125,
+      "src": "Trainer",
+      "skill": [
+        125,
+        150,
+        170,
+        190
+      ],
+      "mat": [
+        [
+          "Bruiseweed",
+          2
+        ],
+        [
+          "Briarthorn",
+          2
+        ],
+        [
+          "Leaded Vial",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Fire Oil",
+      "start": 130,
+      "src": "Trainer",
+      "skill": [
+        130,
+        150,
+        160,
+        170
+      ],
+      "mat": [
+        [
+          "Firefin Snapper",
+          2
+        ],
+        [
+          "Empty Vial",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Elixir of Lesser Defense",
+      "start": 130,
+      "src": "Trainer",
+      "skill": [
+        130,
+        155,
+        175,
+        195
+      ],
+      "mat": [
+        [
+          "Wild Steelbloom",
+          1
+        ],
+        [
+          "Stranglekelp",
+          1
+        ],
+        [
+          "Leaded Vial",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Elixir of Fire Power",
+      "start": 140,
+      "src": "Trainer",
+      "skill": [
+        140,
+        165,
+        185,
+        205
+      ],
+      "mat": [
+        [
+          "Fire Oil",
+          2
+        ],
+        [
+          "Kingsblood",
+          1
+        ],
+        [
+          "Leaded Vial",
+          1
+        ]
+      ]
+    }
+  ],
+  "leatherworking": [
+    {
+      "name": "Light Leather",
+      "start": 1,
+      "src": "Trainer",
+      "skill": [
+        1,
+        20,
+        30,
+        40
+      ],
+      "mat": [
+        [
+          "Ruined Leather Scraps",
+          3
+        ]
+      ]
+    },
+    {
+      "name": "Light Armor Kit",
+      "start": 1,
+      "src": "Trainer",
+      "skill": [
+        1,
+        30,
+        45,
+        60
+      ],
+      "mat": [
+        [
+          "Light Leather",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Handstitched Leather Boots",
+      "start": 1,
+      "src": "Trainer",
+      "skill": [
+        1,
+        40,
+        55,
+        70
+      ],
+      "mat": [
+        [
+          "Light Leather",
+          2
+        ],
+        [
+          "Coarse Thread",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Handstitched Leather Bracers",
+      "start": 1,
+      "src": "Trainer",
+      "skill": [
+        1,
+        40,
+        55,
+        70
+      ],
+      "mat": [
+        [
+          "Light Leather",
+          2
+        ],
+        [
+          "Coarse Thread",
+          3
+        ]
+      ]
+    },
+    {
+      "name": "Handstitched Leather Cloak",
+      "start": 1,
+      "src": "Trainer",
+      "skill": [
+        1,
+        40,
+        55,
+        70
+      ],
+      "mat": [
+        [
+          "Light Leather",
+          2
+        ],
+        [
+          "Coarse Thread",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Handstitched Leather Vest",
+      "start": 1,
+      "src": "Trainer",
+      "skill": [
+        1,
+        40,
+        55,
+        70
+      ],
+      "mat": [
+        [
+          "Light Leather",
+          3
+        ],
+        [
+          "Coarse Thread",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Handstitched Leather Pants",
+      "start": 15,
+      "src": "Trainer",
+      "skill": [
+        15,
+        45,
+        60,
+        75
+      ],
+      "mat": [
+        [
+          "Light Leather",
+          4
+        ],
+        [
+          "Coarse Thread",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Camp Tent",
+      "start": 20,
+      "src": "Trainer",
+      "skill": [
+        20,
+        20,
+        20,
+        20
+      ],
+      "mat": [
+        [
+          "Light Leather",
+          5
+        ]
+      ]
+    },
+    {
+      "name": "Handstitched Leather Belt",
+      "start": 25,
+      "src": "Trainer",
+      "skill": [
+        25,
+        55,
+        70,
+        85
+      ],
+      "mat": [
+        [
+          "Light Leather",
+          6
+        ],
+        [
+          "Coarse Thread",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Light Leather Quiver",
+      "start": 25,
+      "src": "Trainer",
+      "skill": [
+        25,
+        55,
+        70,
+        85
+      ],
+      "mat": [
+        [
+          "Light Leather",
+          4
+        ],
+        [
+          "Coarse Thread",
+          2
+        ]
+      ]
+    },
+    {
+      "name": "Small Leather Ammo Pouch",
+      "start": 25,
+      "src": "Trainer",
+      "skill": [
+        25,
+        55,
+        70,
+        85
+      ],
+      "mat": [
+        [
+          "Light Leather",
+          3
+        ],
+        [
+          "Coarse Thread",
+          4
+        ]
+      ]
+    },
+    {
+      "name": "Cured Light Hide",
+      "start": 30,
+      "src": "Trainer",
+      "skill": [
+        30,
+        50,
+        60,
+        70
+      ],
+      "mat": [
+        [
+          "Light Hide",
+          1
+        ],
+        [
+          "Salt",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Murloc Scale Shoes",
+      "start": 35,
+      "src": "Trainer",
+      "skill": [
+        35,
+        40,
+        40,
+        40
+      ],
+      "mat": [
+        [
+          "Light Leather",
+          12
+        ],
+        [
+          "Cured Light Hide",
+          2
+        ],
+        [
+          "Slimy Murloc Scale",
+          4
+        ]
+      ]
+    },
+    {
+      "name": "Embossed Leather Vest",
+      "start": 35,
+      "src": "Trainer",
+      "skill": [
+        35,
+        65,
+        80,
+        95
+      ],
+      "mat": [
+        [
+          "Light Leather",
+          8
+        ],
+        [
+          "Coarse Thread",
+          4
+        ]
+      ]
+    },
+    {
+      "name": "Embossed Leather Cloak",
+      "start": 40,
+      "src": "Trainer",
+      "skill": [
+        40,
+        70,
+        85,
+        100
+      ],
+      "mat": [
+        [
+          "Light Leather",
+          5
+        ],
+        [
+          "Coarse Thread",
+          2
+        ]
+      ]
+    },
+    {
+      "name": "Embossed Leather Gloves",
+      "start": 40,
+      "src": "Trainer",
+      "skill": [
+        40,
+        70,
+        85,
+        100
+      ],
+      "mat": [
+        [
+          "Light Leather",
+          3
+        ],
+        [
+          "Coarse Thread",
+          2
+        ]
+      ]
+    },
+    {
+      "name": "Light Leather Bracers",
+      "start": 45,
+      "src": "Trainer",
+      "skill": [
+        45,
+        75,
+        90,
+        105
+      ],
+      "mat": [
+        [
+          "Light Leather",
+          6
+        ],
+        [
+          "Coarse Thread",
+          4
+        ]
+      ]
+    },
+    {
+      "name": "Fine Leather Cloak",
+      "start": 50,
+      "src": "Trainer",
+      "skill": [
+        50,
+        70,
+        85,
+        100
+      ],
+      "mat": [
+        [
+          "Light Leather",
+          10
+        ],
+        [
+          "Fine Thread",
+          2
+        ]
+      ]
+    },
+    {
+      "name": "Embossed Leather Boots",
+      "start": 50,
+      "src": "Trainer",
+      "skill": [
+        50,
+        80,
+        95,
+        110
+      ],
+      "mat": [
+        [
+          "Light Leather",
+          8
+        ],
+        [
+          "Coarse Thread",
+          5
+        ]
+      ]
+    },
+    {
+      "name": "Embossed Leather Pants",
+      "start": 50,
+      "src": "Trainer",
+      "skill": [
+        50,
+        80,
+        95,
+        110
+      ],
+      "mat": [
+        [
+          "Cured Light Hide",
+          1
+        ],
+        [
+          "Light Leather",
+          6
+        ],
+        [
+          "Coarse Thread",
+          2
+        ]
+      ]
+    },
+    {
+      "name": "Fine Leather Belt",
+      "start": 55,
+      "src": "Trainer",
+      "skill": [
+        55,
+        85,
+        100,
+        115
+      ],
+      "mat": [
+        [
+          "Light Leather",
+          6
+        ],
+        [
+          "Coarse Thread",
+          2
+        ]
+      ]
+    },
+    {
+      "name": "Fine Leather Tunic",
+      "start": 60,
+      "src": "Trainer",
+      "skill": [
+        60,
+        90,
+        105,
+        120
+      ],
+      "mat": [
+        [
+          "Cured Light Hide",
+          3
+        ],
+        [
+          "Light Leather",
+          6
+        ],
+        [
+          "Coarse Thread",
+          4
+        ]
+      ]
+    },
+    {
+      "name": "Light Leather Pants",
+      "start": 70,
+      "src": "Trainer",
+      "skill": [
+        70,
+        100,
+        115,
+        130
+      ],
+      "mat": [
+        [
+          "Light Leather",
+          10
+        ],
+        [
+          "Cured Light Hide",
+          1
+        ],
+        [
+          "Fine Thread",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Medium Leather",
+      "start": 75,
+      "src": "Trainer",
+      "skill": [
+        75,
+        75,
+        80,
+        85
+      ],
+      "mat": [
+        [
+          "Light Leather",
+          4
+        ]
+      ]
+    },
+    {
+      "name": "Cured Medium Hide",
+      "start": 75,
+      "src": "Trainer",
+      "skill": [
+        75,
+        90,
+        97,
+        105
+      ],
+      "mat": [
+        [
+          "Medium Hide",
+          1
+        ],
+        [
+          "Salt",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Medium Armor Kit",
+      "start": 75,
+      "src": "Trainer",
+      "skill": [
+        75,
+        90,
+        97,
+        105
+      ],
+      "mat": [
+        [
+          "Medium Leather",
+          4
+        ],
+        [
+          "Coarse Thread",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Gray Leather Boots",
+      "start": 75,
+      "src": "Trainer",
+      "skill": [
+        75,
+        100,
+        112,
+        125
+      ],
+      "mat": [
+        [
+          "Medium Leather",
+          4
+        ],
+        [
+          "Fine Thread",
+          2
+        ],
+        [
+          "Gray Dye",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Dark Leather Cloak",
+      "start": 85,
+      "src": "Trainer",
+      "skill": [
+        85,
+        110,
+        122,
+        135
+      ],
+      "mat": [
+        [
+          "Medium Leather",
+          8
+        ],
+        [
+          "Fine Thread",
+          1
+        ],
+        [
+          "Gray Dye",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Dark Leather Pants",
+      "start": 90,
+      "src": "Trainer",
+      "skill": [
+        90,
+        115,
+        127,
+        140
+      ],
+      "mat": [
+        [
+          "Medium Leather",
+          12
+        ],
+        [
+          "Gray Dye",
+          1
+        ],
+        [
+          "Fine Thread",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Nimble Leather Gloves",
+      "start": 95,
+      "src": "Trainer",
+      "skill": [
+        95,
+        120,
+        132,
+        145
+      ],
+      "mat": [
+        [
+          "Elixir of Minor Agility",
+          1
+        ],
+        [
+          "Medium Leather",
+          6
+        ],
+        [
+          "Fine Thread",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Toughened Leather Armor",
+      "start": 95,
+      "src": "Trainer",
+      "skill": [
+        95,
+        120,
+        132,
+        145
+      ],
+      "mat": [
+        [
+          "Medium Leather",
+          10
+        ],
+        [
+          "Cured Light Hide",
+          2
+        ],
+        [
+          "Fine Thread",
+          2
+        ]
+      ]
+    },
+    {
+      "name": "Dark Leather Belt",
+      "start": 100,
+      "src": "Trainer",
+      "skill": [
+        100,
+        125,
+        137,
+        150
+      ],
+      "mat": [
+        [
+          "Fine Leather Belt",
+          1
+        ],
+        [
+          "Cured Medium Hide",
+          1
+        ],
+        [
+          "Fine Thread",
+          2
+        ],
+        [
+          "Gray Dye",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Fletcher's Gloves",
+      "start": 100,
+      "src": "Trainer",
+      "skill": [
+        100,
+        125,
+        137,
+        150
+      ],
+      "mat": [
+        [
+          "Medium Leather",
+          8
+        ],
+        [
+          "Long Tail Feather",
+          4
+        ],
+        [
+          "Fine Thread",
+          2
+        ]
+      ]
+    },
+    {
+      "name": "Hillman's Shoulders",
+      "start": 105,
+      "src": "Trainer",
+      "skill": [
+        105,
+        130,
+        142,
+        155
+      ],
+      "mat": [
+        [
+          "Cured Medium Hide",
+          1
+        ],
+        [
+          "Medium Leather",
+          4
+        ],
+        [
+          "Fine Thread",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Toughened Leather Gloves",
+      "start": 110,
+      "src": "Trainer",
+      "skill": [
+        110,
+        135,
+        147,
+        160
+      ],
+      "mat": [
+        [
+          "Medium Leather",
+          4
+        ],
+        [
+          "Cured Medium Hide",
+          2
+        ],
+        [
+          "Elixir of Lesser Defense",
+          2
+        ],
+        [
+          "Spider's Silk",
+          2
+        ],
+        [
+          "Fine Thread",
+          2
+        ]
+      ]
+    },
+    {
+      "name": "Hillman's Leather Gloves",
+      "start": 120,
+      "src": "Trainer",
+      "skill": [
+        120,
+        145,
+        157,
+        170
+      ],
+      "mat": [
+        [
+          "Medium Leather",
+          14
+        ],
+        [
+          "Fine Thread",
+          4
+        ]
+      ]
+    },
+    {
+      "name": "Heavy Leather",
+      "start": 125,
+      "src": "Trainer",
+      "skill": [
+        125,
+        125,
+        130,
+        135
+      ],
+      "mat": [
+        [
+          "Medium Leather",
+          5
+        ]
+      ]
+    },
+    {
+      "name": "Cured Heavy Hide",
+      "start": 125,
+      "src": "Trainer",
+      "skill": [
+        125,
+        135,
+        140,
+        145
+      ],
+      "mat": [
+        [
+          "Heavy Hide",
+          1
+        ],
+        [
+          "Salt",
+          3
+        ]
+      ]
+    },
+    {
+      "name": "Heavy Armor Kit",
+      "start": 125,
+      "src": "Trainer",
+      "skill": [
+        125,
+        145,
+        155,
+        165
+      ],
+      "mat": [
+        [
+          "Heavy Leather",
+          5
+        ],
+        [
+          "Fine Thread",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Heavy Leather Ammo Pouch",
+      "start": 125,
+      "src": "Trainer",
+      "skill": [
+        125,
+        145,
+        155,
+        165
+      ],
+      "mat": [
+        [
+          "Heavy Leather",
+          8
+        ],
+        [
+          "Fine Thread",
+          2
+        ]
+      ]
+    },
+    {
+      "name": "Heavy Quiver",
+      "start": 125,
+      "src": "Trainer",
+      "skill": [
+        125,
+        145,
+        155,
+        165
+      ],
+      "mat": [
+        [
+          "Heavy Leather",
+          8
+        ],
+        [
+          "Fine Thread",
+          2
+        ]
+      ]
+    },
+    {
+      "name": "Hillman's Cloak",
+      "start": 125,
+      "src": "Trainer",
+      "skill": [
+        125,
+        145,
+        155,
+        165
+      ],
+      "mat": [
+        [
+          "Heavy Leather",
+          5
+        ],
+        [
+          "Fine Thread",
+          2
+        ]
+      ]
+    },
+    {
+      "name": "Green Leather Belt",
+      "start": 135,
+      "src": "Trainer",
+      "skill": [
+        135,
+        155,
+        165,
+        175
+      ],
+      "mat": [
+        [
+          "Cured Heavy Hide",
+          1
+        ],
+        [
+          "Heavy Leather",
+          5
+        ],
+        [
+          "Fine Thread",
+          1
+        ],
+        [
+          "Green Dye",
+          1
+        ],
+        [
+          "Iron Buckle",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Guardian Pants",
+      "start": 135,
+      "src": "Trainer",
+      "skill": [
+        135,
+        155,
+        165,
+        175
+      ],
+      "mat": [
+        [
+          "Heavy Leather",
+          12
+        ],
+        [
+          "Bolt of Silk Cloth",
+          2
+        ],
+        [
+          "Fine Thread",
+          2
+        ]
+      ]
+    }
+  ],
+  "engineering": [
+    {
+      "name": "Rough Blasting Powder",
+      "start": 1,
+      "src": "Trainer",
+      "skill": [
+        1,
+        20,
+        30,
+        40
+      ],
+      "mat": [
+        [
+          "Rough Stone",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Crafted Light Shot",
+      "start": 1,
+      "src": "Trainer",
+      "skill": [
+        1,
+        30,
+        45,
+        60
+      ],
+      "mat": [
+        [
+          "Rough Blasting Powder",
+          1
+        ],
+        [
+          "Copper Bar",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Rough Dynamite",
+      "start": 1,
+      "src": "Trainer",
+      "skill": [
+        1,
+        30,
+        45,
+        60
+      ],
+      "mat": [
+        [
+          "Rough Blasting Powder",
+          1
+        ],
+        [
+          "Linen Cloth",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Reagent Bot",
+      "start": 20,
+      "src": "Trainer",
+      "skill": [
+        20,
+        20,
+        20,
+        20
+      ],
+      "mat": [
+        [
+          "Handful of Copper Bolts",
+          1
+        ],
+        [
+          "Copper Tube",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Handful of Copper Bolts",
+      "start": 30,
+      "src": "Trainer",
+      "skill": [
+        30,
+        45,
+        52,
+        60
+      ],
+      "mat": [
+        [
+          "Copper Bar",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Rough Copper Bomb",
+      "start": 30,
+      "src": "Trainer",
+      "skill": [
+        30,
+        60,
+        75,
+        90
+      ],
+      "mat": [
+        [
+          "Copper Bar",
+          1
+        ],
+        [
+          "Handful of Copper Bolts",
+          1
+        ],
+        [
+          "Rough Blasting Powder",
+          2
+        ],
+        [
+          "Linen Cloth",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Arclight Spanner",
+      "start": 50,
+      "src": "Trainer",
+      "skill": [
+        50,
+        70,
+        80,
+        90
+      ],
+      "mat": [
+        [
+          "Copper Bar",
+          6
+        ]
+      ]
+    },
+    {
+      "name": "Copper Tube",
+      "start": 50,
+      "src": "Trainer",
+      "skill": [
+        50,
+        80,
+        95,
+        110
+      ],
+      "mat": [
+        [
+          "Copper Bar",
+          2
+        ],
+        [
+          "Weak Flux",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Rough Boomstick",
+      "start": 50,
+      "src": "Trainer",
+      "skill": [
+        50,
+        80,
+        95,
+        110
+      ],
+      "mat": [
+        [
+          "Copper Tube",
+          1
+        ],
+        [
+          "Handful of Copper Bolts",
+          1
+        ],
+        [
+          "Wooden Stock",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Crude Scope",
+      "start": 60,
+      "src": "Trainer",
+      "skill": [
+        60,
+        90,
+        105,
+        120
+      ],
+      "mat": [
+        [
+          "Copper Tube",
+          1
+        ],
+        [
+          "Malachite",
+          1
+        ],
+        [
+          "Handful of Copper Bolts",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Copper Modulator",
+      "start": 65,
+      "src": "Trainer",
+      "skill": [
+        65,
+        95,
+        110,
+        125
+      ],
+      "mat": [
+        [
+          "Handful of Copper Bolts",
+          2
+        ],
+        [
+          "Copper Bar",
+          1
+        ],
+        [
+          "Linen Cloth",
+          2
+        ]
+      ]
+    },
+    {
+      "name": "Coarse Blasting Powder",
+      "start": 75,
+      "src": "Trainer",
+      "skill": [
+        75,
+        85,
+        90,
+        95
+      ],
+      "mat": [
+        [
+          "Coarse Stone",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Crafted Heavy Shot",
+      "start": 75,
+      "src": "Trainer",
+      "skill": [
+        75,
+        85,
+        90,
+        95
+      ],
+      "mat": [
+        [
+          "Coarse Blasting Powder",
+          1
+        ],
+        [
+          "Copper Bar",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Coarse Dynamite",
+      "start": 75,
+      "src": "Trainer",
+      "skill": [
+        75,
+        90,
+        97,
+        105
+      ],
+      "mat": [
+        [
+          "Coarse Blasting Powder",
+          3
+        ],
+        [
+          "Linen Cloth",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Target Dummy",
+      "start": 85,
+      "src": "Trainer",
+      "skill": [
+        85,
+        115,
+        130,
+        145
+      ],
+      "mat": [
+        [
+          "Copper Modulator",
+          1
+        ],
+        [
+          "Handful of Copper Bolts",
+          2
+        ],
+        [
+          "Bronze Bar",
+          1
+        ],
+        [
+          "Wool Cloth",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Silver Contact",
+      "start": 90,
+      "src": "Trainer",
+      "skill": [
+        90,
+        110,
+        125,
+        140
+      ],
+      "mat": [
+        [
+          "Silver Bar",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Practice Lock",
+      "start": 100,
+      "src": "Trainer",
+      "skill": [
+        100,
+        115,
+        122,
+        130
+      ],
+      "mat": [
+        [
+          "Bronze Bar",
+          1
+        ],
+        [
+          "Handful of Copper Bolts",
+          2
+        ],
+        [
+          "Weak Flux",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Flying Tiger Goggles",
+      "start": 100,
+      "src": "Trainer",
+      "skill": [
+        100,
+        130,
+        145,
+        160
+      ],
+      "mat": [
+        [
+          "Light Leather",
+          6
+        ],
+        [
+          "Tigerseye",
+          2
+        ]
+      ]
+    },
+    {
+      "name": "Bronze Tube",
+      "start": 105,
+      "src": "Trainer",
+      "skill": [
+        105,
+        105,
+        130,
+        155
+      ],
+      "mat": [
+        [
+          "Bronze Bar",
+          2
+        ],
+        [
+          "Weak Flux",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Large Copper Bomb",
+      "start": 105,
+      "src": "Trainer",
+      "skill": [
+        105,
+        105,
+        130,
+        155
+      ],
+      "mat": [
+        [
+          "Copper Bar",
+          3
+        ],
+        [
+          "Coarse Blasting Powder",
+          4
+        ],
+        [
+          "Silver Contact",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Deadly Blunderbuss",
+      "start": 105,
+      "src": "Trainer",
+      "skill": [
+        105,
+        130,
+        142,
+        155
+      ],
+      "mat": [
+        [
+          "Copper Tube",
+          2
+        ],
+        [
+          "Handful of Copper Bolts",
+          4
+        ],
+        [
+          "Wooden Stock",
+          1
+        ],
+        [
+          "Medium Leather",
+          2
+        ]
+      ]
+    },
+    {
+      "name": "Standard Scope",
+      "start": 110,
+      "src": "Trainer",
+      "skill": [
+        110,
+        135,
+        147,
+        160
+      ],
+      "mat": [
+        [
+          "Bronze Tube",
+          1
+        ],
+        [
+          "Moss Agate",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Small Bronze Bomb",
+      "start": 120,
+      "src": "Trainer",
+      "skill": [
+        120,
+        120,
+        145,
+        170
+      ],
+      "mat": [
+        [
+          "Coarse Blasting Powder",
+          4
+        ],
+        [
+          "Bronze Bar",
+          2
+        ],
+        [
+          "Silver Contact",
+          1
+        ],
+        [
+          "Wool Cloth",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Crafted Solid Shot",
+      "start": 125,
+      "src": "Trainer",
+      "skill": [
+        125,
+        125,
+        135,
+        145
+      ],
+      "mat": [
+        [
+          "Heavy Blasting Powder",
+          1
+        ],
+        [
+          "Bronze Bar",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Heavy Blasting Powder",
+      "start": 125,
+      "src": "Trainer",
+      "skill": [
+        125,
+        125,
+        135,
+        145
+      ],
+      "mat": [
+        [
+          "Heavy Stone",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Heavy Dynamite",
+      "start": 125,
+      "src": "Trainer",
+      "skill": [
+        125,
+        125,
+        135,
+        145
+      ],
+      "mat": [
+        [
+          "Heavy Blasting Powder",
+          2
+        ],
+        [
+          "Wool Cloth",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Whirring Bronze Gizmo",
+      "start": 125,
+      "src": "Trainer",
+      "skill": [
+        125,
+        125,
+        150,
+        175
+      ],
+      "mat": [
+        [
+          "Bronze Bar",
+          2
+        ],
+        [
+          "Wool Cloth",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Sandpaper",
+      "start": 130,
+      "src": "Trainer",
+      "skill": [
+        130,
+        130,
+        142,
+        155
+      ],
+      "mat": [
+        [
+          "Bauxite",
+          2
+        ],
+        [
+          "Bolt of Linen Cloth",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Silver-plated Shotgun",
+      "start": 130,
+      "src": "Trainer",
+      "skill": [
+        130,
+        155,
+        167,
+        180
+      ],
+      "mat": [
+        [
+          "Bronze Tube",
+          2
+        ],
+        [
+          "Whirring Bronze Gizmo",
+          2
+        ],
+        [
+          "Heavy Stock",
+          1
+        ],
+        [
+          "Silver Bar",
+          3
+        ]
+      ]
+    },
+    {
+      "name": "Ornate Spyglass",
+      "start": 135,
+      "src": "Trainer",
+      "skill": [
+        135,
+        160,
+        172,
+        185
+      ],
+      "mat": [
+        [
+          "Bronze Tube",
+          2
+        ],
+        [
+          "Whirring Bronze Gizmo",
+          2
+        ],
+        [
+          "Copper Modulator",
+          1
+        ],
+        [
+          "Moss Agate",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Big Bronze Bomb",
+      "start": 140,
+      "src": "Trainer",
+      "skill": [
+        140,
+        140,
+        165,
+        190
+      ],
+      "mat": [
+        [
+          "Heavy Blasting Powder",
+          2
+        ],
+        [
+          "Bronze Bar",
+          3
+        ],
+        [
+          "Silver Contact",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Bronze Framework",
+      "start": 145,
+      "src": "Trainer",
+      "skill": [
+        145,
+        145,
+        170,
+        195
+      ],
+      "mat": [
+        [
+          "Bronze Bar",
+          2
+        ],
+        [
+          "Medium Leather",
+          1
+        ],
+        [
+          "Wool Cloth",
+          1
+        ]
+      ]
+    }
+  ],
+  "blacksmithing": [
+    {
+      "name": "Copper Rod",
+      "start": 1,
+      "src": "Trainer",
+      "skill": [
+        1,
+        10,
+        12,
+        15
+      ],
+      "mat": [
+        [
+          "Copper Bar",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Rough Copper Vest",
+      "start": 1,
+      "src": "Trainer",
+      "skill": [
+        1,
+        15,
+        35,
+        55
+      ],
+      "mat": [
+        [
+          "Copper Bar",
+          4
+        ]
+      ]
+    },
+    {
+      "name": "Rough Sharpening Stone",
+      "start": 1,
+      "src": "Trainer",
+      "skill": [
+        1,
+        15,
+        35,
+        55
+      ],
+      "mat": [
+        [
+          "Rough Stone",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Rough Weightstone",
+      "start": 1,
+      "src": "Trainer",
+      "skill": [
+        1,
+        15,
+        35,
+        55
+      ],
+      "mat": [
+        [
+          "Rough Stone",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Copper Bracers",
+      "start": 1,
+      "src": "Trainer",
+      "skill": [
+        1,
+        20,
+        40,
+        60
+      ],
+      "mat": [
+        [
+          "Copper Bar",
+          2
+        ]
+      ]
+    },
+    {
+      "name": "Copper Chain Pants",
+      "start": 15,
+      "src": "Trainer",
+      "skill": [
+        15,
+        50,
+        70,
+        90
+      ],
+      "mat": [
+        [
+          "Copper Bar",
+          4
+        ]
+      ]
+    },
+    {
+      "name": "Copper Mace",
+      "start": 15,
+      "src": "Trainer",
+      "skill": [
+        15,
+        55,
+        75,
+        95
+      ],
+      "mat": [
+        [
+          "Copper Bar",
+          6
+        ],
+        [
+          "Weak Flux",
+          1
+        ],
+        [
+          "Linen Cloth",
+          2
+        ]
+      ]
+    },
+    {
+      "name": "Sharpening Wheel",
+      "start": 20,
+      "src": "Trainer",
+      "skill": [
+        20,
+        20,
+        20,
+        20
+      ],
+      "mat": [
+        [
+          "Rough Stone",
+          1
+        ],
+        [
+          "Copper Bar",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Copper Axe",
+      "start": 20,
+      "src": "Trainer",
+      "skill": [
+        20,
+        60,
+        80,
+        100
+      ],
+      "mat": [
+        [
+          "Copper Bar",
+          6
+        ],
+        [
+          "Weak Flux",
+          1
+        ],
+        [
+          "Linen Cloth",
+          2
+        ]
+      ]
+    },
+    {
+      "name": "Copper Chain Boots",
+      "start": 20,
+      "src": "Trainer",
+      "skill": [
+        20,
+        60,
+        80,
+        100
+      ],
+      "mat": [
+        [
+          "Copper Bar",
+          8
+        ]
+      ]
+    },
+    {
+      "name": "Rough Grinding Stone",
+      "start": 25,
+      "src": "Trainer",
+      "skill": [
+        25,
+        45,
+        65,
+        85
+      ],
+      "mat": [
+        [
+          "Rough Stone",
+          2
+        ]
+      ]
+    },
+    {
+      "name": "Copper Claymore",
+      "start": 25,
+      "src": "Trainer",
+      "skill": [
+        25,
+        65,
+        85,
+        105
+      ],
+      "mat": [
+        [
+          "Copper Bar",
+          10
+        ],
+        [
+          "Weak Flux",
+          2
+        ],
+        [
+          "Rough Grinding Stone",
+          1
+        ],
+        [
+          "Light Leather",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Copper Dagger",
+      "start": 25,
+      "src": "Trainer",
+      "skill": [
+        25,
+        65,
+        85,
+        105
+      ],
+      "mat": [
+        [
+          "Copper Bar",
+          6
+        ],
+        [
+          "Weak Flux",
+          1
+        ],
+        [
+          "Rough Grinding Stone",
+          1
+        ],
+        [
+          "Light Leather",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Copper Shortsword",
+      "start": 25,
+      "src": "Trainer",
+      "skill": [
+        25,
+        65,
+        85,
+        105
+      ],
+      "mat": [
+        [
+          "Copper Bar",
+          6
+        ],
+        [
+          "Weak Flux",
+          1
+        ],
+        [
+          "Linen Cloth",
+          2
+        ]
+      ]
+    },
+    {
+      "name": "Copper Battle Axe",
+      "start": 30,
+      "src": "Trainer",
+      "skill": [
+        30,
+        70,
+        90,
+        110
+      ],
+      "mat": [
+        [
+          "Copper Bar",
+          12
+        ],
+        [
+          "Weak Flux",
+          2
+        ],
+        [
+          "Malachite",
+          2
+        ],
+        [
+          "Rough Grinding Stone",
+          2
+        ],
+        [
+          "Light Leather",
+          2
+        ]
+      ]
+    },
+    {
+      "name": "Copper Chain Belt",
+      "start": 30,
+      "src": "Trainer",
+      "skill": [
+        30,
+        70,
+        90,
+        110
+      ],
+      "mat": [
+        [
+          "Copper Bar",
+          6
+        ]
+      ]
+    },
+    {
+      "name": "Gemmed Copper Boots",
+      "start": 35,
+      "src": "Trainer",
+      "skill": [
+        35,
+        40,
+        40,
+        40
+      ],
+      "mat": [
+        [
+          "Copper Bar",
+          2
+        ],
+        [
+          "Tigerseye",
+          2
+        ],
+        [
+          "Malachite",
+          2
+        ],
+        [
+          "Light Leather",
+          4
+        ]
+      ]
+    },
+    {
+      "name": "Glowing Copper Boots",
+      "start": 35,
+      "src": "Trainer",
+      "skill": [
+        35,
+        40,
+        40,
+        40
+      ],
+      "mat": [
+        [
+          "Copper Bar",
+          2
+        ],
+        [
+          "Lesser Magic Essence",
+          4
+        ],
+        [
+          "Light Leather",
+          2
+        ]
+      ]
+    },
+    {
+      "name": "Strange Copper Boots",
+      "start": 35,
+      "src": "Trainer",
+      "skill": [
+        35,
+        40,
+        40,
+        40
+      ],
+      "mat": [
+        [
+          "Copper Bar",
+          2
+        ],
+        [
+          "Strange Dust",
+          4
+        ],
+        [
+          "Light Leather",
+          2
+        ]
+      ]
+    },
+    {
+      "name": "Runed Copper Gauntlets",
+      "start": 35,
+      "src": "Trainer",
+      "skill": [
+        35,
+        75,
+        95,
+        115
+      ],
+      "mat": [
+        [
+          "Copper Bar",
+          8
+        ],
+        [
+          "Rough Grinding Stone",
+          2
+        ]
+      ]
+    },
+    {
+      "name": "Runed Copper Pants",
+      "start": 35,
+      "src": "Trainer",
+      "skill": [
+        35,
+        75,
+        95,
+        115
+      ],
+      "mat": [
+        [
+          "Copper Bar",
+          8
+        ],
+        [
+          "Coarse Thread",
+          3
+        ],
+        [
+          "Rough Grinding Stone",
+          3
+        ]
+      ]
+    },
+    {
+      "name": "Coarse Sharpening Stone",
+      "start": 40,
+      "src": "Trainer",
+      "skill": [
+        40,
+        40,
+        47,
+        55
+      ],
+      "mat": [
+        [
+          "Coarse Stone",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Coarse Weightstone",
+      "start": 40,
+      "src": "Trainer",
+      "skill": [
+        40,
+        40,
+        47,
+        55
+      ],
+      "mat": [
+        [
+          "Coarse Stone",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Heavy Copper Maul",
+      "start": 40,
+      "src": "Trainer",
+      "skill": [
+        40,
+        80,
+        100,
+        120
+      ],
+      "mat": [
+        [
+          "Copper Bar",
+          12
+        ],
+        [
+          "Weak Flux",
+          2
+        ],
+        [
+          "Light Leather",
+          2
+        ]
+      ]
+    },
+    {
+      "name": "Runed Copper Belt",
+      "start": 45,
+      "src": "Trainer",
+      "skill": [
+        45,
+        85,
+        105,
+        125
+      ],
+      "mat": [
+        [
+          "Copper Bar",
+          10
+        ]
+      ]
+    },
+    {
+      "name": "Thick War Axe",
+      "start": 45,
+      "src": "Trainer",
+      "skill": [
+        45,
+        85,
+        105,
+        125
+      ],
+      "mat": [
+        [
+          "Copper Bar",
+          10
+        ],
+        [
+          "Weak Flux",
+          2
+        ],
+        [
+          "Silver Bar",
+          2
+        ],
+        [
+          "Rough Grinding Stone",
+          2
+        ],
+        [
+          "Light Leather",
+          2
+        ]
+      ]
+    },
+    {
+      "name": "Coarse Grinding Stone",
+      "start": 50,
+      "src": "Trainer",
+      "skill": [
+        50,
+        50,
+        70,
+        90
+      ],
+      "mat": [
+        [
+          "Coarse Stone",
+          2
+        ]
+      ]
+    },
+    {
+      "name": "Runed Copper Bracers",
+      "start": 65,
+      "src": "Trainer",
+      "skill": [
+        65,
+        90,
+        102,
+        115
+      ],
+      "mat": [
+        [
+          "Copper Bar",
+          10
+        ],
+        [
+          "Rough Grinding Stone",
+          3
+        ]
+      ]
+    },
+    {
+      "name": "Rough Bronze Boots",
+      "start": 70,
+      "src": "Trainer",
+      "skill": [
+        70,
+        100,
+        115,
+        130
+      ],
+      "mat": [
+        [
+          "Bronze Bar",
+          6
+        ],
+        [
+          "Rough Grinding Stone",
+          6
+        ]
+      ]
+    },
+    {
+      "name": "Heavy Copper Broadsword",
+      "start": 70,
+      "src": "Trainer",
+      "skill": [
+        70,
+        110,
+        130,
+        150
+      ],
+      "mat": [
+        [
+          "Copper Bar",
+          14
+        ],
+        [
+          "Weak Flux",
+          2
+        ],
+        [
+          "Tigerseye",
+          2
+        ],
+        [
+          "Medium Leather",
+          2
+        ]
+      ]
+    },
+    {
+      "name": "Silver Skeleton Key",
+      "start": 75,
+      "src": "Trainer",
+      "skill": [
+        75,
+        75,
+        85,
+        95
+      ],
+      "mat": [
+        [
+          "Silver Bar",
+          1
+        ],
+        [
+          "Rough Grinding Stone",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Silver Rod",
+      "start": 75,
+      "src": "Trainer",
+      "skill": [
+        75,
+        80,
+        82,
+        85
+      ],
+      "mat": [
+        [
+          "Silver Bar",
+          1
+        ],
+        [
+          "Rough Grinding Stone",
+          2
+        ]
+      ]
+    },
+    {
+      "name": "Big Bronze Knife",
+      "start": 80,
+      "src": "Trainer",
+      "skill": [
+        80,
+        110,
+        125,
+        140
+      ],
+      "mat": [
+        [
+          "Bronze Bar",
+          6
+        ],
+        [
+          "Weak Flux",
+          4
+        ],
+        [
+          "Rough Grinding Stone",
+          2
+        ],
+        [
+          "Tigerseye",
+          1
+        ],
+        [
+          "Medium Leather",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Rough Bronze Cuirass",
+      "start": 80,
+      "src": "Trainer",
+      "skill": [
+        80,
+        120,
+        135,
+        150
+      ],
+      "mat": [
+        [
+          "Bronze Bar",
+          7
+        ]
+      ]
+    },
+    {
+      "name": "Rough Bronze Leggings",
+      "start": 80,
+      "src": "Trainer",
+      "skill": [
+        80,
+        120,
+        135,
+        150
+      ],
+      "mat": [
+        [
+          "Bronze Bar",
+          6
+        ]
+      ]
+    },
+    {
+      "name": "Bronze Mace",
+      "start": 85,
+      "src": "Trainer",
+      "skill": [
+        85,
+        115,
+        130,
+        145
+      ],
+      "mat": [
+        [
+          "Bronze Bar",
+          6
+        ],
+        [
+          "Weak Flux",
+          4
+        ],
+        [
+          "Medium Leather",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Pearl-handled Dagger",
+      "start": 85,
+      "src": "Trainer",
+      "skill": [
+        85,
+        115,
+        130,
+        145
+      ],
+      "mat": [
+        [
+          "Bronze Bar",
+          6
+        ],
+        [
+          "Strong Flux",
+          1
+        ],
+        [
+          "Small Lustrous Pearl",
+          2
+        ],
+        [
+          "Coarse Grinding Stone",
+          2
+        ]
+      ]
+    },
+    {
+      "name": "Rough Bronze Shoulders",
+      "start": 85,
+      "src": "Trainer",
+      "skill": [
+        85,
+        115,
+        130,
+        145
+      ],
+      "mat": [
+        [
+          "Bronze Bar",
+          5
+        ],
+        [
+          "Shadowgem",
+          1
+        ],
+        [
+          "Coarse Grinding Stone",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Bronze Axe",
+      "start": 90,
+      "src": "Trainer",
+      "skill": [
+        90,
+        120,
+        135,
+        150
+      ],
+      "mat": [
+        [
+          "Bronze Bar",
+          7
+        ],
+        [
+          "Weak Flux",
+          4
+        ],
+        [
+          "Medium Leather",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Bronze Shortsword",
+      "start": 95,
+      "src": "Trainer",
+      "skill": [
+        95,
+        125,
+        140,
+        155
+      ],
+      "mat": [
+        [
+          "Bronze Bar",
+          5
+        ],
+        [
+          "Weak Flux",
+          4
+        ],
+        [
+          "Medium Leather",
+          2
+        ]
+      ]
+    },
+    {
+      "name": "Patterned Bronze Bracers",
+      "start": 95,
+      "src": "Trainer",
+      "skill": [
+        95,
+        125,
+        140,
+        155
+      ],
+      "mat": [
+        [
+          "Bronze Bar",
+          5
+        ],
+        [
+          "Coarse Grinding Stone",
+          2
+        ]
+      ]
+    },
+    {
+      "name": "Heavy Grinding Stone",
+      "start": 100,
+      "src": "Trainer",
+      "skill": [
+        100,
+        100,
+        112,
+        125
+      ],
+      "mat": [
+        [
+          "Heavy Stone",
+          3
+        ]
+      ]
+    },
+    {
+      "name": "Heavy Sharpening Stone",
+      "start": 100,
+      "src": "Trainer",
+      "skill": [
+        100,
+        100,
+        107,
+        115
+      ],
+      "mat": [
+        [
+          "Heavy Stone",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Heavy Weightstone",
+      "start": 100,
+      "src": "Trainer",
+      "skill": [
+        100,
+        100,
+        107,
+        115
+      ],
+      "mat": [
+        [
+          "Heavy Stone",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Bronze Warhammer",
+      "start": 100,
+      "src": "Trainer",
+      "skill": [
+        100,
+        155,
+        170,
+        185
+      ],
+      "mat": [
+        [
+          "Bronze Bar",
+          8
+        ],
+        [
+          "Strong Flux",
+          1
+        ],
+        [
+          "Medium Leather",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Bronze Greatsword",
+      "start": 105,
+      "src": "Trainer",
+      "skill": [
+        105,
+        135,
+        150,
+        165
+      ],
+      "mat": [
+        [
+          "Bronze Bar",
+          12
+        ],
+        [
+          "Strong Flux",
+          2
+        ],
+        [
+          "Medium Leather",
+          2
+        ]
+      ]
+    },
+    {
+      "name": "Heavy Bronze Mace",
+      "start": 105,
+      "src": "Trainer",
+      "skill": [
+        105,
+        135,
+        150,
+        165
+      ],
+      "mat": [
+        [
+          "Bronze Bar",
+          8
+        ],
+        [
+          "Strong Flux",
+          1
+        ],
+        [
+          "Moss Agate",
+          1
+        ],
+        [
+          "Shadowgem",
+          1
+        ],
+        [
+          "Coarse Grinding Stone",
+          2
+        ],
+        [
+          "Medium Leather",
+          2
+        ]
+      ]
+    },
+    {
+      "name": "Silvered Bronze Boots",
+      "start": 105,
+      "src": "Trainer",
+      "skill": [
+        105,
+        135,
+        150,
+        165
+      ],
+      "mat": [
+        [
+          "Bronze Bar",
+          6
+        ],
+        [
+          "Silver Bar",
+          1
+        ],
+        [
+          "Coarse Grinding Stone",
+          2
+        ]
+      ]
+    },
+    {
+      "name": "Bronze Battle Axe",
+      "start": 110,
+      "src": "Trainer",
+      "skill": [
+        110,
+        140,
+        155,
+        170
+      ],
+      "mat": [
+        [
+          "Bronze Bar",
+          14
+        ],
+        [
+          "Strong Flux",
+          1
+        ],
+        [
+          "Medium Leather",
+          2
+        ]
+      ]
+    },
+    {
+      "name": "Silvered Bronze Gauntlets",
+      "start": 110,
+      "src": "Trainer",
+      "skill": [
+        110,
+        140,
+        155,
+        170
+      ],
+      "mat": [
+        [
+          "Bronze Bar",
+          8
+        ],
+        [
+          "Silver Bar",
+          1
+        ],
+        [
+          "Coarse Grinding Stone",
+          2
+        ]
+      ]
+    },
+    {
+      "name": "Shining Silver Breastplate",
+      "start": 120,
+      "src": "Trainer",
+      "skill": [
+        120,
+        150,
+        165,
+        180
+      ],
+      "mat": [
+        [
+          "Bronze Bar",
+          20
+        ],
+        [
+          "Moss Agate",
+          2
+        ],
+        [
+          "Lesser Moonstone",
+          2
+        ],
+        [
+          "Iridescent Pearl",
+          2
+        ],
+        [
+          "Silver Bar",
+          4
+        ]
+      ]
+    },
+    {
+      "name": "Golden Skeleton Key",
+      "start": 125,
+      "src": "Trainer",
+      "skill": [
+        125,
+        125,
+        135,
+        145
+      ],
+      "mat": [
+        [
+          "Gold Bar",
+          1
+        ],
+        [
+          "Heavy Grinding Stone",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Iron Buckle",
+      "start": 125,
+      "src": "Trainer",
+      "skill": [
+        125,
+        125,
+        127,
+        130
+      ],
+      "mat": [
+        [
+          "Iron Bar",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Golden Rod",
+      "start": 125,
+      "src": "Trainer",
+      "skill": [
+        125,
+        130,
+        132,
+        135
+      ],
+      "mat": [
+        [
+          "Gold Bar",
+          1
+        ],
+        [
+          "Coarse Grinding Stone",
+          2
+        ]
+      ]
+    },
+    {
+      "name": "Green Iron Leggings",
+      "start": 130,
+      "src": "Trainer",
+      "skill": [
+        130,
+        155,
+        167,
+        180
+      ],
+      "mat": [
+        [
+          "Iron Bar",
+          8
+        ],
+        [
+          "Heavy Grinding Stone",
+          1
+        ],
+        [
+          "Green Dye",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Green Iron Bracers",
+      "start": 140,
+      "src": "Trainer",
+      "skill": [
+        140,
+        165,
+        177,
+        190
+      ],
+      "mat": [
+        [
+          "Iron Bar",
+          6
+        ],
+        [
+          "Green Dye",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Green Iron Helm",
+      "start": 145,
+      "src": "Trainer",
+      "skill": [
+        145,
+        170,
+        182,
+        195
+      ],
+      "mat": [
+        [
+          "Iron Bar",
+          12
+        ],
+        [
+          "Citrine",
+          1
+        ],
+        [
+          "Green Dye",
+          1
+        ]
+      ]
+    }
+  ],
+  "tailoring": [
+    {
+      "name": "Bolt of Linen Cloth",
+      "start": 1,
+      "src": "Trainer",
+      "skill": [
+        1,
+        25,
+        37,
+        50
+      ],
+      "mat": [
+        [
+          "Linen Cloth",
+          2
+        ]
+      ]
+    },
+    {
+      "name": "Linen Bag",
+      "start": 1,
+      "src": "Trainer",
+      "skill": [
+        1,
+        30,
+        47,
+        65
+      ],
+      "mat": [
+        [
+          "Bolt of Linen Cloth",
+          3
+        ],
+        [
+          "Coarse Thread",
+          3
+        ]
+      ]
+    },
+    {
+      "name": "Brown Linen Shirt",
+      "start": 1,
+      "src": "Trainer",
+      "skill": [
+        1,
+        35,
+        47,
+        60
+      ],
+      "mat": [
+        [
+          "Bolt of Linen Cloth",
+          1
+        ],
+        [
+          "Coarse Thread",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Linen Cloak",
+      "start": 1,
+      "src": "Trainer",
+      "skill": [
+        1,
+        35,
+        47,
+        60
+      ],
+      "mat": [
+        [
+          "Bolt of Linen Cloth",
+          1
+        ],
+        [
+          "Coarse Thread",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "White Linen Shirt",
+      "start": 1,
+      "src": "Trainer",
+      "skill": [
+        1,
+        35,
+        47,
+        60
+      ],
+      "mat": [
+        [
+          "Bolt of Linen Cloth",
+          1
+        ],
+        [
+          "Coarse Thread",
+          1
+        ],
+        [
+          "Bleach",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Simple Linen Pants",
+      "start": 1,
+      "src": "Trainer",
+      "skill": [
+        1,
+        40,
+        50,
+        60
+      ],
+      "mat": [
+        [
+          "Bolt of Linen Cloth",
+          1
+        ],
+        [
+          "Coarse Thread",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Brown Linen Vest",
+      "start": 10,
+      "src": "Trainer",
+      "skill": [
+        10,
+        45,
+        57,
+        70
+      ],
+      "mat": [
+        [
+          "Bolt of Linen Cloth",
+          1
+        ],
+        [
+          "Coarse Thread",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Linen Belt",
+      "start": 15,
+      "src": "Trainer",
+      "skill": [
+        15,
+        50,
+        67,
+        85
+      ],
+      "mat": [
+        [
+          "Bolt of Linen Cloth",
+          1
+        ],
+        [
+          "Coarse Thread",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Faction Banner",
+      "start": 20,
+      "src": "Trainer",
+      "skill": [
+        20,
+        20,
+        20,
+        20
+      ],
+      "mat": [
+        [
+          "Bolt of Linen Cloth",
+          1
+        ],
+        [
+          "Coarse Thread",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Faction Banner",
+      "start": 20,
+      "src": "Trainer",
+      "skill": [
+        20,
+        20,
+        20,
+        20
+      ],
+      "mat": [
+        [
+          "Bolt of Linen Cloth",
+          1
+        ],
+        [
+          "Coarse Thread",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Simple Linen Boots",
+      "start": 20,
+      "src": "Trainer",
+      "skill": [
+        20,
+        50,
+        67,
+        85
+      ],
+      "mat": [
+        [
+          "Bolt of Linen Cloth",
+          2
+        ],
+        [
+          "Light Leather",
+          1
+        ],
+        [
+          "Coarse Thread",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Blue Linen Shirt",
+      "start": 25,
+      "src": "Trainer",
+      "skill": [
+        25,
+        50,
+        67,
+        85
+      ],
+      "mat": [
+        [
+          "Bolt of Linen Cloth",
+          2
+        ],
+        [
+          "Coarse Thread",
+          1
+        ],
+        [
+          "Blue Dye",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Brown Linen Pants",
+      "start": 25,
+      "src": "Trainer",
+      "skill": [
+        25,
+        50,
+        67,
+        85
+      ],
+      "mat": [
+        [
+          "Bolt of Linen Cloth",
+          2
+        ],
+        [
+          "Coarse Thread",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Brown Linen Robe",
+      "start": 25,
+      "src": "Trainer",
+      "skill": [
+        25,
+        50,
+        67,
+        85
+      ],
+      "mat": [
+        [
+          "Bolt of Linen Cloth",
+          3
+        ],
+        [
+          "Coarse Thread",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Heavy Linen Gloves",
+      "start": 25,
+      "src": "Trainer",
+      "skill": [
+        25,
+        50,
+        67,
+        85
+      ],
+      "mat": [
+        [
+          "Bolt of Linen Cloth",
+          2
+        ],
+        [
+          "Coarse Thread",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Red Linen Shirt",
+      "start": 25,
+      "src": "Trainer",
+      "skill": [
+        25,
+        50,
+        67,
+        85
+      ],
+      "mat": [
+        [
+          "Bolt of Linen Cloth",
+          2
+        ],
+        [
+          "Coarse Thread",
+          1
+        ],
+        [
+          "Red Dye",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Simple Dress",
+      "start": 25,
+      "src": "Trainer",
+      "skill": [
+        25,
+        50,
+        67,
+        85
+      ],
+      "mat": [
+        [
+          "Bolt of Linen Cloth",
+          2
+        ],
+        [
+          "Coarse Thread",
+          1
+        ],
+        [
+          "Blue Dye",
+          1
+        ],
+        [
+          "Bleach",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "White Linen Robe",
+      "start": 25,
+      "src": "Trainer",
+      "skill": [
+        25,
+        50,
+        67,
+        85
+      ],
+      "mat": [
+        [
+          "Bolt of Linen Cloth",
+          3
+        ],
+        [
+          "Coarse Thread",
+          1
+        ],
+        [
+          "Bleach",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Novice Arcanist's Sash",
+      "start": 35,
+      "src": "Trainer",
+      "skill": [
+        35,
+        55,
+        55,
+        55
+      ],
+      "mat": [
+        [
+          "Bolt of Linen Cloth",
+          8
+        ],
+        [
+          "Fine Thread",
+          2
+        ],
+        [
+          "Minor Mana Potion",
+          2
+        ]
+      ]
+    },
+    {
+      "name": "Novice Ardent's Sash",
+      "start": 35,
+      "src": "Trainer",
+      "skill": [
+        35,
+        55,
+        55,
+        55
+      ],
+      "mat": [
+        [
+          "Bolt of Linen Cloth",
+          12
+        ],
+        [
+          "Fine Thread",
+          2
+        ],
+        [
+          "Minor Healing Potion",
+          2
+        ]
+      ]
+    },
+    {
+      "name": "Green Linen Bracers",
+      "start": 35,
+      "src": "Trainer",
+      "skill": [
+        35,
+        60,
+        77,
+        95
+      ],
+      "mat": [
+        [
+          "Bolt of Linen Cloth",
+          3
+        ],
+        [
+          "Coarse Thread",
+          2
+        ],
+        [
+          "Green Dye",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Reinforced Linen Cape",
+      "start": 35,
+      "src": "Trainer",
+      "skill": [
+        35,
+        60,
+        77,
+        95
+      ],
+      "mat": [
+        [
+          "Bolt of Linen Cloth",
+          2
+        ],
+        [
+          "Coarse Thread",
+          3
+        ]
+      ]
+    },
+    {
+      "name": "Barbaric Linen Vest",
+      "start": 40,
+      "src": "Trainer",
+      "skill": [
+        40,
+        65,
+        82,
+        100
+      ],
+      "mat": [
+        [
+          "Bolt of Linen Cloth",
+          4
+        ],
+        [
+          "Light Leather",
+          1
+        ],
+        [
+          "Fine Thread",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Green Linen Shirt",
+      "start": 40,
+      "src": "Trainer",
+      "skill": [
+        40,
+        65,
+        82,
+        100
+      ],
+      "mat": [
+        [
+          "Bolt of Linen Cloth",
+          3
+        ],
+        [
+          "Fine Thread",
+          1
+        ],
+        [
+          "Green Dye",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Linen Boots",
+      "start": 40,
+      "src": "Trainer",
+      "skill": [
+        40,
+        65,
+        82,
+        100
+      ],
+      "mat": [
+        [
+          "Bolt of Linen Cloth",
+          3
+        ],
+        [
+          "Coarse Thread",
+          1
+        ],
+        [
+          "Light Leather",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Handstitched Linen Britches",
+      "start": 45,
+      "src": "Trainer",
+      "skill": [
+        45,
+        70,
+        87,
+        105
+      ],
+      "mat": [
+        [
+          "Bolt of Linen Cloth",
+          4
+        ],
+        [
+          "Fine Thread",
+          2
+        ]
+      ]
+    },
+    {
+      "name": "Simple Kilt",
+      "start": 50,
+      "src": "Trainer",
+      "skill": [
+        50,
+        75,
+        92,
+        110
+      ],
+      "mat": [
+        [
+          "Bolt of Linen Cloth",
+          4
+        ],
+        [
+          "Fine Thread",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Woolen Bag",
+      "start": 50,
+      "src": "Trainer",
+      "skill": [
+        50,
+        75,
+        92,
+        110
+      ],
+      "mat": [
+        [
+          "Bolt of Woolen Cloth",
+          3
+        ],
+        [
+          "Fine Thread",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Bolt of Woolen Cloth",
+      "start": 55,
+      "src": "Trainer",
+      "skill": [
+        55,
+        70,
+        77,
+        85
+      ],
+      "mat": [
+        [
+          "Wool Cloth",
+          3
+        ]
+      ]
+    },
+    {
+      "name": "Soft-soled Linen Boots",
+      "start": 55,
+      "src": "Trainer",
+      "skill": [
+        55,
+        80,
+        97,
+        115
+      ],
+      "mat": [
+        [
+          "Bolt of Linen Cloth",
+          5
+        ],
+        [
+          "Light Leather",
+          2
+        ],
+        [
+          "Fine Thread",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Woolen Cape",
+      "start": 55,
+      "src": "Trainer",
+      "skill": [
+        55,
+        80,
+        97,
+        115
+      ],
+      "mat": [
+        [
+          "Bolt of Woolen Cloth",
+          1
+        ],
+        [
+          "Fine Thread",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Green Woolen Vest",
+      "start": 60,
+      "src": "Trainer",
+      "skill": [
+        60,
+        85,
+        102,
+        120
+      ],
+      "mat": [
+        [
+          "Bolt of Woolen Cloth",
+          2
+        ],
+        [
+          "Fine Thread",
+          2
+        ],
+        [
+          "Green Dye",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Heavy Woolen Gloves",
+      "start": 60,
+      "src": "Trainer",
+      "skill": [
+        60,
+        85,
+        102,
+        120
+      ],
+      "mat": [
+        [
+          "Bolt of Woolen Cloth",
+          3
+        ],
+        [
+          "Fine Thread",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Pearl-clasped Cloak",
+      "start": 70,
+      "src": "Trainer",
+      "skill": [
+        70,
+        95,
+        112,
+        130
+      ],
+      "mat": [
+        [
+          "Bolt of Woolen Cloth",
+          3
+        ],
+        [
+          "Fine Thread",
+          2
+        ],
+        [
+          "Small Lustrous Pearl",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Woolen Boots",
+      "start": 70,
+      "src": "Trainer",
+      "skill": [
+        70,
+        95,
+        112,
+        130
+      ],
+      "mat": [
+        [
+          "Bolt of Woolen Cloth",
+          4
+        ],
+        [
+          "Fine Thread",
+          2
+        ],
+        [
+          "Light Leather",
+          2
+        ]
+      ]
+    },
+    {
+      "name": "Gray Woolen Shirt",
+      "start": 80,
+      "src": "Trainer",
+      "skill": [
+        80,
+        90,
+        100,
+        110
+      ],
+      "mat": [
+        [
+          "Bolt of Woolen Cloth",
+          2
+        ],
+        [
+          "Fine Thread",
+          1
+        ],
+        [
+          "Gray Dye",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Double-Stitched Woolen Shoulders",
+      "start": 85,
+      "src": "Trainer",
+      "skill": [
+        85,
+        110,
+        127,
+        145
+      ],
+      "mat": [
+        [
+          "Bolt of Woolen Cloth",
+          3
+        ],
+        [
+          "Fine Thread",
+          2
+        ]
+      ]
+    },
+    {
+      "name": "Heavy Woolen Pants",
+      "start": 85,
+      "src": "Trainer",
+      "skill": [
+        85,
+        110,
+        127,
+        145
+      ],
+      "mat": [
+        [
+          "Bolt of Woolen Cloth",
+          5
+        ],
+        [
+          "Fine Thread",
+          4
+        ]
+      ]
+    },
+    {
+      "name": "Stylish Red Shirt",
+      "start": 85,
+      "src": "Trainer",
+      "skill": [
+        85,
+        110,
+        127,
+        145
+      ],
+      "mat": [
+        [
+          "Bolt of Woolen Cloth",
+          3
+        ],
+        [
+          "Red Dye",
+          2
+        ],
+        [
+          "Fine Thread",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "White Woolen Dress",
+      "start": 85,
+      "src": "Trainer",
+      "skill": [
+        85,
+        110,
+        127,
+        145
+      ],
+      "mat": [
+        [
+          "Bolt of Woolen Cloth",
+          3
+        ],
+        [
+          "Bleach",
+          4
+        ],
+        [
+          "Fine Thread",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Bolt of Silk Cloth",
+      "start": 100,
+      "src": "Trainer",
+      "skill": [
+        100,
+        110,
+        115,
+        120
+      ],
+      "mat": [
+        [
+          "Silk Cloth",
+          4
+        ]
+      ]
+    },
+    {
+      "name": "Spidersilk Boots",
+      "start": 100,
+      "src": "Trainer",
+      "skill": [
+        100,
+        125,
+        142,
+        160
+      ],
+      "mat": [
+        [
+          "Bolt of Silk Cloth",
+          2
+        ],
+        [
+          "Medium Leather",
+          4
+        ],
+        [
+          "Spider's Silk",
+          4
+        ],
+        [
+          "Iridescent Pearl",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Gloves of Meditation",
+      "start": 105,
+      "src": "Trainer",
+      "skill": [
+        105,
+        125,
+        140,
+        155
+      ],
+      "mat": [
+        [
+          "Bolt of Woolen Cloth",
+          4
+        ],
+        [
+          "Fine Thread",
+          3
+        ],
+        [
+          "Elixir of Wisdom",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Lesser Wizard's Robe",
+      "start": 110,
+      "src": "Trainer",
+      "skill": [
+        110,
+        130,
+        145,
+        160
+      ],
+      "mat": [
+        [
+          "Bolt of Silk Cloth",
+          2
+        ],
+        [
+          "Fine Thread",
+          2
+        ],
+        [
+          "Spider's Silk",
+          2
+        ]
+      ]
+    },
+    {
+      "name": "Azure Silk Pants",
+      "start": 115,
+      "src": "Trainer",
+      "skill": [
+        115,
+        135,
+        150,
+        165
+      ],
+      "mat": [
+        [
+          "Bolt of Silk Cloth",
+          4
+        ],
+        [
+          "Blue Dye",
+          2
+        ],
+        [
+          "Fine Thread",
+          3
+        ]
+      ]
+    },
+    {
+      "name": "Azure Silk Hood",
+      "start": 120,
+      "src": "Trainer",
+      "skill": [
+        120,
+        130,
+        135,
+        140
+      ],
+      "mat": [
+        [
+          "Bolt of Silk Cloth",
+          2
+        ],
+        [
+          "Blue Dye",
+          2
+        ],
+        [
+          "Fine Thread",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Silk Headband",
+      "start": 125,
+      "src": "Trainer",
+      "skill": [
+        125,
+        135,
+        140,
+        145
+      ],
+      "mat": [
+        [
+          "Bolt of Silk Cloth",
+          3
+        ],
+        [
+          "Fine Thread",
+          2
+        ]
+      ]
+    },
+    {
+      "name": "White Swashbuckler's Shirt",
+      "start": 125,
+      "src": "Trainer",
+      "skill": [
+        125,
+        135,
+        140,
+        145
+      ],
+      "mat": [
+        [
+          "Bolt of Silk Cloth",
+          3
+        ],
+        [
+          "Bleach",
+          2
+        ],
+        [
+          "Silken Thread",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Azure Silk Vest",
+      "start": 125,
+      "src": "Trainer",
+      "skill": [
+        125,
+        145,
+        160,
+        175
+      ],
+      "mat": [
+        [
+          "Bolt of Silk Cloth",
+          5
+        ],
+        [
+          "Blue Dye",
+          4
+        ]
+      ]
+    },
+    {
+      "name": "Small Silk Pack",
+      "start": 125,
+      "src": "Trainer",
+      "skill": [
+        125,
+        145,
+        160,
+        175
+      ],
+      "mat": [
+        [
+          "Bolt of Silk Cloth",
+          3
+        ],
+        [
+          "Heavy Leather",
+          2
+        ],
+        [
+          "Fine Thread",
+          3
+        ]
+      ]
+    },
+    {
+      "name": "Formal White Shirt",
+      "start": 135,
+      "src": "Trainer",
+      "skill": [
+        135,
+        145,
+        150,
+        155
+      ],
+      "mat": [
+        [
+          "Bolt of Silk Cloth",
+          3
+        ],
+        [
+          "Bleach",
+          2
+        ],
+        [
+          "Fine Thread",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Earthen Vest",
+      "start": 135,
+      "src": "Trainer",
+      "skill": [
+        135,
+        155,
+        170,
+        185
+      ],
+      "mat": [
+        [
+          "Bolt of Silk Cloth",
+          3
+        ],
+        [
+          "Elemental Earth",
+          1
+        ],
+        [
+          "Fine Thread",
+          2
+        ]
+      ]
+    },
+    {
+      "name": "Bolt of Mageweave",
+      "start": 140,
+      "src": "Trainer",
+      "skill": [
+        140,
+        145,
+        147,
+        150
+      ],
+      "mat": [
+        [
+          "Mageweave Cloth",
+          5
+        ]
+      ]
+    },
+    {
+      "name": "Red Swashbuckler's Shirt",
+      "start": 140,
+      "src": "Trainer",
+      "skill": [
+        140,
+        150,
+        155,
+        160
+      ],
+      "mat": [
+        [
+          "Bolt of Silk Cloth",
+          3
+        ],
+        [
+          "Red Dye",
+          2
+        ],
+        [
+          "Silken Thread",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Azure Silk Belt",
+      "start": 140,
+      "src": "Trainer",
+      "skill": [
+        140,
+        160,
+        175,
+        190
+      ],
+      "mat": [
+        [
+          "Bolt of Silk Cloth",
+          4
+        ],
+        [
+          "Elemental Water",
+          1
+        ],
+        [
+          "Blue Dye",
+          2
+        ],
+        [
+          "Fine Thread",
+          2
+        ],
+        [
+          "Iron Buckle",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Crimson Silk Belt",
+      "start": 140,
+      "src": "Trainer",
+      "skill": [
+        140,
+        160,
+        175,
+        190
+      ],
+      "mat": [
+        [
+          "Bolt of Silk Cloth",
+          4
+        ],
+        [
+          "Iron Buckle",
+          1
+        ],
+        [
+          "Red Dye",
+          2
+        ],
+        [
+          "Silken Thread",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "Green Silken Shoulders",
+      "start": 145,
+      "src": "Trainer",
+      "skill": [
+        145,
+        165,
+        180,
+        195
+      ],
+      "mat": [
+        [
+          "Bolt of Silk Cloth",
+          5
+        ],
+        [
+          "Silken Thread",
+          2
+        ]
+      ]
+    }
+  ]
+}
