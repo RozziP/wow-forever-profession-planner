@@ -1,10 +1,11 @@
 ## Interface: 16001
 ## Title: Forever Profession Trainer
 ## Notes: Six profession routes through 150 or 300, material costs, and Auctionator imports.
-## Version: 0.3.7
-## OptionalDeps: Auctionator
+## Version: 0.3.8
+## Dependencies: Auctionator
 ## SavedVariables: ForeverProfessionPlannerSettings
 
 Routes.lua
 Quotes.lua
+RecipeIcons.lua
 Planner.lua
