@@ -14,6 +14,12 @@ Supports Alchemy, Blacksmithing, Enchanting, Engineering, Leatherworking, and Ta
 3. Use **Overview** for the full remaining route, or select a skill range to see just those steps and materials. Save any crafted items marked **Keep ×N** for later steps.
 
 
+Drag the bottom-right corner to resize the planner. It remembers the size for your next session.
+
+### While crafting
+
+The progress bar shows your current skill, target, and how many points you still need. Follow the highlighted recipe and switch at the skill shown. Craft counts are estimates, and the planner updates them as you gain skill. If you hit your trained cap before reaching the target, the planner prompts you to train the next rank.
+
 ### Shop for materials
 
 1. Open **Overview** or the skill range you want to shop for.
