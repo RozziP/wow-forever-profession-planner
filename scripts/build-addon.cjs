@@ -27,15 +27,42 @@ if (!exportPath) {
 }
 
 const prices = readPrices(exportPath);
-const { output: rushRoutes, vend, sales, retained, yields } = require('../finalroutes.cjs');
+const { output: rushRoutes, vend, sales, yields } = require('../finalroutes.cjs');
 
 function auctionItem([name, id, quantity]) {
   if (!id) throw new Error('Missing WoW item ID for ' + name);
   return { name, id, quantity, price: prices[name] ?? 0 };
 }
 
+const vendorItemIds = {
+  'Blacksmith Hammer': 5956,
+  'Weak Flux': 2880,
+  'Strong Flux': 3466,
+  'Empty Vial': 3371,
+  'Leaded Vial': 3372,
+  'Crystal Vial': 8925,
+  'Green Dye': 2605,
+  'Mote of Magic': 247786,
+  'Copper Rod': 6217,
+  'Maple Seed': 17034,
+  'Stranglethorn Seed': 17035,
+  'Salt': 4289,
+  'Coarse Thread': 2320,
+  'Fine Thread': 2321,
+  'Silken Thread': 4291,
+  'Heavy Silken Thread': 8343,
+  'Rune Thread': 14341,
+  'Gray Dye': 4340,
+  'Black Dye': 2325,
+  'Blue Dye': 6260,
+  'Red Dye': 2604,
+  'Simple Wood': 4470,
+};
+
 function vendorItem([name, quantity, price]) {
-  return { name, quantity, price };
+  const id = vendorItemIds[name];
+  if (!id) throw new Error('Missing WoW item ID for ' + name);
+  return { name, id, quantity, price };
 }
 
 function tailoringFinishes(finishes) {
@@ -50,7 +77,10 @@ function tailoringFinishes(finishes) {
   }));
 }
 
-const outputs = { 'Fire Oil': 2, 'Blackmouth Oil': 2, 'Silver Contact': 5, 'Iron Buckle': 2 };
+const outputs = {
+  'Fire Oil': 2, 'Blackmouth Oil': 2, 'Silver Contact': 5, 'Iron Buckle': 2,
+  'Rough Copper Bomb': 2, 'Coarse Dynamite': 2, 'Hi-Explosive Bomb': 4,
+};
 const intermediateIds = {
   'Fire Oil': 6371,
   'Lesser Magic Essence': 10938,
@@ -87,13 +117,13 @@ const questThorium = {
 
 function stepsFor(name, rows, yieldsByRecipe = outputs, modeledSteps = []) {
   const professionRecipes = recipes[name.toLowerCase()];
-  return rows.map(([from, to, recipe, estimate, sell]) => {
+  return rows.map(([from, to, recipe, estimate, sellPrice]) => {
     const data = professionRecipes.find(row => row.name === recipe);
     const mat = data ? Object.fromEntries(data.mat) : guideMaterials[recipe];
     if (!mat) throw new Error('Missing materials for ' + recipe);
     const step = {
       from, to, recipe, crafts: Math.ceil(estimate - 1e-9),
-      mat, yield: yieldsByRecipe[recipe] ?? 1, sell,
+      mat, yield: yieldsByRecipe[recipe] ?? 1, sellPrice: sellPrice ?? sales[recipe] ?? 0,
     };
     if (data && data.skill[3] >= to && !modeledSteps.includes(recipe)) {
       step.yellow = data.skill[1];
@@ -147,8 +177,8 @@ const publishedCheckpoints = {
 
 const professions = Object.entries(guides).map(([name, guide]) => {
   const full = {
-    steps: stepsFor(name, guide.steps.map(([from, to, recipe, crafts, units = 0, sell = 0]) =>
-      [from, to, recipe, crafts, sell * units / crafts])),
+    steps: stepsFor(name, guide.steps.map(([from, to, recipe, crafts, , sellPrice]) =>
+      [from, to, recipe, crafts, sellPrice])),
     auction: guide.auction.map(auctionItem),
     vendor: guide.vendor.map(vendorItem),
     notes: guide.notes,
@@ -165,9 +195,8 @@ const professions = Object.entries(guides).map(([name, guide]) => {
   const ids = { ...intermediateIds, ...Object.fromEntries(guide.auction.map(([item, id]) => [item, id])), ...rushItemIds };
   const rushRoute = rushRoutes[name];
   const rush = {
-    steps: stepsFor(name, rushRoute.plans.map(({ a, b, name: recipe, m }) => [
-      a, b, recipe, m, retained.has(recipe) ? 0 : (sales[recipe] ?? 0) * (yields[recipe] ?? 1),
-    ]), { ...outputs, ...yields }, ['Rough Dynamite', 'Rough Copper Bomb', 'Linen Bag']),
+    steps: stepsFor(name, rushRoute.plans.map(({ a, b, name: recipe, m }) => [a, b, recipe, m]),
+      { ...outputs, ...yields }, ['Rough Dynamite', 'Rough Copper Bomb', 'Linen Bag']),
     auction: Object.entries(rushRoute.ah).map(([item, quantity]) => auctionItem([item, ids[item], quantity])),
     vendor: Object.entries(rushRoute.vendor).map(([item, quantity]) => vendorItem([item, quantity, vend[item]])),
     prep: rushPrep[name] ?? {},

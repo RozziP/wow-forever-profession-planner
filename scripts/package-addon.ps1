@@ -28,11 +28,26 @@ $addonFiles = Get-ChildItem -LiteralPath $addonDirectory -File -Recurse
 $relativePaths = @($addonFiles | ForEach-Object {
     [IO.Path]::GetRelativePath($addonDirectory, $_.FullName).Replace('\', '/')
 })
-foreach ($line in ($toc -split '\r?\n')) {
-    $path = $line.Trim().Replace('\', '/')
-    if ($path -and !$path.StartsWith('#') -and $relativePaths -cnotcontains $path) {
-        throw "Missing TOC file '$path' in $addonName."
+$entries = @($toc -split '\r?\n' | ForEach-Object { $_.Trim().Replace('\', '/') } |
+    Where-Object { $_ -and !$_.StartsWith('#') })
+if (!$entries.Count) {
+    throw "Expected runtime files in $tocName."
+}
+
+$packageFiles = [ordered]@{ $foreverTocName = $tocPath }
+$media = @(
+    'BaltoTheme/LightningMcQueen.tga'
+    'BaltoTheme/HotRod.tga'
+    'BaltoTheme/CarHorns.mp3'
+)
+foreach ($path in ($entries + $media)) {
+    if ($relativePaths -cnotcontains $path) {
+        throw "Missing runtime file '$path' in $addonName."
     }
+    if ($packageFiles.Contains($path)) {
+        throw "Duplicate package entry '$path'."
+    }
+    $packageFiles[$path] = Join-Path $addonDirectory $path
 }
 
 $output = (New-Item -ItemType Directory -Path $OutputDirectory -Force).FullName
@@ -41,13 +56,9 @@ $archiveFile = [IO.File]::Open($zipPath, [IO.FileMode]::Create)
 try {
     $archive = [IO.Compression.ZipArchive]::new($archiveFile, [IO.Compression.ZipArchiveMode]::Create)
     try {
-        foreach ($file in $addonFiles) {
-            $relativePath = [IO.Path]::GetRelativePath($addonDirectory, $file.FullName).Replace('\', '/')
-            if ($relativePath -ceq $tocName) {
-                $relativePath = $foreverTocName
-            }
+        foreach ($entry in $packageFiles.GetEnumerator()) {
             [void][IO.Compression.ZipFileExtensions]::CreateEntryFromFile(
-                $archive, $file.FullName, "$addonName/$relativePath", [IO.Compression.CompressionLevel]::Optimal
+                $archive, $entry.Value, "$addonName/$($entry.Key)", [IO.Compression.CompressionLevel]::Optimal
             )
         }
     } finally {
