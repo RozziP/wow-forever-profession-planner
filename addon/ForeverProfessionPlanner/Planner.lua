@@ -876,7 +876,7 @@ local function showDebugPage()
     page:ClearAllPoints()
     page:SetPoint("TOPLEFT", frame.targetControls, "BOTTOMLEFT", 0, -10)
     page:SetPoint("TOPRIGHT", frame.targetControls, "BOTTOMRIGHT", 0, -10)
-    page:SetHeight(80)
+    page:SetHeight(112)
     local skill = button(page, "Skill up (+1)", 14, 12, 174)
     skill:SetScript("OnClick", function() frame.previewSkillFeedback(true, false) end)
     local milestone = button(page, "Slider slide and splash", 196, 12, 174)
@@ -885,6 +885,8 @@ local function showDebugPage()
     both:SetScript("OnClick", function() frame.previewSkillFeedback(true, true) end)
     local craft = button(page, "Crafting time (-23s)", 196, 44, 174)
     craft:SetScript("OnClick", function() showCraftingFeedback(frame, 23000) end)
+    local balto = button(page, "Play Balto entrance", 14, 76, 174)
+    balto:SetScript("OnClick", function() addon.PlayBaltoEntrance(frame) end)
     frame.debugPage = page
   end
 
@@ -1378,7 +1380,6 @@ local function createPlanner()
   local panelTop = trainerTop + 49
   local stepPanel = insetPanel(body, "TOPLEFT", 18, panelTop)
   local itemPanel = insetPanel(body, "TOPRIGHT", -18, panelTop)
-  frame.themeInsets = { welcome, cappedBanner, targetControls, stepPanel, itemPanel }
   local stepHeaderTop = 12
   local stepScrollTop = 37
   local stepInset = 9
