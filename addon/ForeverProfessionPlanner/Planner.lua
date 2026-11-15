@@ -35,11 +35,10 @@ local frame
 local active
 local stepRowHeight = 36
 local targetStep = 5
-local rushSkillCap = 150
-local shoppingListTop = 128
+local defaultTarget, maxTarget = 75, 300
+local shoppingListTop = 193
 local startingSkills = {}
 local anchoredPlans = {}
-local rushPlans = {}
 local selectedPlan
 local settings
 local colors = {
@@ -69,8 +68,8 @@ local insetBackdrop = {
   insets = { left = 3, right = 3, top = 3, bottom = 3 },
 }
 
-local function snapTarget(value, maximum)
-  return math.min(maximum, math.max(targetStep, math.floor(value / targetStep + 0.5) * targetStep))
+local function snapTarget(value)
+  return math.min(maxTarget, math.max(targetStep, math.floor(value / targetStep + 0.5) * targetStep))
 end
 
 local function paint(region, color)
@@ -151,7 +150,7 @@ end
 
 local function money(value)
   local copper = math.floor(math.abs(value) + 0.5)
-  local sign = value < 0 and "-" or ""
+  local sign = value < 0 and "-" or (value > 0 and "+" or "")
   local gold = math.floor(copper / 10000)
   local silver = math.floor(copper / 100) % 100
   if gold > 0 then
@@ -160,6 +159,11 @@ local function money(value)
     return string.format("%s%ds %02dc", sign, silver, copper % 100)
   end
   return string.format("%s%dc", sign, copper)
+end
+
+local function showMoney(region, value)
+  region:SetText(value and money(value) or "—")
+  paint(region, value and value < 0 and colors.red or (value and value > 0 and colors.green or colors.text))
 end
 
 local function stopWheelScroll(scroll)
@@ -225,8 +229,8 @@ local function showGuideInfo(plan)
   local defaultCost = plan.defaultGuideCost
   frame.guidePrices:SetShown(defaultCost ~= nil)
   if defaultCost then
-    local custom = plan.cost.gross and money(plan.cost.gross) or "unpriced"
-    local default = defaultCost.gross and money(defaultCost.gross) or "unpriced"
+    local custom = plan.cost.gross and money(-plan.cost.gross) or "unpriced"
+    local default = defaultCost.gross and money(-defaultCost.gross) or "unpriced"
     frame.guidePrices:SetText(string.format("Materials for %d–%d: FPT %s  ·  WoW Professions %s",
       plan.from, plan.cap, custom, default))
   end
@@ -338,46 +342,29 @@ local function showNextTrainer(profession, rank, maximum)
   end
 end
 
-local function professionGuide(index, rush)
-  local plans = rush and rushPlans or anchoredPlans
-  local guide = plans[index]
-  if not guide then
-    local plan = addon.GetPlan(index, rush, rush and rushSkillCap or 300, true, startingSkills[index])
-    local steps = addon.GetGuideSteps(index, plan)
-    if rush then
-      for _, step in ipairs(professionGuide(index, false).steps) do
-        if step.from >= rushSkillCap then steps[#steps + 1] = step end
-      end
-    end
-    guide = { plan = plan, steps = steps }
-    plans[index] = guide
+local function professionGuide(index, target)
+  local guide = anchoredPlans[index]
+  if not guide or guide.plan.cap ~= target then
+    local plan = addon.GetPlan(index, target, true, startingSkills[index] or 1)
+    guide = { plan = plan, steps = addon.GetGuideSteps(index, plan) }
+    anchoredPlans[index] = guide
   end
   return guide
 end
 
 local function showRoute(index, keepScroll)
   local learned = learnedProfessions()
-  local firstLearned
-  local visibleTabs = 0
-  for i, tab in ipairs(frame.tabs) do
-    local skill = learned[professionSkillLines[routes[i].name]]
-    tab:SetShown(skill ~= nil)
-    if skill then
-      tab:ClearAllPoints()
-      tab:SetPoint("TOPLEFT", frame, "TOPRIGHT", -1, -44 - visibleTabs * (tab:GetHeight() + 2))
-      firstLearned = firstLearned or i
-      visibleTabs = visibleTabs + 1
-    else
-      startingSkills[i], anchoredPlans[i], rushPlans[i] = nil, nil, nil
-    end
-  end
-  if not index or not learned[professionSkillLines[routes[index].name]] then index = firstLearned end
   keepScroll = keepScroll and active == index
   active = index
   for i, tab in ipairs(frame.tabs) do
+    tab.skill = learned[professionSkillLines[routes[i].name]]
     tab.selected:SetShown(i == index)
+    if not tab.skill and startingSkills[i] then
+      startingSkills[i], anchoredPlans[i] = nil, nil
+    end
   end
   frame.welcome:SetShown(index == nil)
+  frame.targetControls:SetShown(index ~= nil)
   if not index then
     frame.planPage:Hide()
     frame.trainPage:Show()
@@ -387,16 +374,18 @@ local function showRoute(index, keepScroll)
     return
   end
   local profession = routes[index].name
-  local skill = learned[professionSkillLines[profession]]
-  local rank, maximum = skill.rank, skill.maximum
+  local skill = frame.tabs[index].skill
+  local rank, maximum = skill and skill.rank or 1, skill and skill.maximum
+  local target = settings.target
+  frame.syncTarget(target)
   local training = nextRanks[maximum]
-  local capped = training ~= nil and rank == maximum
+  local capped = training ~= nil and rank == maximum and rank < target
   frame.planPage:SetShown(not capped)
   frame.trainPage:SetShown(capped)
   frame.cappedBanner:SetShown(capped)
-  if not startingSkills[index] or rank < startingSkills[index] then
+  if skill and (not startingSkills[index] or rank < startingSkills[index]) then
     startingSkills[index] = rank
-    anchoredPlans[index], rushPlans[index] = nil, nil
+    anchoredPlans[index] = nil
   end
   if capped then
     selectedPlan = nil
@@ -408,12 +397,8 @@ local function showRoute(index, keepScroll)
       training.name, profession, training.level, trainer))
     return
   end
-  local canRush = rank <= rushSkillCap
-  local rush = canRush and settings.rush150
-  local target = rush and settings.rushTarget or settings.target
-  frame.syncTarget(canRush, rush, target)
-  local guide = professionGuide(index, rush)
-  local route = addon.GetPlan(index, rush, target, true, rank, guide.plan)
+  local guide = professionGuide(index, target)
+  local route = addon.GetPlan(index, target, true, rank, guide.plan)
   selectedPlan = guide.plan
   showGuideInfo(selectedPlan)
   if frame.copyPanel and frame.copyPanel:IsShown() then
@@ -421,13 +406,18 @@ local function showRoute(index, keepScroll)
       frame.copyPanel:Hide()
     end
   end
-  showNextTrainer(profession, rank, maximum)
+  if rank >= target then
+    frame.trainerStatus:SetText(string.format("Target reached at skill %d", rank))
+    frame.trainerLocation:SetText("")
+  elseif skill then
+    showNextTrainer(profession, rank, maximum)
+  else
+    frame.trainerStatus:SetText("Learn " .. profession .. " to start crafting")
+    frame.trainerLocation:SetText("Ask a capital-city guard for the " .. profession .. " trainer.")
+  end
   local cost = route.cost
   local source = ""
-  local netColor = colors.text
-  if cost.net ~= nil then
-    netColor = cost.net > 0 and colors.red or (cost.net < 0 and colors.green or colors.text)
-  elseif #route.auction > 0 then
+  if cost.gross == nil and #route.auction > 0 then
     if cost.available then
       source = string.format("Auctionator prices missing for %d item%s", #cost.missing, #cost.missing == 1 and "" or "s")
     else
@@ -435,10 +425,9 @@ local function showRoute(index, keepScroll)
     end
   end
   frame.priceStatus:SetText(source)
-  frame.costs[1]:SetText(cost.gross and money(cost.gross) or "—")
-  frame.costs[2]:SetText(cost.net and money(cost.net) or "—")
-  paint(frame.costs[1], cost.gross and colors.red or colors.text)
-  paint(frame.costs[2], netColor)
+  showMoney(frame.costs[1], cost.gross and -cost.gross)
+  showMoney(frame.costs[2], route.from < route.cap and route.revenue or nil)
+  showMoney(frame.costs[3], cost.net and -cost.net)
   frame.importButton:SetEnabled(#route.auction > 0)
   local latestCompletedRow
   while #frame.steps < #guide.steps do addStepRow() end
@@ -452,10 +441,10 @@ local function showRoute(index, keepScroll)
     if complete then latestCompletedRow = i end
     if step then
       local crafts = step.crafts
-      if current and not step.prep and rank < target then
+      if current and not step.prep then
         for _, remainingStep in ipairs(route.steps) do
           if not remainingStep.prep and remainingStep.from == rank
-            and remainingStep.recipe == step.recipe and remainingStep.to == math.min(step.to, target) then
+            and remainingStep.recipe == step.recipe and remainingStep.to == step.to then
             crafts = remainingStep.crafts
             break
           end
@@ -578,7 +567,7 @@ local function createPlanner()
     local index = i
     local tab = CreateFrame("Button", nil, frame)
     tab:SetSize(tabSize, tabSize)
-    tab:Hide()
+    tab:SetPoint("TOPLEFT", frame, "TOPRIGHT", -1, -44 - (i - 1) * (tabSize + 2))
     local background = tab:CreateTexture(nil, "BACKGROUND")
     background:SetAllPoints()
     background:SetAtlas("common-sidetab")
@@ -600,7 +589,12 @@ local function createPlanner()
     highlight:SetAtlas("common-sidetab-hover")
     tab:SetScript("OnEnter", function(self)
       GameTooltip:SetOwner(self, "ANCHOR_LEFT")
-      GameTooltip:SetText(routes[index].name)
+      GameTooltip:SetText(route.name)
+      if self.skill then
+        GameTooltip:AddLine("Skill " .. self.skill.rank)
+      else
+        GameTooltip:AddLine("Preview from skill 1")
+      end
       GameTooltip:Show()
     end)
     tab:SetScript("OnLeave", function() GameTooltip:Hide() end)
@@ -616,7 +610,7 @@ local function createPlanner()
   frame.trainPage = trainPage
 
   local welcome = insetPanel(trainPage, "CENTER", 0, 0)
-  welcome:SetSize(476, 200)
+  welcome:SetSize(476, 160)
   frame.welcome = welcome
   local welcomeIcon = welcome:CreateTexture(nil, "ARTWORK")
   welcomeIcon:SetPoint("TOP", 0, -20)
@@ -624,15 +618,11 @@ local function createPlanner()
   welcomeIcon:SetTexture("Interface\\Icons\\INV_Misc_Book_09")
   local welcomeTitle = label(welcome, fonts.title, 28, 68, 420)
   welcomeTitle:SetJustifyH("CENTER")
-  welcomeTitle:SetText("Learn a crafting profession")
+  welcomeTitle:SetText("Choose a profession")
   local welcomeText = label(welcome, fonts.body, 28, 98, 420)
   welcomeText:SetJustifyH("CENTER")
   welcomeText:SetSpacing(4)
-  welcomeText:SetText("Ask a guard in a capital city to point you to a trainer. Once you learn a supported profession, its guide appears here.")
-  local supported = label(welcome, fonts.note, 28, 154, 420)
-  supported:SetJustifyH("CENTER")
-  supported:SetSpacing(3)
-  supported:SetText("Alchemy, Blacksmithing, Enchanting\nEngineering, Leatherworking, Tailoring")
+  welcomeText:SetText("Select a tab on the right to preview recipes, materials, and estimated gold.")
 
   local cappedBanner = CreateFrame("Frame", nil, trainPage, "BackdropTemplate")
   cappedBanner:SetSize(640, 78)
@@ -661,20 +651,26 @@ local function createPlanner()
   local body = CreateFrame("Frame", nil, frame)
   body:SetAllPoints()
   frame.planPage = body
-  local targetBackground = surface(body, 16, 52, 1, 50, 0.135, 0.098, 0.063)
-  targetBackground:SetPoint("TOPRIGHT", -16, -52)
+  local targetControls = CreateFrame("Frame", nil, frame)
+  targetControls:SetPoint("TOPLEFT", 16, -52)
+  targetControls:SetPoint("TOPRIGHT", -16, -52)
+  targetControls:SetHeight(50)
+  frame.targetControls = targetControls
+  local targetBackground = surface(targetControls, 0, 0, 1, 50, 0.135, 0.098, 0.063)
+  targetBackground:SetPoint("TOPRIGHT")
 
-  label(body, fonts.heading, 29, 56, 145):SetText("Target skill level:")
-  frame.targetValue = label(body, fonts.heading, 182, 56, 42)
+  label(targetControls, fonts.heading, 13, 4, 145):SetText("Target skill level:")
+  frame.targetValue = label(targetControls, fonts.heading, 166, 4, 42)
   paint(frame.targetValue, colors.text)
-  local targetSlider = CreateFrame("Slider", nil, body)
-  targetSlider:SetPoint("TOPLEFT", 29, -77)
-  targetSlider:SetPoint("TOPRIGHT", -29, -77)
+  local targetSlider = CreateFrame("Slider", nil, targetControls)
+  targetSlider:SetPoint("TOPLEFT", 13, -25)
+  targetSlider:SetPoint("TOPRIGHT", -13, -25)
   targetSlider:SetHeight(22)
   targetSlider:SetOrientation("HORIZONTAL")
   targetSlider:EnableMouse(true)
   targetSlider:SetValueStep(targetStep)
   targetSlider:SetObeyStepOnDrag(true)
+  targetSlider:SetMinMaxValues(targetStep, maxTarget)
 
   local track = targetSlider:CreateTexture(nil, "BACKGROUND")
   track:SetPoint("LEFT")
@@ -700,39 +696,42 @@ local function createPlanner()
   fill:SetColorTexture(0.73, 0.47, 0.18, 1)
   tintGradient(fill, { 0.49, 0.25, 0.07, 1 }, { 0.88, 0.62, 0.25, 1 })
 
-  local rush = CreateFrame("CheckButton", nil, body, "UICheckButtonTemplate")
-  rush:SetPoint("TOPRIGHT", -99, -53)
-  rush:SetSize(24, 24)
-  rush:SetHitRectInsets(0, -73, 0, 0)
-  label(rush, fonts.body, 27, 5, 70):SetText("Rush 150")
-  rush:SetScript("OnClick", function(self)
-    settings.rush150 = not not self:GetChecked()
-    if settings.rush150 then settings.rushTarget = rushSkillCap end
+  local function setTarget(value)
+    local target = snapTarget(value)
+    if settings.target == target then return end
+    settings.target = target
     showRoute(active)
-  end)
+  end
 
-  local updatingTarget, rushActive
-  frame.syncTarget = function(canRush, useRush, target)
-    rush:SetShown(canRush)
-    rush:SetChecked(useRush)
+  local targets = { defaultTarget, 150, maxTarget }
+  local presets = {}
+  local presetWidth, presetGap = 48, 5
+  for i, target in ipairs(targets) do
+    local preset = button(targetControls, tostring(target), 0, 0, presetWidth)
+    preset:ClearAllPoints()
+    preset:SetPoint("TOPRIGHT", -13 - (#targets - i) * (presetWidth + presetGap), -1)
+    preset:SetScript("OnClick", function() setTarget(target) end)
+    presets[target] = preset
+  end
+
+  local updatingTarget
+  frame.syncTarget = function(target)
     updatingTarget = true
-    rushActive = useRush
-    targetSlider:SetMinMaxValues(targetStep, rushActive and rushSkillCap or 300)
     targetSlider:SetValue(target)
     fill:SetShown(target > targetStep)
     frame.targetValue:SetText(target)
+    for value, preset in pairs(presets) do
+      if value == target then
+        preset:LockHighlight()
+      else
+        preset:UnlockHighlight()
+      end
+    end
     updatingTarget = false
   end
 
   targetSlider:SetScript("OnValueChanged", function(_, value)
-    fill:SetShown(value > targetStep)
-    if updatingTarget then return end
-    local target = snapTarget(value, rushActive and rushSkillCap or 300)
-    local key = rushActive and "rushTarget" or "target"
-    if settings[key] == target then return end
-    settings[key] = target
-    frame.targetValue:SetText(target)
-    showRoute(active)
+    if not updatingTarget then setTarget(value) end
   end)
   frame:RegisterEvent("SKILL_LINES_CHANGED")
   frame:RegisterEvent("CHAT_MSG_SKILL")
@@ -788,19 +787,23 @@ local function createPlanner()
   end
 
   frame.costs = {}
-  for i, caption in ipairs({ "Shopping cost:", "Net after sales:" }) do
+  for i, caption in ipairs({ "Buy materials", "Vendor sales", "After vendor sales" }) do
     local y = 52 + (i - 1) * 23
-    local heading = label(itemPanel, fonts.body, 12, y, 122)
+    local heading = label(itemPanel, fonts.body, 12, y, 130)
     heading:SetMaxLines(1)
     heading:SetText(caption)
-    local value = label(itemPanel, fonts.body, 138, y, 110)
+    local value = label(itemPanel, fonts.body, 0, y, 110)
+    value:ClearAllPoints()
     value:SetPoint("TOPRIGHT", -12, -y)
     value:SetJustifyH("RIGHT")
     value:SetMaxLines(1)
     frame.costs[i] = value
   end
-  frame.priceStatus = label(itemPanel, fonts.note, 12, 100, 240)
-  frame.priceStatus:SetPoint("TOPRIGHT", -12, -100)
+  frame.priceStatus = label(itemPanel, fonts.note, 12, 121, 240)
+  frame.priceStatus:SetPoint("TOPRIGHT", -12, -121)
+  local sellingNote = label(itemPanel, fonts.note, 12, 146, 240)
+  sellingNote:SetPoint("TOPRIGHT", -12, -146)
+  sellingNote:SetText("Keep marked crafts. Vendor extras, or use the Auction House if you expect more gold after fees.")
 
   local footer = CreateFrame("Frame", nil, body)
   footer:SetPoint("BOTTOMLEFT", 18, 10)
@@ -927,10 +930,15 @@ SlashCmdList.FOREVERPROFESSIONTRAINER = function(message)
     if type(ForeverProfessionPlannerSettings) ~= "table" then ForeverProfessionPlannerSettings = {} end
     settings = ForeverProfessionPlannerSettings
     local legacyTarget = settings.stopAt150 == false and settings.fullTarget or settings.shortTarget
-    local target = math.floor(tonumber(settings.target) or tonumber(legacyTarget) or 150)
-    settings.target = target <= 1 and 150 or snapTarget(target, 300)
-    settings.rush150 = settings.rush150 == true
-    settings.rushTarget = snapTarget(tonumber(settings.rushTarget) or rushSkillCap, rushSkillCap)
+    local target = tonumber(settings.target) or tonumber(legacyTarget) or defaultTarget
+    if settings.rush150 == true then
+      target = math.min(150, tonumber(settings.rushTarget) or 150)
+    elseif settings.rush150 == false and target == 150 then
+      -- The old default was saved even before the player moved the slider.
+      target = defaultTarget
+    end
+    settings.target = target <= 1 and defaultTarget or snapTarget(target)
+    settings.rush150, settings.rushTarget = nil, nil
     settings.stopAt150, settings.shortTarget, settings.fullTarget = nil, nil, nil
     settings.preferBuying = nil
     createPlanner()
