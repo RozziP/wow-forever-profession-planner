@@ -9,4 +9,5 @@ Routes.lua
 Quotes.lua
 RecipeIcons.lua
 Planner.lua
+BaltoTheme.lua
 CharacterScripts.lua

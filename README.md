@@ -14,7 +14,7 @@ See the [changelog](CHANGELOG.md) for what changed.
 
 1. Type `/fpt` or `/foreverprofessiontrainer`, or click the book tab in Blizzard’s **Professions** window. The book opens the planner at the Professions window’s scale and places it alongside when there’s room.
 2. Choose any of the six profession tabs on the right. Gold borders mark learned professions, and the highlighted tab shows the guide you’re viewing. You can also jump straight to a guide with a command such as `/fpt tailoring`.
-3. Set a **Skill target** with the slider or click a marker at **75**, **150**, **225**, or **300**. A fresh install defaults to 75. The plan starts at your actual skill, with a slider minimum that follows it exactly. Unlearned professions are previewed from skill 1.
+3. Each profession tab click resets the **Skill target** to the next milestone above your current skill, up to **300**. Click a marker at **75**, **150**, **225**, or **300**, or use the slider to choose a different target. Unlearned professions are previewed from skill 1 and default to a target of 75.
 
 Drag the bottom-right corner to resize the planner. It remembers your chosen size for the next session.
 
@@ -26,7 +26,7 @@ Follow the highlighted recipe and switch at the skill shown. Completed steps sta
 
 At a trainable skill cap, selecting the profession tab opens the trainer screen even if you’ve already reached your planned target. It names the rank you need to unlock further skill gains, shows the required character level, and gives directions for your faction. Click **View plan** and set a higher target to plan or shop ahead. Click **Training** or select the profession tab again to return. Click a named trainer to open the map and place a waypoint where supported. Annora’s pin marks the rear entrance to Uldaman.
 
-In the **Tailoring** plan below skill 150, check **Skip wool** in the footer to use the linen-based route for early skill gains. The footer compares estimated materials and crafting time.
+With **Tailoring** selected below skill 150, **Skip wool** is on by default and uses the linen-based route for early skill gains. Uncheck it in the footer to use wool. Selecting the Tailoring tab again turns it back on. The footer compares material cost and crafting time.
 
 ## Shopping and costs
 
@@ -45,6 +45,22 @@ If prices are missing, scan the Auction House with Auctionator and reopen the pl
 
 Edit `CharacterScripts.lua` in the `ForeverProfessionPlanner` addon folder to add optional Lua callbacks that run on login or UI reload. Use an exact character name, `Name-Realm` with the normalized realm name, or a full BattleTag including its `#` and digits. A realm-specific character entry takes priority over a name-only entry. A BattleTag entry applies to the logged-in character on that account and can run once Battle.net supplies the tag. Back up any edits to the script before updating.
 
+The Balto theme and Animation Debug are account-scoped. The theme uses a film still from the [Pixar Cars gallery](https://www.pixar.com/cars) and [Car Horn Beeps](https://freesound.org/people/hsaunier10/sounds/254678/) by hsaunier10 (CC0).
+
 ## Guide credits
 
 The routes are based on WoW Professions’ WoW Forever guides. Click **WoW Professions** in the planner footer to copy the selected guide’s link. [WoW Professions guides](https://www.wow-professions.com/forever)
+
+## Development checks
+
+Run from the source worktree with PowerShell 7, Node.js, and pnpm.
+
+```powershell
+pwsh -NoProfile -File ./scripts/check-source.ps1
+pnpm install --frozen-lockfile
+pnpm test
+```
+
+The source check prints the branch, revision, and both TOC versions, then compares the source files with the WoW Forever installation using the `wow-addon-dev` skill's comparator. It is read-only. Exit codes are `0` for a match, `1` for file differences, and `2` for a setup error. Use `-InstalledDirectory` for a different installed `ForeverProfessionPlanner` folder, or `-CompareScript` for a comparator in a different location.
+
+The test runner checks Lua 5.1 syntax and loads the addon in TOC order with mocked WoW and Auctionator APIs. It runs without WoW and covers route quotes and exports, profession tab defaults, training navigation, late prices, and crafting events. Use the game client to check layout and API behavior against the installed build.

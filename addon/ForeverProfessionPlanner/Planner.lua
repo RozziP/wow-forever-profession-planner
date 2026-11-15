@@ -50,10 +50,13 @@ local artisanTrainers = {
 }
 
 local frame
+local plannerTheme
 local active
+local debugSelected
 local stepRowHeight = 36
 local targetStep = 5
 local defaultTarget, maxTarget = 75, 300
+local skillMilestones = { defaultTarget, 150, 225, maxTarget }
 local defaultWindowWidth, defaultWindowHeight = 750, 620
 local stepColumns = { skill = 12, icon = 79, recipe = 109, crafts = 42 }
 local startingSkills = {}
@@ -88,6 +91,13 @@ local insetBackdrop = {
   edgeSize = 12,
   insets = { left = 3, right = 3, top = 3, bottom = 3 },
 }
+
+local function nextSkillTarget(rank)
+  for _, milestone in ipairs(skillMilestones) do
+    if milestone > rank then return milestone end
+  end
+  return maxTarget
+end
 
 local function snapTarget(value, minimum)
   local snapped = math.min(maxTarget, math.floor(value / targetStep + 0.5) * targetStep)
@@ -258,6 +268,7 @@ local function insetPanel(parent, point, x, y)
   shading:SetPoint("BOTTOMRIGHT", -5, 5)
   shading:SetColorTexture(0.10, 0.074, 0.051, 1)
   tintGradient(shading, { 0.16, 0.115, 0.078, 1 }, { 0.085, 0.061, 0.041, 1 })
+  panel.shading = shading
   return panel
 end
 
@@ -677,15 +688,28 @@ local function updateProfessionTabs(index)
   end
 end
 
-local function showRoute(index, keepScroll)
+local function showRoute(index, keepScroll, resetPlan)
   keepScroll = keepScroll and active == index
-  if active ~= index then
+  if debugSelected then
+    debugSelected = nil
+    frame.debugPage:Hide()
+    frame.debugTab:SetChecked(false)
+    clearCraftingFeedback(frame)
+    frame.clearSkillFeedback()
+  end
+  if active ~= index or resetPlan then
     clearCraftingFeedback(frame)
     frame.clearSkillFeedback()
     frame.viewingCappedPlan = nil
   end
   active = index
   updateProfessionTabs(index)
+  local skill = index and frame.tabs[index].skill
+  local rank, maximum = skill and skill.rank or 1, skill and skill.maximum
+  if resetPlan then
+    settings.target = nextSkillTarget(rank)
+    settings.skipWool = nil
+  end
   local profession = index and routes[index].name
   local portraitIcon = profession and professionIcons[profession] or plannerIcon
   frame.PortraitContainer.portrait:SetTexture("Interface\\Icons\\" .. portraitIcon)
@@ -693,7 +717,7 @@ local function showRoute(index, keepScroll)
   frame.welcome:SetShown(index == nil)
   frame.targetControls:SetShown(index ~= nil)
   local isTailoring = profession == "Tailoring"
-  local skipWool = isTailoring and settings.skipWool == true
+  local skipWool = isTailoring and settings.skipWool ~= false
   frame.skipWool:SetChecked(skipWool)
   if not index then
     frame.skipWool:Hide()
@@ -707,8 +731,6 @@ local function showRoute(index, keepScroll)
     frame.copyPanel:Hide()
     return
   end
-  local skill = frame.tabs[index].skill
-  local rank, maximum = skill and skill.rank or 1, skill and skill.maximum
   local minimum = skill and math.min(rank, maxTarget) or targetStep
   local target = snapTarget(settings.target, minimum)
   frame.syncTarget(target, minimum, skill and rank)
@@ -837,9 +859,59 @@ local function showRoute(index, keepScroll)
   return route
 end
 
-local function selectProfession(index)
+local function canUseDebug()
+  return addon.IsAnimationDebugAccount and addon.IsAnimationDebugAccount()
+end
+
+local function refreshDebugTab(self)
+  local allowed = canUseDebug()
+  if not allowed and debugSelected then showRoute(active, true) end
+  self.debugTab:SetShown(not not allowed)
+end
+
+local function showDebugPage()
+  if debugSelected or not canUseDebug() then return end
+  if not frame.debugPage then
+    local page = insetPanel(frame, "TOPLEFT", 0, 0)
+    page:ClearAllPoints()
+    page:SetPoint("TOPLEFT", frame.targetControls, "BOTTOMLEFT", 0, -10)
+    page:SetPoint("TOPRIGHT", frame.targetControls, "BOTTOMRIGHT", 0, -10)
+    page:SetHeight(80)
+    local skill = button(page, "Skill up (+1)", 14, 12, 174)
+    skill:SetScript("OnClick", function() frame.previewSkillFeedback(true, false) end)
+    local milestone = button(page, "Slider slide and splash", 196, 12, 174)
+    milestone:SetScript("OnClick", function() frame.previewSkillFeedback(false, true) end)
+    local both = button(page, "Both skill-up effects", 14, 44, 174)
+    both:SetScript("OnClick", function() frame.previewSkillFeedback(true, true) end)
+    local craft = button(page, "Crafting time (-23s)", 196, 44, 174)
+    craft:SetScript("OnClick", function() showCraftingFeedback(frame, 23000) end)
+    frame.debugPage = page
+  end
+
+  debugSelected = true
+  for _, tab in ipairs(frame.tabs) do tab:SetChecked(false) end
+  frame.debugTab:SetChecked(true)
+  frame.PortraitContainer.portrait:SetTexture("Interface\\Icons\\INV_Misc_Gear_01")
+  frame.TitleContainer.TitleText:SetText(plannerTitle .. " · Animation Debug")
+  frame.welcome:Hide()
+  frame.planPage:Hide()
+  frame.trainPage:Hide()
+  frame.copyPanel:Hide()
+  frame.guideFooter:Hide()
+  frame.skipWool:Hide()
+  clearCraftingFeedback(frame)
+  frame:SetScript("OnUpdate", nil)
+  frame.displayedCraftingTime = nil
+  frame.craftingTime:SetText("Est. crafting  |cfff7ead11m 00s|r")
+  frame.clearSkillFeedback()
+  frame.targetControls:Show()
+  frame.syncTarget(100, 74, 74)
+  frame.debugPage:Show()
+end
+
+local function selectProfession(index, resetPlan)
   frame.viewingCappedPlan = nil
-  showRoute(index)
+  showRoute(index, nil, resetPlan)
 end
 
 local function showCopy(value, heading, instructions)
@@ -907,7 +979,7 @@ local function createPlanner()
   for i, route in ipairs(routes) do
     local index = i
     local tab = createSideTab(frame, professionIcons[route.name], function()
-      if active ~= index or frame.viewingCappedPlan then selectProfession(index) end
+      selectProfession(index, true)
     end)
     tab.Background:SetDesaturated(true)
     tab:SetScript("OnEnter", function(self)
@@ -923,6 +995,21 @@ local function createPlanner()
     tab:SetScript("OnLeave", hideTooltip)
     frame.tabs[i] = tab
   end
+  local debugTab = createSideTab(frame, "INV_Misc_Gear_01", function()
+    if debugSelected then showRoute(active, true) else showDebugPage() end
+  end)
+  debugTab:SetPoint("BOTTOMLEFT", frame, "BOTTOMRIGHT", 0, 8)
+  debugTab.Background:SetDesaturated(true)
+  debugTab:SetScript("OnEnter", function(self)
+    GameTooltip:SetOwner(self, "ANCHOR_LEFT")
+    GameTooltip:SetText("Animation Debug")
+    GameTooltip:Show()
+  end)
+  debugTab:SetScript("OnLeave", hideTooltip)
+  debugTab:Hide()
+  frame.debugTab = debugTab
+  frame:HookScript("OnShow", refreshDebugTab)
+
   local contentTop = 56
   local targetControlsHeight = 68
   local trainPage = CreateFrame("Frame", nil, frame)
@@ -1073,7 +1160,7 @@ local function createPlanner()
   splash:Hide()
 
   local ticks = {}
-  for _, milestone in ipairs({ 75, 150, 225, maxTarget }) do
+  for _, milestone in ipairs(skillMilestones) do
     local tick = CreateFrame("Button", nil, targetBar)
     tick:SetSize(34, 18)
     tick:SetFrameLevel(targetSlider:GetFrameLevel() + 1)
@@ -1174,7 +1261,7 @@ local function createPlanner()
 
   frame.syncTarget = function(target, minimum, currentSkill)
     updatingTarget = true
-    if displayedSkill and currentSkill and currentSkill > displayedSkill then
+    if not debugSelected and displayedSkill and currentSkill and currentSkill > displayedSkill then
       playSkillGain(currentSkill - displayedSkill)
       if minimum > targetMinimum and math.floor(minimum / targetStep) > math.floor(targetMinimum / targetStep) then
         startSkillSlide()
@@ -1193,6 +1280,7 @@ local function createPlanner()
     trackMinimum = hasSkill and 0 or targetStep
     layoutTargetBar(targetBar)
     targetSlider:SetShown(minimum < maxTarget)
+    targetSlider:EnableMouse(not debugSelected)
     targetSlider:SetValue(target)
     completed:SetShown(hasSkill)
     spark:SetShown(hasSkill)
@@ -1201,16 +1289,25 @@ local function createPlanner()
     local skillColor = hasSkill and "91c497" or "b7a68b"
     frame.targetValue:SetText(string.format("|cff%s%d|r / |cfff5c173%d|r", skillColor, currentSkill or 0, target))
     for milestone, tick in pairs(ticks) do
-      local enabled = milestone >= minimum
+      local enabled = not debugSelected and milestone >= minimum
       tick:SetEnabled(enabled)
       tick:SetAlpha(enabled and 1 or 0.35)
     end
     updatingTarget = false
   end
 
+  frame.previewSkillFeedback = function(showGain, showMilestone)
+    local rank = showMilestone and 75 or 73
+    frame.clearSkillFeedback()
+    frame.syncTarget(100, rank - 1, rank - 1)
+    if showMilestone then startSkillSlide() end
+    frame.syncTarget(100, rank, rank)
+    if showGain then playSkillGain(1) end
+  end
+
   targetSlider:SetMinMaxValues(targetMinimum, maxTarget)
   targetSlider:SetScript("OnValueChanged", function(_, value)
-    if updatingTarget then return end
+    if updatingTarget or debugSelected then return end
     local target = snapTarget(value, targetMinimum)
     if target ~= snapTarget(settings.target, targetMinimum) then
       settings.target = target
@@ -1227,12 +1324,19 @@ local function createPlanner()
   frame:RegisterEvent("BAG_UPDATE_DELAYED")
   frame:RegisterEvent("GET_ITEM_INFO_RECEIVED")
   frame:RegisterEvent("TRADE_SKILL_ITEM_CRAFTED_RESULT")
+  frame:RegisterEvent("BN_CONNECTED")
+  frame:RegisterEvent("BN_INFO_CHANGED")
   frame:RegisterEvent("AUCTION_HOUSE_CLOSED")
   frame:RegisterUnitEvent("UNIT_SPELLCAST_START", "player")
   frame:RegisterUnitEvent("UNIT_SPELLCAST_SUCCEEDED", "player")
   local refreshPending
   frame:SetScript("OnEvent", function(self, event, ...)
     if not self:IsShown() then return end
+    if event == "BN_CONNECTED" or event == "BN_INFO_CHANGED" then
+      refreshDebugTab(self)
+      return
+    end
+    if debugSelected then return end
     if event == "UNIT_SPELLCAST_START" then
       updateCraftingTime(self)
       return
@@ -1257,7 +1361,7 @@ local function createPlanner()
     refreshPending = true
     C_Timer.After(0, function()
       refreshPending = nil
-      if self:IsShown() then showRoute(active, true) end
+      if self:IsShown() and not debugSelected then showRoute(active, true) end
     end)
   end)
 
@@ -1274,6 +1378,7 @@ local function createPlanner()
   local panelTop = trainerTop + 49
   local stepPanel = insetPanel(body, "TOPLEFT", 18, panelTop)
   local itemPanel = insetPanel(body, "TOPRIGHT", -18, panelTop)
+  frame.themeInsets = { welcome, cappedBanner, targetControls, stepPanel, itemPanel }
   local stepHeaderTop = 12
   local stepScrollTop = 37
   local stepInset = 9
@@ -1339,10 +1444,16 @@ local function createPlanner()
   footer:SetHeight(37)
 
   local skipWool = CreateFrame("CheckButton", nil, footer, "UICheckButtonTemplate")
-  skipWool:SetPoint("BOTTOMLEFT", -3, -4)
   skipWool:SetSize(24, 24)
-  skipWool:SetHitRectInsets(0, -64, 0, 0)
-  label(skipWool, fonts.caption, 24, 5, 64):SetText("Skip wool")
+  local skipWoolLabel = skipWool:CreateFontString(nil, "OVERLAY")
+  skipWoolLabel:SetFontObject(fonts.caption)
+  skipWoolLabel:SetPoint("LEFT", skipWool, "RIGHT", 3, 0)
+  skipWoolLabel:SetWordWrap(false)
+  skipWoolLabel:SetText("Skip wool")
+  local labelWidth = math.ceil(skipWoolLabel:GetUnboundedStringWidth()) + 2
+  skipWoolLabel:SetWidth(labelWidth)
+  skipWool:SetPoint("TOPRIGHT", footer, "TOPRIGHT", -(labelWidth + 3), -1)
+  skipWool:SetHitRectInsets(0, -(labelWidth + 3), 0, 0)
   skipWool:SetScript("OnEnter", function(self)
     GameTooltip:SetOwner(self, "ANCHOR_TOP")
     GameTooltip:SetText("Use the linen-based route through skill 150.")
@@ -1351,7 +1462,7 @@ local function createPlanner()
   skipWool:SetScript("OnLeave", hideTooltip)
   skipWool:SetScript("OnHide", hideTooltip)
   skipWool:SetScript("OnClick", function(self)
-    settings.skipWool = self:GetChecked()
+    settings.skipWool = not not self:GetChecked()
     showRoute(active, true)
   end)
   frame.skipWool = skipWool
@@ -1393,6 +1504,12 @@ local function createPlanner()
   guideLink:SetScript("OnClick", function()
     if selectedPlan then showCopy(selectedPlan.url, "Copy guide link (Ctrl+C)") end
   end)
+
+  local affiliation = guideFooter:CreateFontString(nil, "OVERLAY")
+  affiliation:SetFontObject(fonts.note)
+  paint(affiliation, colors.muted)
+  affiliation:SetPoint("LEFT", guideLink, "RIGHT", 4, 0)
+  affiliation:SetText("·  FPT is not affiliated")
 
   frame.guidePrices = label(guideFooter, fonts.note, 94, 21, 1)
   frame.guidePrices:SetPoint("TOPRIGHT", 0, -21)
@@ -1489,7 +1606,7 @@ local function createPlanner()
     frame.trainerLocation:SetWidth(width - 60)
     local itemWidth = math.min(330, math.max(248, math.floor(contentWidth * 0.34)))
     local stepWidth = contentWidth - 10 - itemWidth
-    local panelHeight = height - panelTop - 54
+    local panelHeight = height - panelTop - footer:GetHeight() - 17
     stepPanel:SetSize(stepWidth, panelHeight)
     itemPanel:SetSize(itemWidth, panelHeight)
     frame.stepScroll:SetSize(stepWidth - 36, panelHeight - stepScrollTop - 8)
@@ -1498,6 +1615,13 @@ local function createPlanner()
   frame:SetScript("OnSizeChanged", layout)
   layout(frame, frame:GetSize())
   frame:Hide()
+  if plannerTheme then plannerTheme(frame) end
+end
+
+function addon.SetPlannerTheme(applyTheme)
+  if plannerTheme == applyTheme then return end
+  plannerTheme = applyTheme
+  if frame then plannerTheme(frame) end
 end
 
 local function ensurePlanner()
@@ -1524,8 +1648,8 @@ local function ensurePlanner()
   end
 end
 
-local function showPlanner(index)
-  selectProfession(index)
+local function showPlanner(index, resetPlan)
+  selectProfession(index, resetPlan)
   frame:Show()
   frame:Raise()
 end
@@ -1534,11 +1658,22 @@ SLASH_FOREVERPROFESSIONTRAINER1 = "/fpt"
 SLASH_FOREVERPROFESSIONTRAINER2 = "/foreverprofessiontrainer"
 SlashCmdList.FOREVERPROFESSIONTRAINER = function(message)
   local requested = message and message:match("^%s*(.-)%s*$"):lower()
+  if requested == "debug" then
+    if not canUseDebug() then
+      print(plannerTitle .. ": Animation Debug is unavailable on this account.")
+      return
+    end
+    ensurePlanner()
+    if not frame:IsShown() then showPlanner(active) end
+    showDebugPage()
+    frame:Raise()
+    return
+  end
   ensurePlanner()
   if requested and requested ~= "" then
     for i, route in ipairs(routes) do
       if route.name:lower() == requested then
-        showPlanner(i)
+        showPlanner(i, true)
         return
       end
     end

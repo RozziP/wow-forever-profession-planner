@@ -35,12 +35,17 @@ if (!$entries.Count) {
 }
 
 $packageFiles = [ordered]@{ $foreverTocName = $tocPath }
-foreach ($path in $entries) {
+$media = @(
+    'BaltoTheme/LightningMcQueen.tga'
+    'BaltoTheme/HotRod.tga'
+    'BaltoTheme/CarHorns.mp3'
+)
+foreach ($path in ($entries + $media)) {
     if ($relativePaths -cnotcontains $path) {
-        throw "Missing TOC file '$path' in $addonName."
+        throw "Missing runtime file '$path' in $addonName."
     }
     if ($packageFiles.Contains($path)) {
-        throw "Duplicate TOC entry '$path' in $tocName."
+        throw "Duplicate package entry '$path'."
     }
     $packageFiles[$path] = Join-Path $addonDirectory $path
 }
