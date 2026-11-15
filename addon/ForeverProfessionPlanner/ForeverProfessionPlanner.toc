@@ -1,7 +1,7 @@
 ## Interface: 16001
 ## Title: Forever Profession Trainer
 ## Notes: Six profession guides with skill targets, material estimates, and Auctionator shopping lists.
-## Version: 0.3.9
+## Version: 0.4.0
 ## Dependencies: Auctionator
 ## SavedVariables: ForeverProfessionPlannerSettings
 
@@ -9,3 +9,4 @@ Routes.lua
 Quotes.lua
 RecipeIcons.lua
 Planner.lua
+CharacterScripts.lua
