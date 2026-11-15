@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.4.1
+
+- Lightning McQueen now drives across the full screen on Balto’s planner entrance and plays “Ka-chow!” three times over 4.8 seconds.
+- Added **Play Balto entrance** to Animation Debug and restored the standard planner background for the Balto account.
+
 ## 0.4.0
 
 - Added a book tab to Blizzard’s **Professions** window that opens the planner alongside it when space permits.

@@ -45,7 +45,7 @@ If prices are missing, scan the Auction House with Auctionator and reopen the pl
 
 Edit `CharacterScripts.lua` in the `ForeverProfessionPlanner` addon folder to add optional Lua callbacks that run on login or UI reload. Use an exact character name, `Name-Realm` with the normalized realm name, or a full BattleTag including its `#` and digits. A realm-specific character entry takes priority over a name-only entry. A BattleTag entry applies to the logged-in character on that account and can run once Battle.net supplies the tag. Back up any edits to the script before updating.
 
-The Balto theme and Animation Debug are account-scoped. The theme uses a film still from the [Pixar Cars gallery](https://www.pixar.com/cars) and [Car Horn Beeps](https://freesound.org/people/hsaunier10/sounds/254678/) by hsaunier10 (CC0).
+The account-scoped Balto entrance sends Lightning McQueen across the screen with three plays of “Ka-chow!” Run `/fpt debug` and click **Play Balto entrance** on the debug-enabled account to replay it. [Disney/Pixar character render](https://www.pngfind.com/mpng/ihwhJ_disney-cars-png-lightning-mcqueen-disney-cars-clipart/) · [Audio clip from Cars](https://www.101soundboards.com/sounds/9606776-ka-chow)
 
 ## Guide credits
 

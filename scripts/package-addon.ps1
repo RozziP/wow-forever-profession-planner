@@ -36,9 +36,8 @@ if (!$entries.Count) {
 
 $packageFiles = [ordered]@{ $foreverTocName = $tocPath }
 $media = @(
-    'BaltoTheme/LightningMcQueen.tga'
-    'BaltoTheme/HotRod.tga'
-    'BaltoTheme/CarHorns.mp3'
+    'BaltoTheme/McQueenDriveBy.tga'
+    'BaltoTheme/KaChow.mp3'
 )
 foreach ($path in ($entries + $media)) {
     if ($relativePaths -cnotcontains $path) {
