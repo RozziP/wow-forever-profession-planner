@@ -386,9 +386,9 @@ local function tailoringPlan(profession, start, cap, market, bags, preferBuying,
   return best
 end
 
-function addon.GetPlan(index, rush150, target, preferBuying, currentSkill, pinnedPlan)
+function addon.GetPlan(index, target, preferBuying, currentSkill, pinnedPlan)
   local profession = addon.routes[index]
-  local maximum = rush150 and 150 or 300
+  local maximum = 300
   local cap = math.min(maximum, math.max(1, math.floor(target or maximum)))
   local start = math.max(1, math.floor(currentSkill or 1))
   local market = makePriceReader()
@@ -397,19 +397,11 @@ function addon.GetPlan(index, rush150, target, preferBuying, currentSkill, pinne
     return buildPlan(profession, pinnedPlan.source, start, cap, market, bags, preferBuying, false,
       pinnedPlan.selected and pinnedPlan.selected.name)
   end
-  if not rush150 and profession.full.beltOption then
+  if profession.full.beltOption then
     return tailoringPlan(profession, start, cap, market, bags, preferBuying, start == 1 and not preferBuying)
   end
-  local guide = buildPlan(profession, profession.full, start, cap, market, bags, preferBuying,
-    start == 1 and not rush150 and not preferBuying)
-  if not rush150 or start >= cap then return guide end
-
-  local optimized = buildPlan(profession, profession.rush, start, cap, market, bags, preferBuying)
-  if lowerCost(optimized.cost, guide.cost) then
-    optimized.defaultGuideCost = guide.cost
-    return optimized
-  end
-  return guide
+  return buildPlan(profession, profession.full, start, cap, market, bags, preferBuying,
+    start == 1 and not preferBuying)
 end
 
 function addon.GetGuideSteps(index, plan)
