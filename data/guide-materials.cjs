@@ -1,5 +1,11 @@
 // Per-craft ingredients for guide recipes beyond the original 1–150 recipe snapshot.
 module.exports = {
+  'Brilliant Smallfish': { 'Raw Brilliant Smallfish': 1 },
+  'Longjaw Mud Snapper': { 'Raw Longjaw Mud Snapper': 1 },
+  'Bristle Whisker Catfish': { 'Raw Bristle Whisker Catfish': 1 },
+  'Goblin Deviled Clams': { 'Tangy Clam Meat': 1, 'Hot Spices': 1 },
+  'Roast Raptor': { 'Raptor Flesh': 1, 'Hot Spices': 1 },
+  'Spotted Yellowtail': { 'Raw Spotted Yellowtail': 1 },
   'Mana Potion': { Stranglekelp: 1, Kingsblood: 1, 'Leaded Vial': 1 },
   'Nature Protection Potion': { Liferoot: 1, Stranglekelp: 1, 'Leaded Vial': 1 },
   'Elixir of Greater Intellect': { Blindweed: 1, "Khadgar's Whisker": 1, 'Crystal Vial': 1 },

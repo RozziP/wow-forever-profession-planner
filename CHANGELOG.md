@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.4.2
+
+- Added Cooking through skill 300, including the Expert Cookbook and Clamlette Surprise shopping requirements, rank directions, and `/fpt cooking`.
+- Keep craft estimates, **Keep** amounts, shopping quantities, costs, and exports fixed while crafting. Use **Update plan** to recalculate from current skill, inventory, and Auctionator prices.
+- Completed rows now show **Made** counts for successful crafts recorded on the current plan, including crafts without a skill-up. Floating feedback shows the actual completed cast duration.
+- Replaced **Skip wool** with **Less wool**: linen through 75, wool from 75 to 100, then silk through 150. Corrected partial-step estimates and the Mageweave handoff for later recipes.
+- Fixed trainer waypoint feedback so a successful placement does not report that waypoints are unavailable.
+- Preserved vendor item IDs so shopping quantities account for supplies already in your bags.
+
 ## 0.4.1
 
 - Lightning McQueen now drives across the full screen on Balto’s planner entrance and plays “Ka-chow!” three times over 4.8 seconds.

@@ -6,9 +6,10 @@ Blacksmithing:[[1,38,'Rough Sharpening Stone'],[38,85,'Rough Grinding Stone'],[8
 Enchanting:[[1,2,'Runed Copper Rod'],[2,24,'Enchant Bracer - Inferior Stamina'],[24,86,'Lesser Magic Wand'],[86,129,'Greater Magic Wand'],[129,130,'Runed Silver Rod'],[130,146,'Greater Magic Wand'],[146,150,'Enchant Boots - Minor Stamina']],
 Engineering:[[1,30,'Rough Blasting Powder'],[30,57,'Rough Dynamite'],[57,58,'Arclight Spanner'],[58,69,'Rough Copper Bomb'],[69,75,'Copper Tube'],[75,100,'Coarse Dynamite'],[100,150,'Flying Tiger Goggles']],
 Leatherworking:[[1,30,'Light Armor Kit'],[30,50,'Cured Light Hide'],[50,70,'Embossed Leather Pants'],[70,90,'Light Leather Pants'],[90,108,'Dark Leather Pants'],[108,123,'Light Leather Pants'],[123,134,'Dark Leather Pants'],[134,150,"Hillman's Shoulders"]],
-Tailoring:[[1,25,'Bolt of Linen Cloth'],[25,57,'Linen Bag'],[57,69,'Linen Belt'],[69,83,'Reinforced Linen Cape'],[83,100,'Soft-soled Linen Boots'],[100,120,'Bolt of Silk Cloth'],[120,131,'Azure Silk Hood'],[131,150,'Small Silk Pack']],
+// Use wool only for the 75–100 stretch, then rejoin the normal guide at 150.
+Tailoring:[[1,43,'Bolt of Linen Cloth'],[43,70,'Linen Belt'],[70,75,'Reinforced Linen Cape'],[75,83,'Bolt of Woolen Cloth'],[83,100,'Woolen Cape'],[100,120,'Bolt of Silk Cloth'],[120,134,'Azure Silk Hood'],[134,150,'Small Silk Pack']],
 };
-const retained=new Set(['Arclight Spanner','Runed Copper Rod','Runed Silver Rod','Cured Light Hide','Rough Blasting Powder','Bolt of Linen Cloth','Bolt of Silk Cloth']);
+const retained=new Set(['Arclight Spanner','Runed Copper Rod','Runed Silver Rod','Cured Light Hide','Rough Blasting Powder','Bolt of Linen Cloth','Bolt of Woolen Cloth','Bolt of Silk Cloth']);
 Object.assign(vend,{'Copper Rod':124});
 const yields={'Rough Dynamite':2,'Rough Copper Bomb':2,'Coarse Dynamite':2,'Heavy Dynamite':3,'Big Bronze Bomb':3,'Iron Buckle':2,'Fire Oil':2};
 const embedded={
@@ -16,25 +17,23 @@ const embedded={
   'Cured Light Hide':[['Light Hide',1],['Salt',1]],
   'Cured Medium Hide':[['Medium Hide',1],['Salt',1]],
   'Bolt of Linen Cloth':[['Linen Cloth',2]],
+  'Bolt of Woolen Cloth':[['Wool Cloth',3]],
   'Bolt of Silk Cloth':[['Silk Cloth',4]],
   'Handful of Copper Bolts':[['Copper Bar',1]],
 };
 const optionalVendorTools={Engineering:{'Blacksmith Hammer':1},Blacksmithing:{'Blacksmith Hammer':1}};
 const output={};
 const add=(map,k,n)=>map[k]=(map[k]??0)+n;
-function distro(r,a,b) {
-  let d=Array(1301).fill(0);d[0]=1;
-  for(let s=a;s<b;s++){
-    const p=prob(r,s),v=Array(d.length).fill(0);
-    if(!(p>0))throw Error(r.name+' '+s);
-    for(let k=1;k<d.length;k++)v[k]=p*d[k-1]+(1-p)*v[k-1];
-    d=v;
+function expectedCrafts(recipe, from, to) {
+  let crafts = 0;
+  for (let skill = from; skill < to; skill++) {
+    const chance = prob(recipe, skill);
+    if (!(chance > 0)) throw new Error(recipe.name + ' cannot give a skill point at ' + skill);
+    crafts += 1 / chance;
   }
-  return d;
+  return crafts;
 }
-function sum(d){return d.reduce((a,p,n)=>a+p*n,0)}
 const totals={};
-const linenBagsWithBoltSkill=40.89748;
 const engRecipes=Object.fromEntries(professionRecipes.engineering.map(r=>[r.name,r]));
 const dynamiteSimulation=[];
 let seed=11998;
@@ -67,22 +66,33 @@ for(const [p,path] of Object.entries(paths)){
  const plans=path.map(([a,b,name])=>{
   const r=recipes.find(r=>r.name===name);
   if(!r || r.start>a)throw new Error('early '+name);
-  const d=distro(r,a,b),m=sum(d);
+  const estimate = expectedCrafts(r, a, b);
+  // Match the integer recipe batches used by the in-game Less wool plan.
+  const m = p === 'Tailoring' ? Math.ceil(estimate - 1e-9) : estimate;
   return {a,b,name,r,m};
  });
  const stock={};
  for(const step of plans)add(stock,step.name,step.m);
  const consumables=()=>{
   const mat={...optionalVendorTools[p]};
-  if(p==='Tailoring')stock['Linen Bag']=linenBagsWithBoltSkill;
+  const demand = {};
   function use(n,q) {
-    if(embedded[n])for(const [k,a] of embedded[n])use(k,a*q);
-    else add(mat,n,q);
+    if (embedded[n]) {
+      add(demand, n, q);
+      for (const [k, a] of embedded[n]) use(k, a * q);
+    } else add(mat, n, q);
   }
   for(const [name,n] of Object.entries(stock)){
     const r=recipes.find(r=>r.name===name);
     if(embedded[name])continue;
     for(const [k,a] of r.mat)use(k,a*n);
+  }
+  if (p === 'Tailoring') {
+    for (const [name, quantity] of Object.entries(stock)) {
+      if (!embedded[name]) continue;
+      const extra = quantity - (demand[name] ?? 0);
+      if (extra > 0) use(name, extra);
+    }
   }
   if(p==='Engineering'){
     delete mat['Rough Blasting Powder'];
@@ -95,10 +105,6 @@ for(const [p,path] of Object.entries(paths)){
  };
  const quote=mat=>Object.entries(mat).reduce((t,[n,q])=>t+q*(vend[n]??prices[n]),0);
  const cart=consumables();
- if(p==='Tailoring'){
-  const bags=plans.find(s=>s.name==='Linen Bag');
-  bags.m=linenBagsWithBoltSkill;
- }
  if(p==='Engineering')for(const [name,key] of [['Rough Dynamite','dynamite'],['Rough Copper Bomb','roughBombs']]){
   const step=plans.find(s=>s.name===name);
   step.m=engExpected[key];

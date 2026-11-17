@@ -59,8 +59,8 @@ const vendorItemIds = {
   'Simple Wood': 4470,
 };
 
-function vendorItem([name, quantity, price]) {
-  const id = vendorItemIds[name];
+function vendorItem([name, quantity, price, explicitId]) {
+  const id = explicitId ?? vendorItemIds[name];
   if (!id) throw new Error('Missing WoW item ID for ' + name);
   return { name, id, quantity, price };
 }
@@ -116,8 +116,8 @@ const questThorium = {
 };
 
 function stepsFor(name, rows, yieldsByRecipe = outputs, modeledSteps = []) {
-  const professionRecipes = recipes[name.toLowerCase()];
-  return rows.map(([from, to, recipe, estimate, sellPrice]) => {
+  const professionRecipes = recipes[name.toLowerCase()] ?? [];
+  return rows.map(([from, to, recipe, estimate, sellPrice, yellow, gray]) => {
     const data = professionRecipes.find(row => row.name === recipe);
     const mat = data ? Object.fromEntries(data.mat) : guideMaterials[recipe];
     if (!mat) throw new Error('Missing materials for ' + recipe);
@@ -125,7 +125,10 @@ function stepsFor(name, rows, yieldsByRecipe = outputs, modeledSteps = []) {
       from, to, recipe, crafts: Math.ceil(estimate - 1e-9),
       mat, yield: yieldsByRecipe[recipe] ?? 1, sellPrice: sellPrice ?? sales[recipe] ?? 0,
     };
-    if (data && data.skill[3] >= to && !modeledSteps.includes(recipe)) {
+    if (yellow !== undefined) {
+      step.yellow = yellow;
+      step.gray = gray;
+    } else if (data && data.skill[3] >= to && !modeledSteps.includes(recipe)) {
       step.yellow = data.skill[1];
       step.gray = data.skill[3];
     }
@@ -177,8 +180,8 @@ const publishedCheckpoints = {
 
 const professions = Object.entries(guides).map(([name, guide]) => {
   const full = {
-    steps: stepsFor(name, guide.steps.map(([from, to, recipe, crafts, , sellPrice]) =>
-      [from, to, recipe, crafts, sellPrice])),
+    steps: stepsFor(name, guide.steps.map(([from, to, recipe, crafts, , sellPrice, yellow, gray]) =>
+      [from, to, recipe, crafts, sellPrice, yellow, gray])),
     auction: guide.auction.map(auctionItem),
     vendor: guide.vendor.map(vendorItem),
     notes: guide.notes,
@@ -189,26 +192,37 @@ const professions = Object.entries(guides).map(([name, guide]) => {
   }
   if (guide.beltOption) [full.beltOption] = stepsFor(name, [guide.beltOption]);
   full.intermediates = intermediates(full);
+  const profession = {
+    name,
+    url: 'https://www.wow-professions.com/forever/' + name.toLowerCase() + '-leveling-guide',
+    full,
+  };
+  if (guide.rankMaterials) full.rankMaterials = guide.rankMaterials;
+  const rushRoute = rushRoutes[name];
+  if (!rushRoute) return profession;
   full.published = Object.fromEntries(Object.entries({ ...publishedCheckpoints[name], 300: {} })
     .map(([cap, counts]) => [cap, guide.auction.map(([item, id, quantity]) =>
       [item, id, counts[item] ?? quantity]).filter(([, , quantity]) => quantity > 0).map(auctionItem)]));
   const ids = { ...intermediateIds, ...Object.fromEntries(guide.auction.map(([item, id]) => [item, id])), ...rushItemIds };
-  const rushRoute = rushRoutes[name];
-  const rush = {
+  profession.rush = {
     steps: stepsFor(name, rushRoute.plans.map(({ a, b, name: recipe, m }) => [a, b, recipe, m]),
-      { ...outputs, ...yields }, ['Rough Dynamite', 'Rough Copper Bomb', 'Linen Bag']),
+      { ...outputs, ...yields }, ['Rough Dynamite', 'Rough Copper Bomb']),
     auction: Object.entries(rushRoute.ah).map(([item, quantity]) => auctionItem([item, ids[item], quantity])),
     vendor: Object.entries(rushRoute.vendor).map(([item, quantity]) => vendorItem([item, quantity, vend[item]])),
     prep: rushPrep[name] ?? {},
     notes: 'Use the estimated craft counts to shop, then switch recipes when you reach the next skill range.',
   };
-  rush.intermediates = intermediates(rush);
-  return {
-    name,
-    url: 'https://www.wow-professions.com/forever/' + name.toLowerCase() + '-leveling-guide',
-    full,
-    rush,
-  };
+  profession.rush.intermediates = intermediates(profession.rush);
+  if (name === 'Tailoring') {
+    const handoff = profession.rush.steps.at(-1).to;
+    if (!full.steps.some(step => step.from === handoff)) {
+      throw new Error('Less wool must end at a normal Tailoring step boundary');
+    }
+    // Later recipes still use Mageweave bolts when leveling with silk to 150.
+    const bolt = full.steps.find(step => step.recipe === 'Bolt of Mageweave');
+    profession.rush.prep[bolt.recipe] = { mat: bolt.mat, yield: bolt.yield };
+  }
+  return profession;
 });
 
 writeFileSync(resolve(__dirname, '../addon/ForeverProfessionPlanner/Routes.lua'),
