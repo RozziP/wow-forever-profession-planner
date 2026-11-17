@@ -74,12 +74,16 @@ local function mergeItems(base, extra)
   return items
 end
 
-local function expectedCrafts(from, to, yellow, gray)
+local function craftEstimate(from, to, yellow, gray)
   local crafts = 0
   for skill = from, to - 1 do
     crafts = crafts + (skill <= yellow and 1 or (gray - yellow) / (gray - skill))
   end
-  return math.ceil(crafts - 1e-9)
+  return crafts
+end
+
+local function expectedCrafts(from, to, yellow, gray)
+  return math.ceil(craftEstimate(from, to, yellow, gray) - 1e-9)
 end
 
 local function newSection(from, cap)
@@ -97,7 +101,7 @@ local keepTools = {
   ["Arclight Spanner"] = true, ["Gyromatic Micro-Adjustor"] = true,
 }
 
-local function sectionPlans(base, start, target, market, preferBuying, bags, used)
+local function sectionPlans(profession, base, start, target, market, preferBuying, bags, used, currentMaximum)
   local sections, prices, vendorPrices = {}, {}, {}
   local recipes, stock = {}, {}
   for _, item in ipairs(base.intermediates) do prices[item.name] = item end
@@ -180,7 +184,17 @@ local function sectionPlans(base, start, target, market, preferBuying, bags, use
   local function craftsTo(step, targetSkill)
     if targetSkill <= step.from then return 0 end
     if targetSkill >= step.to then return step.crafts end
-    if step.yellow then return math.min(step.crafts, expectedCrafts(step.from, targetSkill, step.yellow, step.gray)) end
+    if step.yellow then
+      local estimate = craftEstimate(step.from, targetSkill, step.yellow, step.gray)
+      if profession == "Tailoring" then
+        -- Spread the guide's extra crafts across the range, including when resuming mid-step.
+        local fullEstimate = craftEstimate(step.from, step.to, step.yellow, step.gray)
+        if step.crafts ~= math.ceil(fullEstimate - 1e-9) then
+          estimate = estimate * step.crafts / fullEstimate
+        end
+      end
+      return math.min(step.crafts, math.ceil(estimate - 1e-9))
+    end
     return math.ceil(step.crafts * (targetSkill - step.from) / (step.to - step.from))
   end
 
@@ -189,6 +203,10 @@ local function sectionPlans(base, start, target, market, preferBuying, bags, use
     if to > from then
       section, shopping = newSection(from, to), {}
       sections[#sections + 1] = section
+      local rankCap = bounds[1]
+      if base.rankMaterials and from == rankCap and (not currentMaximum or currentMaximum <= rankCap) then
+        for material, units in pairs(base.rankMaterials[rankCap] or {}) do consume(material, units) end
+      end
       for _, step in ipairs(base.steps) do
         if step.from < to and step.to > from then
           local crafts = craftsTo(step, to) - craftsTo(step, from)
@@ -295,9 +313,9 @@ local function shoppingProgress(purchases, matsInUse, bags)
   return rows
 end
 
-local function buildPlan(profession, source, start, cap, market, bags, preferBuying, usePublished, finishName)
+local function buildPlan(profession, source, start, cap, market, bags, preferBuying, usePublished, finishName, currentMaximum)
   local used = {}
-  local sections = sectionPlans(source, start, cap, market, preferBuying, bags, used)
+  local sections = sectionPlans(profession.name, source, start, cap, market, preferBuying, bags, used, currentMaximum)
   local plan = newSection(start, cap)
   plan.source = source
   plan.name, plan.url, plan.notes, plan.sections = profession.name, profession.url, source.notes, sections
@@ -359,12 +377,15 @@ local function tailoringSource(full, rush, belt)
     auction = rush and mergeItems(full.auction, rush.auction) or full.auction,
     vendor = rush and mergeItems(full.vendor, rush.vendor) or full.vendor,
     intermediates = rush and mergeItems(full.intermediates, rush.intermediates) or full.intermediates,
+    prep = rush and rush.prep or full.prep,
   }
+  local handoff = 1
   if rush then
     for _, step in ipairs(rush.steps) do route.steps[#route.steps + 1] = step end
+    handoff = rush.steps[#rush.steps].to
   end
   for _, step in ipairs(full.steps) do
-    if not rush or step.from >= 150 then
+    if step.from >= handoff then
       route.steps[#route.steps + 1] = belt and step.from == belt.from and step.to == belt.to and belt or step
     end
   end
@@ -374,30 +395,19 @@ end
 local function tailoringPlan(profession, start, cap, market, bags, preferBuying, usePublished, skipWool)
   local full = profession.full
   local belt = full.beltOption
+  local rush = skipWool and start < 150 and start < cap and profession.rush
+  local source = rush and tailoringSource(full, rush) or full
   local canUseBelt = start < belt.to and cap > belt.from and start < cap
-  local function planFor(rush)
-    local source = rush and tailoringSource(full, rush) or full
-    local plan = buildPlan(profession, source, start, cap, market, bags, preferBuying,
-      usePublished and not rush and not canUseBelt)
-    if canUseBelt then
-      local candidate = buildPlan(profession, tailoringSource(full, rush, belt), start, cap, market, bags, preferBuying)
-      if lowerCost(candidate.cost, plan.cost) then
-        candidate.defaultGuideCost = plan.cost
-        return candidate
-      end
-    end
-    return plan
+  local plan = buildPlan(profession, source, start, cap, market, bags, preferBuying,
+    usePublished and not rush and not canUseBelt)
+  if canUseBelt then
+    local candidate = buildPlan(profession, tailoringSource(full, rush, belt), start, cap, market, bags, preferBuying)
+    if lowerCost(candidate.cost, plan.cost) then return candidate end
   end
-  local standard = planFor()
-  if not skipWool or start >= 150 or start >= cap then return standard end
-  local best = planFor(profession.rush)
-  best.defaultGuideCost = standard.cost
-  local standardTime = addon.GetCraftingMilliseconds(standard)
-  best.woolTimeDifference = addon.GetCraftingMilliseconds(best) - standardTime
-  return best
+  return plan
 end
 
-function addon.GetPlan(index, target, preferBuying, currentSkill, pinnedPlan, skipWool)
+function addon.GetPlan(index, target, preferBuying, currentSkill, pinnedPlan, skipWool, currentMaximum)
   local profession = addon.routes[index]
   local maximum = 300
   local cap = math.min(maximum, math.max(1, math.floor(target or maximum)))
@@ -406,13 +416,14 @@ function addon.GetPlan(index, target, preferBuying, currentSkill, pinnedPlan, sk
   local bags = makeBagReader()
   if pinnedPlan then
     return buildPlan(profession, pinnedPlan.source, start, cap, market, bags, preferBuying, false,
-      pinnedPlan.selected and pinnedPlan.selected.name)
+      pinnedPlan.selected and pinnedPlan.selected.name, currentMaximum)
   end
   local plan
   if profession.full.beltOption then
     plan = tailoringPlan(profession, start, cap, market, bags, preferBuying, start == 1 and not preferBuying, skipWool)
   else
-    plan = buildPlan(profession, profession.full, start, cap, market, bags, preferBuying, start == 1 and not preferBuying)
+    plan = buildPlan(profession, profession.full, start, cap, market, bags, preferBuying,
+      start == 1 and not preferBuying, nil, currentMaximum)
   end
   plan.missingPrices = market.missing
   return plan
@@ -426,30 +437,44 @@ function addon.HasNewPlanPrices(plan)
   return false
 end
 
-function addon.GetGuideSteps(index, plan, history)
-  if plan.from > 1 and not history then
-    -- Reconstruct earlier rows without assuming the player still owns those materials.
-    history = buildPlan(addon.routes[index], plan.source, 1, plan.cap, makePriceReader(),
-      function() return 0 end, true, false, plan.selected and plan.selected.name).steps
+function addon.GetGuideSteps(index, plan)
+  local steps = {}
+  local rangeStarts = {}
+  local function addStep(step, from)
+    from = from or step.from
+    local previous = steps[#steps]
+    if previous and not previous.prep and not step.prep
+      and previous.recipe == step.recipe and previous.to == from then
+      if previous.to <= plan.from and step.to > plan.from then
+        -- Keep the full skill range when resuming, with counts from the remaining plan.
+        previous.crafts, previous.keep = step.crafts, step.keep
+      else
+        previous.crafts = previous.crafts + step.crafts
+        if step.keep then previous.keep = (previous.keep or 0) + step.keep end
+      end
+      previous.to = step.to
+    else
+      local row = {}
+      for key, value in pairs(step) do row[key] = value end
+      row.from = from
+      steps[#steps + 1] = row
+    end
   end
-  local steps, currentRanges = {}, {}
-  for _, step in ipairs(history or {}) do
-    if step.to <= plan.from then
-      steps[#steps + 1] = step
-    elseif not step.prep and step.from < plan.from then
-      currentRanges[step.recipe] = step
+
+  if plan.from > 1 then
+    -- Reconstruct earlier rows without assuming the player still owns those materials.
+    local history = buildPlan(addon.routes[index], plan.source, 1, plan.cap, makePriceReader(),
+      function() return 0 end, true, false, plan.selected and plan.selected.name)
+    for _, step in ipairs(history.steps) do
+      if step.to <= plan.from then
+        addStep(step)
+      elseif not step.prep and step.from < plan.from then
+        rangeStarts[step.to] = step.from
+      end
     end
   end
   for _, step in ipairs(plan.steps) do
-    local range = not step.prep and step.from == plan.from and currentRanges[step.recipe]
-    if range and range.to == step.to then
-      local row = {}
-      for key, value in pairs(step) do row[key] = value end
-      row.from = range.from
-      steps[#steps + 1] = row
-    else
-      steps[#steps + 1] = step
-    end
+    addStep(step, step.from == plan.from and rangeStarts[step.to])
   end
   return steps
 end

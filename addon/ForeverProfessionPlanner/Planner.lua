@@ -4,18 +4,35 @@ local plannerTitle = "Forever Profession Trainer"
 local professionSlotCount = 7
 local professionSkillLines = {
   Alchemy = 171, Blacksmithing = 164, Enchanting = 333,
-  Engineering = 202, Leatherworking = 165, Tailoring = 197,
+  Engineering = 202, Leatherworking = 165, Tailoring = 197, Cooking = 185,
 }
 local professionIcons = {
   Alchemy = "Trade_Alchemy", Blacksmithing = "Trade_BlackSmithing", Enchanting = "Trade_Engraving",
   Engineering = "Trade_Engineering", Leatherworking = "Trade_LeatherWorking", Tailoring = "Trade_Tailoring",
+  Cooking = "INV_Misc_Food_15",
 }
-local plannerIcon = "INV_Misc_Book_09"
+local gameIconPath = "Interface\\Icons\\"
+local plannerIcon = gameIconPath .. "INV_Misc_Book_09"
 -- Trainer locations and outdoor map coordinates follow the WoW Professions, Method, and Icy Veins Forever guides.
 local nextRanks = {
   [75] = { name = "Journeyman", skill = 50, level = 10 },
   [150] = { name = "Expert", skill = 125, level = 20 },
   [225] = { name = "Artisan", skill = 200, level = 35 },
+}
+local cookingRanks = {
+  [75] = { name = "Journeyman", skill = 50 },
+  [150] = {
+    name = "Expert", skill = 125, action = "Read Expert Cookbook",
+    instructions = "Buy and read Expert Cookbook to unlock Cooking 225.",
+  },
+  [225] = {
+    name = "Artisan", skill = 225, level = 35, action = "Complete Clamlette Surprise",
+    instructions = "Bring 12 Giant Eggs, 10 Zesty Clam Meat,\nand 20 Alterac Swiss to Dirge Quikcleave.",
+  },
+}
+local expertCookingVendors = {
+  Horde = { name = "Wulan", location = "Shadowprey Village, Desolace", mapID = 1443, x = 26.1, y = 69.7 },
+  Alliance = { name = "Shandrina", location = "Silverwind Refuge, Ashenvale", mapID = 1440, x = 49.5, y = 67.1 },
 }
 local expertTrainingCities = {
   Alchemy = { Horde = "Undercity", Alliance = "Darnassus" },
@@ -34,6 +51,7 @@ local artisanTrainers = {
     Alliance = { name = "Kylanna Windwhisper", location = "Feathermoon Stronghold, Feralas", mapID = 1444, x = 32.6, y = 43.8 },
   },
   Blacksmithing = { name = "Brikk Keencraft", location = "Booty Bay, Stranglethorn Vale", mapID = 1434, x = 29.0, y = 75.6 },
+  Cooking = { name = "Dirge Quikcleave", location = "Gadgetzan, Tanaris", mapID = 1446, x = 52.6, y = 28.1 },
   Enchanting = {
     name = "Annora", location = "Inside Uldaman, Badlands", mapID = 1418, x = 65.3, y = 42.6,
     waypointLabel = "Uldaman's rear entrance",
@@ -58,8 +76,7 @@ local targetStep = 5
 local defaultTarget, maxTarget = 75, 300
 local skillMilestones = { defaultTarget, 150, 225, maxTarget }
 local defaultWindowWidth, defaultWindowHeight = 750, 620
-local stepColumns = { skill = 12, icon = 79, recipe = 109, crafts = 42 }
-local startingSkills = {}
+local stepColumns = { skill = 12, icon = 79, recipe = 109, crafts = 60 }
 local anchoredPlans = {}
 local selectedPlan
 local settings
@@ -119,7 +136,7 @@ local function createSideTab(parent, icon, onClick)
   tab:EnableMouse(true)
   tab:SetFillToInterior(true)
   tab:SetChecked(false)
-  tab.Icon:SetTexture("Interface\\Icons\\" .. icon)
+  tab.Icon:SetTexture(icon)
   tab:SetCustomOnMouseUpHandler(function(self, button, upInside)
     if button == "LeftButton" and upInside then onClick(self) end
   end)
@@ -183,10 +200,10 @@ local function openTrainerMap(link)
     return
   end
   local mapID = trainer.mapID
-  local placed = C_Map.CanSetUserWaypointOnMap and C_Map.CanSetUserWaypointOnMap(mapID)
-    and C_Map.SetUserWaypoint and UiMapPoint and UiMapPoint.CreateFromCoordinates
-    and C_Map.SetUserWaypoint(UiMapPoint.CreateFromCoordinates(mapID, trainer.x / 100, trainer.y / 100))
-  if not placed then
+  if C_Map.CanSetUserWaypointOnMap and C_Map.CanSetUserWaypointOnMap(mapID)
+    and C_Map.SetUserWaypoint and UiMapPoint and UiMapPoint.CreateFromCoordinates then
+    C_Map.SetUserWaypoint(UiMapPoint.CreateFromCoordinates(mapID, trainer.x / 100, trainer.y / 100))
+  else
     UIErrorsFrame:AddMessage("Waypoints are unavailable for this map.", unpack(colors.red))
   end
   C_Map.OpenWorldMap(mapID)
@@ -302,35 +319,6 @@ local function formatDuration(milliseconds)
     or string.format("%ds", seconds)
 end
 
-local function updateCraftingTime(self)
-  local remaining = self.craftingEstimate or 0
-  local countingDown
-  if remaining > 0 then
-    local name, _, _, startTime, endTime, isTradeSkill, castID, _, spellID = UnitCastingInfo("player")
-    if isTradeSkill and (not issecretvalue
-      or not (issecretvalue(name) or issecretvalue(startTime) or issecretvalue(endTime)
-        or issecretvalue(castID) or issecretvalue(spellID))) then
-      local estimatedCast = self.craftingDurations[spellID] or self.craftingDurations[name]
-      if estimatedCast then
-        if castID and startTime and (not self.craftingCast or self.craftingCast.id ~= castID) then
-          self.craftingCast = { id = castID, startTime = startTime }
-        end
-        -- Substitute the live time left for the copy of this craft in the route estimate.
-        local castRemaining = math.max(0, endTime - math.floor(GetTime() * 1000 + 0.5))
-        remaining = remaining - estimatedCast + castRemaining
-        countingDown = true
-      end
-    end
-  end
-
-  local onUpdate = countingDown and updateCraftingTime or nil
-  if self:GetScript("OnUpdate") ~= onUpdate then self:SetScript("OnUpdate", onUpdate) end
-  local seconds = math.ceil(remaining / 1000)
-  if seconds == self.displayedCraftingTime then return end
-  self.displayedCraftingTime = seconds
-  self.craftingTime:SetText("Est. crafting  |cfff7ead1" .. formatDuration(remaining) .. "|r")
-end
-
 local function showCraftingFeedback(self, milliseconds)
   local seconds = string.format("%.1f", milliseconds / 1000):gsub("%.0$", "")
   local unit = seconds == "1" and "second" or "seconds"
@@ -341,15 +329,12 @@ local function showCraftingFeedback(self, milliseconds)
 end
 
 local function clearCraftingFeedback(self)
-  self.craftingCast = nil
   self.craftingFeedbackAnimation:Stop()
   self.craftingFeedback:Hide()
 end
 
-local function showShoppingBagSpace(plan)
-  local space = addon.GetShoppingBagSpace(plan)
+local function showShoppingBagSpace(space)
   frame.bagSpace:SetShown(space ~= nil)
-  frame.pendingBagItems = space and space.pending
   if not space then return end
 
   local text
@@ -427,26 +412,6 @@ local function scrollArea(parent, x, y, width, height)
   return scroll, content
 end
 
-local function showGuideInfo(plan, rank)
-  local defaultCost = plan.defaultGuideCost
-  local showComparison = defaultCost ~= nil and (plan.woolTimeDifference == nil or rank < 150)
-  frame.guidePrices:SetShown(showComparison)
-  if showComparison then
-    local custom = plan.cost.gross and money(-plan.cost.gross) or "unpriced"
-    local default = defaultCost.gross and money(-defaultCost.gross) or "unpriced"
-    local difference = plan.woolTimeDifference
-    if difference then
-      local tradeoff = difference == 0 and "same crafting time"
-        or formatDuration(math.abs(difference)) .. (difference > 0 and " longer" or " faster")
-      frame.guidePrices:SetText(string.format("Skip wool %d–%d: %s  ·  Materials: %s vs %s",
-        plan.from, plan.cap, tradeoff, custom, default))
-    else
-      frame.guidePrices:SetText(string.format("Materials for %d–%d: FPT %s  ·  WoW Professions %s",
-        plan.from, plan.cap, custom, default))
-    end
-  end
-end
-
 local function addStepRow()
   local index = #frame.steps + 1
   local y = (index - 1) * stepRowHeight
@@ -478,20 +443,26 @@ local function addStepRow()
   keep:SetHeight(14)
   keep:SetJustifyV("MIDDLE")
   paint(keep, colors.muted)
-  local crafts = label(row, fonts.body, 0, 0, stepColumns.crafts - 6)
+  local crafts = label(row, fonts.body, 0, 0, stepColumns.crafts - 24)
   crafts:ClearAllPoints()
   crafts:SetPoint("TOPRIGHT", -6, 0)
   crafts:SetHeight(stepRowHeight)
   crafts:SetJustifyV("MIDDLE")
   crafts:SetJustifyH("RIGHT")
+  local made = label(row, fonts.note, 0, 0, stepColumns.crafts - 6)
+  made:ClearAllPoints()
+  made:SetPoint("BOTTOMRIGHT", -6, 3)
+  made:SetJustifyH("RIGHT")
+  made:SetWordWrap(false)
+  paint(made, colors.complete)
   local check = row:CreateTexture(nil, "ARTWORK")
-  check:SetPoint("RIGHT", -6, 0)
-  check:SetSize(20, 20)
+  check:SetPoint("RIGHT", crafts, "LEFT", -2, 0)
+  check:SetSize(16, 16)
   check:SetTexture("Interface\\Buttons\\UI-CheckBox-Check")
   check:SetDesaturated(true)
   check:SetVertexColor(unpack(colors.complete))
   check:Hide()
-  row.skill, row.recipe, row.crafts, row.keep = skill, recipe, crafts, keep
+  row.skill, row.recipe, row.crafts, row.keep, row.made = skill, recipe, crafts, keep, made
   row.icon, row.marker, row.check = icon, marker, check
   row:SetScript("OnEnter", function(self)
     GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
@@ -570,6 +541,34 @@ local function learnedProfessions()
   return learned
 end
 
+local function trackCraftingCast(self)
+  local guide = active and anchoredPlans[active]
+  if not guide then return end
+  local name, _, _, startTime, _, isTradeSkill, castID = UnitCastingInfo("player")
+  if not isTradeSkill or (issecretvalue
+    and (issecretvalue(name) or issecretvalue(startTime) or issecretvalue(castID))) then return end
+  if not castID or not startTime or not name or (self.craftingCast and self.craftingCast.id == castID) then return end
+  local skill = learnedProfessions()[professionSkillLines[guide.plan.name]]
+  if not skill or skill.rank >= guide.plan.cap then return end
+
+  local recipe = name:lower()
+  local matched, prep
+  for _, step in ipairs(guide.steps) do
+    if skill.rank < step.to and step.recipe:lower() == recipe then
+      if not step.prep and step.from <= skill.rank then
+        matched = step
+        break
+      elseif step.prep and (guide.made[step] or 0) < step.crafts then
+        prep = prep or step
+      end
+    end
+  end
+  local step = matched or prep
+  if step then
+    self.craftingCast = { id = castID, startTime = startTime, guide = guide, step = step }
+  end
+end
+
 local function updateScrollAreas()
   local stepWidth, stepHeight = frame.stepScroll:GetSize()
   local itemWidth, itemHeight = frame.itemScroll:GetSize()
@@ -615,6 +614,7 @@ local function nextTrainer(profession, maximum)
   local faction = UnitFactionGroup and UnitFactionGroup("player")
   local trainers = (maximum == 225 and artisanTrainers[profession])
     or (maximum == 150 and profession == "Enchanting" and expertEnchantingTrainers)
+    or (maximum == 150 and profession == "Cooking" and expertCookingVendors)
   if trainers then
     local trainer = trainers.name and trainers or trainers[faction]
     if trainer then return trainer, trainer.location end
@@ -626,12 +626,17 @@ local function nextTrainer(profession, maximum)
   return nil, guardDirections(profession, city)
 end
 
+local function nextTraining(profession, maximum)
+  local ranks = profession == "Cooking" and cookingRanks or nextRanks
+  return ranks[maximum]
+end
+
 local function showNextTrainer(profession, rank, maximum)
-  local training = nextRanks[maximum]
+  local training = nextTraining(profession, maximum)
   if training then
-    local status = rank >= training.skill
-      and string.format("Train %s (character level %d)", training.name, training.level)
-      or string.format("Train %s at skill %d (character level %d)", training.name, training.skill, training.level)
+    local status = training.action or ("Train " .. training.name)
+    if rank < training.skill then status = string.format("%s at skill %d", status, training.skill) end
+    if training.level then status = string.format("%s (character level %d)", status, training.level) end
     frame.trainerStatus:SetText(status)
     local trainer, location = nextTrainer(profession, maximum)
     setTrainerMapLink(frame.trainerMapLink, trainer, trainer and (trainer.name .. " · " .. location) or location)
@@ -641,11 +646,18 @@ local function showNextTrainer(profession, rank, maximum)
   end
 end
 
-local function professionGuide(index, target, skipWool)
+local function professionGuide(index, minimum, skill, skipWool, resetPlan)
+  local rank, maximum = skill and skill.rank or 1, skill and skill.maximum
   local guide = anchoredPlans[index]
-  if not guide or guide.plan.cap ~= target or guide.skipWool ~= skipWool or addon.HasNewPlanPrices(guide.plan) then
-    local plan = addon.GetPlan(index, target, true, startingSkills[index] or 1, nil, skipWool)
-    guide = { plan = plan, steps = addon.GetGuideSteps(index, plan), skipWool = skipWool }
+  if not guide or resetPlan or guide.requestedTarget ~= settings.target or guide.skipWool ~= skipWool
+    or guide.learned ~= (skill ~= nil) or rank < guide.plan.from then
+    local target = snapTarget(settings.target, minimum)
+    local plan = addon.GetPlan(index, target, true, rank, nil, skipWool, maximum)
+    guide = {
+      plan = plan, steps = addon.GetGuideSteps(index, plan), skipWool = skipWool, made = {},
+      requestedTarget = settings.target, learned = skill ~= nil,
+      craftingTime = formatDuration(addon.GetCraftingMilliseconds(plan)), bagSpace = addon.GetShoppingBagSpace(plan),
+    }
     anchoredPlans[index] = guide
   end
   return guide
@@ -654,32 +666,32 @@ end
 local function updateProfessionTabs(index)
   local learned = learnedProfessions()
   local orderedTabs = {}
-  local learnedCount = 0
+  local cookingPosition = professionSlotCount + #frame.tabs + 1
   for i, tab in ipairs(frame.tabs) do
     tab.skill = learned[professionSkillLines[routes[i].name]]
-    if tab.skill then learnedCount = learnedCount + 1 end
-    local position = tab.skill and tab.skill.slot or professionSlotCount + i
+    local position = routes[i].name == "Cooking" and cookingPosition
+      or (tab.skill and tab.skill.slot or professionSlotCount + i)
     orderedTabs[position] = tab
     tab.Background:SetVertexColor(unpack(tab.skill and colors.gold or colors.tabNeutral))
     tab:SetChecked(i == index)
-    if not tab.skill and startingSkills[i] then
-      startingSkills[i], anchoredPlans[i] = nil, nil
+    if not tab.skill and anchoredPlans[i] and anchoredPlans[i].learned then
+      anchoredPlans[i] = nil
     end
   end
 
-  local compactPreviews = learnedCount >= 2
   local previousTab = frame
-  for position = 1, professionSlotCount + #frame.tabs do
+  for position = 1, cookingPosition do
     local tab = orderedTabs[position]
     if tab then
-      local scale = compactPreviews and not tab.skill and 0.875 or 1
+      local scale = tab.skill and 1 or 0.7
       if tab:GetScale() ~= scale then tab:SetScale(scale) end
       if tab.previousTab ~= previousTab then
         tab:ClearAllPoints()
         if previousTab == frame then
           tab:SetPoint("TOPLEFT", frame, "TOPRIGHT", 0, -60)
         else
-          tab:SetPoint("TOPLEFT", previousTab, "BOTTOMLEFT", 0, -2)
+          local gap = position == cookingPosition and 18 or 2
+          tab:SetPoint("TOPLEFT", previousTab, "BOTTOMLEFT", 0, -gap)
         end
         tab.previousTab = previousTab
       end
@@ -711,19 +723,18 @@ local function showRoute(index, keepScroll, resetPlan)
     settings.skipWool = nil
   end
   local profession = index and routes[index].name
-  local portraitIcon = profession and professionIcons[profession] or plannerIcon
-  frame.PortraitContainer.portrait:SetTexture("Interface\\Icons\\" .. portraitIcon)
+  local portraitIcon = profession and gameIconPath .. professionIcons[profession] or plannerIcon
+  frame.PortraitContainer.portrait:SetTexture(portraitIcon)
   frame.TitleContainer.TitleText:SetText(profession and (plannerTitle .. " · " .. profession) or plannerTitle)
   frame.welcome:SetShown(index == nil)
   frame.targetControls:SetShown(index ~= nil)
+  frame.applyEnchant:SetShown(profession == "Enchanting")
   local isTailoring = profession == "Tailoring"
   local skipWool = isTailoring and settings.skipWool ~= false
   frame.skipWool:SetChecked(skipWool)
   if not index then
     frame.skipWool:Hide()
     frame.guideFooter:Hide()
-    frame.craftingEstimate, frame.craftingDurations = nil, nil
-    updateCraftingTime(frame)
     frame.planPage:Hide()
     frame.trainPage:Show()
     frame.cappedBanner:Hide()
@@ -731,37 +742,36 @@ local function showRoute(index, keepScroll, resetPlan)
     frame.copyPanel:Hide()
     return
   end
+  frame.skipWool:SetShown(isTailoring and rank < 150)
   local minimum = skill and math.min(rank, maxTarget) or targetStep
-  local target = snapTarget(settings.target, minimum)
+  local guide = professionGuide(index, minimum, skill, skipWool, resetPlan)
+  local route = guide.plan
+  local target = route.cap
   frame.syncTarget(target, minimum, skill and rank)
-  local training = nextRanks[maximum]
+  local training = nextTraining(profession, maximum)
   local capped = training ~= nil and rank == maximum
   if not capped then frame.viewingCappedPlan = nil end
   local showTraining = capped and not frame.viewingCappedPlan
   frame.planPage:SetShown(not showTraining)
   frame.guideFooter:SetShown(not showTraining)
-  frame.skipWool:SetShown(isTailoring and rank < 150 and not showTraining)
   frame.trainPage:SetShown(showTraining)
   frame.cappedBanner:SetShown(showTraining)
   frame.trainingButton:SetShown(capped and not showTraining)
-  if skill and (not startingSkills[index] or rank < startingSkills[index]) then
-    startingSkills[index] = rank
-    anchoredPlans[index] = nil
-  end
-  local guide = professionGuide(index, target, skipWool)
-  local route = addon.GetPlan(index, target, true, rank, guide.plan)
-  frame.craftingEstimate, frame.craftingDurations = addon.GetCraftingMilliseconds(route)
-  updateCraftingTime(frame)
+  frame.craftingTime:SetText("Est. crafting  |cfff7ead1" .. guide.craftingTime .. "|r")
+  trackCraftingCast(frame)
   if showTraining then
     selectedPlan = nil
     frame.copyPanel:Hide()
     local trainer, location = nextTrainer(profession, maximum)
-    frame.cappedIcon:SetTexture(skill.icon or "Interface\\Icons\\" .. professionIcons[profession])
-    frame.cappedTitle:SetText(string.format("Train %s %s", training.name, profession))
-    frame.cappedWarning:SetText(string.format("You cannot gain more %s skill until you\nlearn %s (%s) from your trainer",
-      profession, profession, training.name))
-    frame.cappedRequirements:SetText(string.format("Skill cap reached at %d · Requires character level %d",
-      maximum, training.level))
+    frame.cappedIcon:SetTexture(skill.icon or gameIconPath .. professionIcons[profession])
+    frame.cappedTitle:SetText(training.action or string.format("Train %s %s", training.name, profession))
+    frame.cappedWarning:SetText(training.instructions or string.format(
+      "You cannot gain more %s skill until you\nlearn %s (%s) from your trainer", profession, profession, training.name))
+    local requirements = string.format("Skill cap reached at %d", maximum)
+    if training.level then
+      requirements = string.format("%s · Requires character level %d", requirements, training.level)
+    end
+    frame.cappedRequirements:SetText(requirements)
     setTrainerMapLink(frame.cappedMapLink, trainer, trainer and trainer.name or "")
     frame.cappedTrainer:SetShown(trainer ~= nil)
     local locationTop = trainer and 100 or 77
@@ -770,9 +780,7 @@ local function showRoute(index, keepScroll, resetPlan)
     frame.cappedBanner:SetHeight(locationTop + math.max(17, frame.cappedLocation:GetStringHeight()) + 16)
     return
   end
-  local guideSteps = addon.GetGuideSteps(index, route, guide.steps)
-  selectedPlan = guide.plan
-  showGuideInfo(selectedPlan, rank)
+  selectedPlan = route
   if frame.copyPanel and frame.copyPanel:IsShown() then
     if not keepScroll or (frame.copyingShoppingList and copyText ~= addon.ImportString(route)) then
       frame.copyPanel:Hide()
@@ -802,19 +810,21 @@ local function showRoute(index, keepScroll, resetPlan)
   showMoney(frame.costs[1], cost.gross and -cost.gross)
   showMoney(frame.costs[2], route.from < route.cap and route.revenue or nil)
   showMoney(frame.costs[3], cost.net and -cost.net, true)
-  showShoppingBagSpace(route)
+  showShoppingBagSpace(guide.bagSpace)
   frame.importButton:SetEnabled(#route.auction > 0)
   local latestCompletedRow
-  while #frame.steps < #guideSteps do addStepRow() end
+  while #frame.steps < #guide.steps do addStepRow() end
   for i, row in ipairs(frame.steps) do
-    local step = guideSteps[i]
-    local complete = step and rank >= step.to
-    local current = step and rank >= step.from and rank < step.to
+    local step = guide.steps[i]
+    local made = step and guide.made[step]
+    local complete = step and (rank >= step.to or (step.prep and made and made >= step.crafts))
+    local current = step and not complete and rank >= step.from and rank < step.to
     row:SetShown(step ~= nil)
     showRecipeIcon(row, step, complete)
     row.marker:SetShown(not not current)
     row.check:SetShown(not not complete)
-    if complete then latestCompletedRow = i end
+    row.made:SetShown(not not (complete and made))
+    if step and rank >= step.to then latestCompletedRow = i end
     if step then
       if current then
         row.background:SetColorTexture(0.78, 0.52, 0.20, 0.16)
@@ -830,7 +840,11 @@ local function showRoute(index, keepScroll, resetPlan)
       paint(row.crafts, stepColor)
       row.skill:SetText(step.prep and "Prep" or string.format("%d–%d", step.from, step.to))
       row.recipe:SetText(step.recipe)
-      row.crafts:SetText(complete and "" or ("×" .. step.crafts))
+      local showMade = complete and made
+      row.crafts:SetPoint("TOPRIGHT", -6, showMade and -3 or 0)
+      row.crafts:SetHeight(showMade and 17 or stepRowHeight)
+      row.crafts:SetText(step.to <= route.from and "" or ("×" .. step.crafts))
+      if showMade then row.made:SetText("Made ×" .. made) end
       row.keep:SetText(step.keep and ("Keep ×" .. step.keep) or "")
       row.keep:SetShown(step.keep ~= nil)
       row.recipe:SetPoint("TOPLEFT", stepColumns.recipe, step.keep and -3 or 0)
@@ -842,8 +856,8 @@ local function showRoute(index, keepScroll, resetPlan)
   showShoppingItems(frame.shoppingGroups[1], route.shoppingAuction)
   showShoppingItems(frame.shoppingGroups[2], route.shoppingVendor)
   frame.emptyShopping:SetShown(#route.shoppingAuction == 0 and #route.shoppingVendor == 0)
-  frame.emptySteps:SetShown(#guideSteps == 0)
-  frame.stepCount = #guideSteps
+  frame.emptySteps:SetShown(#guide.steps == 0)
+  frame.stepCount = #guide.steps
   frame.layoutShopping()
   if not keepScroll or latestCompletedRow ~= frame.latestCompletedRow then
     local scroll = frame.stepScroll
@@ -856,7 +870,6 @@ local function showRoute(index, keepScroll, resetPlan)
     stopWheelScroll(frame.itemScroll)
     frame.itemScroll:SetVerticalScroll(0)
   end
-  return route
 end
 
 local function canUseDebug()
@@ -893,17 +906,15 @@ local function showDebugPage()
   debugSelected = true
   for _, tab in ipairs(frame.tabs) do tab:SetChecked(false) end
   frame.debugTab:SetChecked(true)
-  frame.PortraitContainer.portrait:SetTexture("Interface\\Icons\\INV_Misc_Gear_01")
+  frame.PortraitContainer.portrait:SetTexture(gameIconPath .. "INV_Misc_Gear_01")
   frame.TitleContainer.TitleText:SetText(plannerTitle .. " · Animation Debug")
   frame.welcome:Hide()
   frame.planPage:Hide()
   frame.trainPage:Hide()
   frame.copyPanel:Hide()
-  frame.guideFooter:Hide()
   frame.skipWool:Hide()
+  frame.applyEnchant:Hide()
   clearCraftingFeedback(frame)
-  frame:SetScript("OnUpdate", nil)
-  frame.displayedCraftingTime = nil
   frame.craftingTime:SetText("Est. crafting  |cfff7ead11m 00s|r")
   frame.clearSkillFeedback()
   frame.targetControls:Show()
@@ -934,8 +945,7 @@ local function plannerScreenSize()
   return UIParent:GetWidth() * scale, UIParent:GetHeight() * scale
 end
 
-local function setPlannerSize(professions)
-  local width, height = tonumber(settings.windowWidth), tonumber(settings.windowHeight)
+local function setPlannerSize(professions, width, height)
   local stockWidth, stockHeight
   if professions and professions.ProfessionsOverviewTab then
     frame:SetScale(professions:GetEffectiveScale() / UIParent:GetEffectiveScale())
@@ -960,7 +970,7 @@ local function createPlanner()
   frame:SetClampRectInsets(-13, tabOverhang, 16, -3)
   frame:SetMovable(true)
   frame:SetResizable(true)
-  setPlannerSize(ProfessionsFrame)
+  setPlannerSize(ProfessionsFrame, tonumber(settings.windowWidth), tonumber(settings.windowHeight))
   frame:EnableMouse(true)
   frame.Bg:SetColorTexture(unpack(colors.window))
   table.insert(UISpecialFrames, frame:GetName())
@@ -980,7 +990,7 @@ local function createPlanner()
   frame.tabs = {}
   for i, route in ipairs(routes) do
     local index = i
-    local tab = createSideTab(frame, professionIcons[route.name], function()
+    local tab = createSideTab(frame, gameIconPath .. professionIcons[route.name], function()
       selectProfession(index, true)
     end)
     tab.Background:SetDesaturated(true)
@@ -997,7 +1007,7 @@ local function createPlanner()
     tab:SetScript("OnLeave", hideTooltip)
     frame.tabs[i] = tab
   end
-  local debugTab = createSideTab(frame, "INV_Misc_Gear_01", function()
+  local debugTab = createSideTab(frame, gameIconPath .. "INV_Misc_Gear_01", function()
     if debugSelected then showRoute(active, true) else showDebugPage() end
   end)
   debugTab:SetPoint("BOTTOMLEFT", frame, "BOTTOMRIGHT", 0, 8)
@@ -1025,7 +1035,7 @@ local function createPlanner()
   local welcomeIcon = welcome:CreateTexture(nil, "ARTWORK")
   welcomeIcon:SetPoint("TOP", 0, -20)
   welcomeIcon:SetSize(36, 36)
-  welcomeIcon:SetTexture("Interface\\Icons\\" .. plannerIcon)
+  welcomeIcon:SetTexture(plannerIcon)
   local welcomeTitle = label(welcome, fonts.title, 28, 68, 420)
   welcomeTitle:SetJustifyH("CENTER")
   welcomeTitle:SetText("Choose a profession")
@@ -1097,10 +1107,7 @@ local function createPlanner()
   frame.craftingFeedback:Hide()
 
   frame.craftingFeedbackAnimation = floatAndFade(frame.craftingFeedback, 24, 1.2, 0.35)
-  frame:HookScript("OnHide", function(self)
-    self:SetScript("OnUpdate", nil)
-    clearCraftingFeedback(self)
-  end)
+  frame:HookScript("OnHide", clearCraftingFeedback)
 
   local targetBar = CreateFrame("Frame", nil, targetControls)
   targetBar:SetPoint("TOPLEFT", 13, -27)
@@ -1323,42 +1330,35 @@ local function createPlanner()
   frame:RegisterEvent("SKILL_LINES_CHANGED")
   frame:RegisterEvent("CHAT_MSG_SKILL")
   frame:RegisterEvent("TRADE_SKILL_DETAILS_UPDATE")
-  frame:RegisterEvent("BAG_UPDATE_DELAYED")
-  frame:RegisterEvent("GET_ITEM_INFO_RECEIVED")
   frame:RegisterEvent("TRADE_SKILL_ITEM_CRAFTED_RESULT")
   frame:RegisterEvent("BN_CONNECTED")
   frame:RegisterEvent("BN_INFO_CHANGED")
-  frame:RegisterEvent("AUCTION_HOUSE_CLOSED")
   frame:RegisterUnitEvent("UNIT_SPELLCAST_START", "player")
   frame:RegisterUnitEvent("UNIT_SPELLCAST_SUCCEEDED", "player")
   local refreshPending
   frame:SetScript("OnEvent", function(self, event, ...)
+    if event == "UNIT_SPELLCAST_START" then
+      trackCraftingCast(self)
+      return
+    end
+    if event == "UNIT_SPELLCAST_SUCCEEDED" then
+      local cast = self.craftingCast
+      local _, castID = ...
+      if not cast or cast.finished or (issecretvalue and issecretvalue(castID)) or castID ~= cast.id then return end
+      cast.finished = true
+      local made = cast.guide.made
+      made[cast.step] = (made[cast.step] or 0) + 1
+      local elapsed = GetTime() * 1000 - cast.startTime
+      if elapsed > 0 and self:IsShown() and not debugSelected and anchoredPlans[active] == cast.guide then
+        showCraftingFeedback(self, elapsed)
+      end
+    end
     if not self:IsShown() then return end
     if event == "BN_CONNECTED" or event == "BN_INFO_CHANGED" then
       refreshDebugTab(self)
       return
     end
     if debugSelected then return end
-    if event == "UNIT_SPELLCAST_START" then
-      updateCraftingTime(self)
-      return
-    end
-    if event == "UNIT_SPELLCAST_SUCCEEDED" then
-      local cast = self.craftingCast
-      local _, castID = ...
-      if cast and not cast.finished and (not issecretvalue or not issecretvalue(castID)) and castID == cast.id then
-        cast.finished = true
-        local elapsed = GetTime() * 1000 - cast.startTime
-        if elapsed > 0 then showCraftingFeedback(self, elapsed) end
-      end
-      return
-    end
-    if event == "BAG_UPDATE_DELAYED" and not active then return end
-    if event == "GET_ITEM_INFO_RECEIVED" then
-      local itemID, success = ...
-      local pending = self.planPage:IsShown() and self.pendingBagItems
-      if not success or not pending or not pending[itemID] then return end
-    end
     if refreshPending then return end
     refreshPending = true
     C_Timer.After(0, function()
@@ -1397,7 +1397,23 @@ local function createPlanner()
   craftsHeading:SetText("Crafts")
   frame.steps = {}
 
-  label(itemPanel, fonts.heading, 12, 12, 160):SetText("Shopping List")
+  label(itemPanel, fonts.heading, 12, 12, 124):SetText("Shopping List")
+  local updatePlan = button(itemPanel, "Update plan", 0, 0, 100)
+  updatePlan:ClearAllPoints()
+  updatePlan:SetPoint("TOPRIGHT", -12, -9)
+  updatePlan:SetScript("OnClick", function()
+    if active then
+      anchoredPlans[active] = nil
+      showRoute(active, true)
+    end
+  end)
+  updatePlan:SetScript("OnEnter", function(self)
+    GameTooltip:SetOwner(self, "ANCHOR_TOP")
+    GameTooltip:SetText("Recalculate using your current skill, bags, and Auctionator prices.")
+    GameTooltip:Show()
+  end)
+  updatePlan:SetScript("OnLeave", hideTooltip)
+  updatePlan:SetScript("OnHide", hideTooltip)
   frame.itemScroll, frame.itemContent = scrollArea(itemPanel, 12, 1, 1, 1)
   frame.emptyShopping = label(frame.itemContent, fonts.caption, 0, 0, 180)
   frame.emptyShopping:SetText("No materials needed")
@@ -1442,7 +1458,7 @@ local function createPlanner()
   local footer = CreateFrame("Frame", nil, frame)
   footer:SetPoint("BOTTOMLEFT", 18, 10)
   footer:SetPoint("BOTTOMRIGHT", -18, 10)
-  footer:SetHeight(37)
+  footer:SetHeight(25)
 
   local skipWool = CreateFrame("CheckButton", nil, footer, "UICheckButtonTemplate")
   skipWool:SetSize(24, 24)
@@ -1450,14 +1466,14 @@ local function createPlanner()
   skipWoolLabel:SetFontObject(fonts.caption)
   skipWoolLabel:SetPoint("LEFT", skipWool, "RIGHT", 3, 0)
   skipWoolLabel:SetWordWrap(false)
-  skipWoolLabel:SetText("Skip wool")
+  skipWoolLabel:SetText("Less wool")
   local labelWidth = math.ceil(skipWoolLabel:GetUnboundedStringWidth()) + 2
   skipWoolLabel:SetWidth(labelWidth)
   skipWool:SetPoint("TOPRIGHT", footer, "TOPRIGHT", -(labelWidth + 3), -1)
   skipWool:SetHitRectInsets(0, -(labelWidth + 3), 0, 0)
   skipWool:SetScript("OnEnter", function(self)
     GameTooltip:SetOwner(self, "ANCHOR_TOP")
-    GameTooltip:SetText("Use the linen-based route through skill 150.")
+    GameTooltip:SetText("Use wool only from skill 75 to 100. Switch to silk until skill 150.")
     GameTooltip:Show()
   end)
   skipWool:SetScript("OnLeave", hideTooltip)
@@ -1467,6 +1483,37 @@ local function createPlanner()
     showRoute(active, true)
   end)
   frame.skipWool = skipWool
+
+  local applyEnchant = button(footer, "Apply enchant", 0, 0, 128)
+  applyEnchant:ClearAllPoints()
+  applyEnchant:SetPoint("TOPRIGHT", footer, "TOPRIGHT", 0, -1)
+  applyEnchant:Hide()
+  applyEnchant:SetScript("OnEnter", function(self)
+    GameTooltip:SetOwner(self, "ANCHOR_TOP")
+    GameTooltip:SetText("Apply selected enchant")
+    GameTooltip:AddLine("In the Enchanting window, select an enchant and put an item in its target slot.", 1, 1, 1, true)
+    GameTooltip:AddLine("Replaces the existing enchant on that item.", 1, 1, 1, true)
+    GameTooltip:Show()
+  end)
+  applyEnchant:SetScript("OnLeave", hideTooltip)
+  applyEnchant:SetScript("OnHide", hideTooltip)
+  applyEnchant:SetScript("OnClick", function()
+    local page = ProfessionsFrame and ProfessionsFrame.CraftingPage
+    local info = page and page:IsVisible() and page.professionInfo
+    local transaction = info and (info.parentProfessionID or info.professionID) == professionSkillLines.Enchanting
+      and page.SchematicForm:GetTransaction()
+    if not transaction or not transaction:GetEnchantAllocation() then
+      print(plannerTitle .. ": Select an enchant and place an item in the Enchanting window's target slot.")
+      return
+    end
+    local create = page.CreateButton
+    if not create:IsVisible() or not create:IsEnabled() or StaticPopup_FindVisible("REPLACE_ENCHANT") then return end
+    -- Based on the WoW Professions macro. Accept only the overwrite prompt from this craft.
+    create:Click()
+    local overwrite = StaticPopup_FindVisible("REPLACE_ENCHANT")
+    if overwrite then overwrite:GetButton1():Click() end
+  end)
+  frame.applyEnchant = applyEnchant
 
   local guideFooter = CreateFrame("Frame", nil, footer)
   guideFooter:SetAllPoints()
@@ -1512,11 +1559,6 @@ local function createPlanner()
   affiliation:SetPoint("LEFT", guideLink, "RIGHT", 4, 0)
   affiliation:SetText("·  FPT is not affiliated")
 
-  frame.guidePrices = label(guideFooter, fonts.note, 94, 21, 1)
-  frame.guidePrices:SetPoint("TOPRIGHT", 0, -21)
-  frame.guidePrices:SetJustifyH("RIGHT")
-  paint(frame.guidePrices, colors.muted)
-
   local copy = button(itemPanel, "Export to Auctionator", 0, 0, 1)
   copy:ClearAllPoints()
   copy:SetPoint("BOTTOMLEFT", 12, 10)
@@ -1524,7 +1566,7 @@ local function createPlanner()
   copy:SetHeight(28)
   frame.importButton = copy
   copy:SetScript("OnClick", function()
-    local shopping = showRoute(active, true)
+    local shopping = selectedPlan
     if not shopping or #shopping.auction == 0 then return end
     showCopy(addon.ImportString(shopping), "Copy shopping list (Ctrl+C)",
       "Paste into Auctionator's Shopping tab using Import.")

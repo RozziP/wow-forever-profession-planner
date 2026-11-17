@@ -58,22 +58,55 @@ end
 
 clickTab(6)
 expectTarget(150)
-equal(frame.skipWool:GetChecked(), true, "Tailoring defaults to Skip wool")
-assert(not addon.ImportString(lastPlan):find("Wool Cloth", 1, true), "Default route uses wool")
+equal(frame.skipWool:GetChecked(), true, "Tailoring defaults to Less wool")
+local lowWoolExport = addon.ImportString(lastPlan)
+assert(lowWoolExport:find("Wool Cloth", 1, true), "Default route finishes the wool stage")
+assert(not lowWoolExport:find("Elixir of Wisdom", 1, true), "Default route switches to silk at 100")
 frame.skipWool:SetChecked(false)
 click(frame.skipWool)
 equal(settings.skipWool, false, "Manual route selection")
-assert(addon.ImportString(lastPlan):find("Wool Cloth", 1, true), "Alternate route must use wool")
+assert(addon.ImportString(lastPlan):find("Elixir of Wisdom", 1, true), "Normal route uses Gloves of Meditation")
 slider:SetValue(165)
-event("BAG_UPDATE_DELAYED")
+event("TRADE_SKILL_DETAILS_UPDATE")
 slash("")
 slash("")
 expectTarget(165)
-equal(frame.skipWool:GetChecked(), false, "Bag refresh and reopening preserve the route selection")
+equal(frame.skipWool:GetChecked(), false, "Passive refresh and reopening preserve the route selection")
 clickTab(6)
 expectTarget(150)
-equal(frame.skipWool:GetChecked(), true, "Same tab restores Skip wool")
+equal(frame.skipWool:GetChecked(), true, "Same tab restores Less wool")
 print("PASS profession tab resets, milestone bounds, and Tailoring defaults")
+
+tailoring.rank, tailoring.maximum = 55, 75
+slash("tailoring")
+slider:SetValue(150)
+frame.skipWool:SetChecked(false)
+click(frame.skipWool)
+local function expectWoolStep(crafts)
+  local wool
+  for _, row in ipairs(frame.steps) do
+    if row:IsShown() and row.recipe:GetText() == "Bolt of Woolen Cloth" and row.skill:GetText() ~= "Prep" then
+      assert(not wool, "The wool leveling step should appear once")
+      wool = row
+    end
+  end
+  assert(wool and wool.marker:IsShown(), "The wool leveling step should be current")
+  equal(wool.skill:GetText(), "55–80", "Wool step spans the training break")
+  equal(wool.crafts:GetText(), "×" .. crafts, "Wool craft count")
+  equal(wool.keep:GetText(), "Keep ×" .. crafts, "Wool keep count")
+end
+
+expectWoolStep(45)
+tailoring.rank = 75
+event("SKILL_LINES_CHANGED")
+assert(frame.cappedBanner:IsShown(), "Training is still required at the rank cap")
+click(wow.button("View plan"))
+expectWoolStep(45)
+tailoring.maximum = 150
+event("SKILL_LINES_CHANGED")
+click(wow.button("Update plan"))
+expectWoolStep(14)
+print("PASS one wool leveling row across training and after recalculation")
 
 alchemy.rank, alchemy.maximum = 75, 75
 clickTab(1)
@@ -92,7 +125,14 @@ print("PASS capped Training and View plan navigation")
 tailoring.rank, tailoring.maximum = 215, 300
 slash("tailoring")
 expectTarget(225)
-equal(lastPlan.steps[1].recipe, "Mageweave Bag", "Provisional route while prices are missing")
+local function nextLevelingRecipe()
+  for _, step in ipairs(lastPlan.steps) do
+    if not step.prep then return step.recipe end
+  end
+end
+equal(lastPlan.steps[1].recipe, "Bolt of Mageweave", "Less wool can prep Mageweave for later recipes")
+assert(lastPlan.steps[1].prep, "Mageweave bolts at 215 should be prep")
+equal(nextLevelingRecipe(), "Mageweave Bag", "Provisional route while prices are missing")
 assert(frame.priceStatus:GetText():find("prices missing", 1, true), "Missing prices should be visible")
 wow.defaultPrice = 50
 wow.prices[4338] = 10000 -- Mageweave Cloth
@@ -100,57 +140,151 @@ wow.prices[4339] = 10000 -- Bolt of Mageweave
 slash("")
 slash("")
 expectTarget(225)
-local changedRecipe
-for _, step in ipairs(lastPlan.steps) do
-  if not step.prep then changedRecipe = step.recipe; break end
-end
-equal(changedRecipe, "Runecloth Belt", "Late quotes replace the provisional recipe after reopening")
+equal(nextLevelingRecipe(), "Mageweave Bag", "Reopening preserves the provisional plan")
+click(wow.button("Update plan"))
+equal(nextLevelingRecipe(), "Runecloth Belt", "Updating the plan applies late quotes")
 equal(frame.priceStatus:GetText(), "", "Missing-price warning clears")
-print("PASS late Auctionator prices replace the provisional recipe")
+print("PASS explicit plan update applies late Auctionator quotes")
 
-alchemy.rank, alchemy.maximum = 18, 75
-slash("alchemy")
-local baseline = frame.displayedCraftingTime
-assert(baseline > 0, "Alchemy needs remaining craft time")
-wow.cast = { name = "Elixir of Minor Defense", id = "interrupted", startTime = 49000, endTime = 52000, spellID = 123 }
-event("UNIT_SPELLCAST_START", "player", wow.cast.id, 123)
-assert(frame:GetScript("OnUpdate") and frame.displayedCraftingTime < baseline, "Matching cast starts the countdown")
-wow.now = 51
-local previousTime = frame.displayedCraftingTime
-frame:RunScript("OnUpdate")
-assert(frame.displayedCraftingTime < previousTime, "Active cast should tick")
-slash("")
-assert(not frame:GetScript("OnUpdate"), "Closing the planner stops countdown updates")
-slash("")
-assert(frame:GetScript("OnUpdate"), "Reopening mid-cast resumes countdown updates")
+tailoring.rank, tailoring.maximum = 117, 150
+wow.bags[4306], wow.bags[4305] = 92, 59
+NUM_BAG_SLOTS = 0
+wow.freeBagSlots = 24
+C_Container = {
+  GetContainerNumFreeSlots = function() return wow.freeBagSlots, 0 end,
+  GetContainerNumSlots = function() return 0 end,
+}
+C_Item.GetItemInfo = function() return nil, nil, nil, nil, nil, nil, nil, 20 end
+slash("tailoring")
+local originalPlan = lastPlan
+
+local function displayedNumbers()
+  local values = { frame.craftingTime:GetText(), frame.bagSpace:GetText() }
+  for _, cost in ipairs(frame.costs) do values[#values + 1] = cost:GetText() end
+  for _, row in ipairs(frame.steps) do
+    if row:IsShown() then
+      values[#values + 1] = row.recipe:GetText() .. row.crafts:GetText() .. row.keep:GetText()
+    end
+  end
+  for _, group in ipairs(frame.shoppingGroups) do
+    for _, row in ipairs(group.rows) do
+      if row:IsShown() then values[#values + 1] = row.name:GetText() .. row.count:GetText() end
+    end
+  end
+  return table.concat(values, "\n")
+end
+
+local silkStep
+for _, row in ipairs(frame.steps) do
+  if row:IsShown() and row.recipe:GetText() == "Bolt of Silk Cloth" and row.marker:IsShown() then
+    silkStep = row
+    break
+  end
+end
+assert(silkStep and silkStep.keep:IsShown(), "Select the current silk step with its keep count")
+local originalNumbers = displayedNumbers()
+local originalExport = addon.ImportString(originalPlan)
+click(frame.importButton)
+equal(frame.copyBox:GetText(), originalExport, "Export contains the displayed plan")
+
+local function startSilk(id)
+  wow.cast = { name = "Bolt of Silk Cloth", id = id, startTime = wow.now * 1000, spellID = 3839 }
+  event("UNIT_SPELLCAST_START", "player")
+  equal(displayedNumbers(), originalNumbers, "Numbers stay fixed during casts")
+end
+local function finishSilk(newRank)
+  local id = wow.cast.id
+  wow.now = wow.now + 5.125
+  wow.cast, tailoring.rank = nil, newRank
+  event("SKILL_LINES_CHANGED")
+  event("UNIT_SPELLCAST_SUCCEEDED", "player", id, 3839)
+end
+
+startSilk("interrupted")
 wow.cast = nil
-frame:RunScript("OnUpdate")
-equal(frame.displayedCraftingTime, baseline, "Interruption restores the estimate")
-assert(not frame:GetScript("OnUpdate"), "Interruption stops countdown updates")
+event("TRADE_SKILL_DETAILS_UPDATE")
 
-wow.cast = { name = "Elixir of Minor Defense", id = "finished", startTime = 51500, endTime = 54000, spellID = 123 }
-wow.now = 52
-event("UNIT_SPELLCAST_START", "player", wow.cast.id, 123)
-wow.now = 54
-event("UNIT_SPELLCAST_SUCCEEDED", "player", wow.cast.id, 123)
-equal(frame.craftingFeedback:GetText(), "-2.5 seconds", "Feedback shows actual cast duration")
-event("UNIT_SPELLCAST_SUCCEEDED", "player", wow.cast.id, 123)
-equal(frame.craftingFeedbackAnimation.plays, 1, "Duplicate success does not replay feedback")
-wow.cast, alchemy.rank = nil, 19
+startSilk("no-skill-up")
+finishSilk(117)
+equal(frame.craftingFeedback:GetText(), "-5.1 seconds", "Feedback shows the actual cast duration")
+event("UNIT_SPELLCAST_SUCCEEDED", "player", "no-skill-up", 3839)
+equal(frame.craftingFeedbackAnimation.plays, 1, "Duplicate success is ignored")
+assert(not silkStep.made:IsShown(), "Made count stays hidden on the active step")
+
+startSilk("skill-118")
+finishSilk(118)
+wow.bags[4306], wow.bags[4305], wow.freeBagSlots = 84, 61, 23
 event("TRADE_SKILL_ITEM_CRAFTED_RESULT")
-assert(frame.displayedCraftingTime < baseline, "Completing a craft updates the remaining estimate")
-print("PASS crafting countdown, interruption, reopening, and completed cast feedback")
+equal(displayedNumbers(), originalNumbers, "Skill, bag, and craft refreshes preserve all plan numbers")
+equal(lastPlan, originalPlan, "Passive refresh retains the plan")
+equal(frame.copyBox:GetText(), originalExport, "Shopping payload stays fixed")
 
-assert(not frame.debugTab:IsShown(), "Animation Debug stays hidden for other accounts")
-local hasDebugAccess = addon.IsAnimationDebugAccount
-addon.IsAnimationDebugAccount = function() return true end
-event("BN_INFO_CHANGED")
-assert(frame.debugTab:IsShown(), "Animation Debug appears when Battle.net access is available")
-slash("debug")
-assert(frame.debugPage:IsShown() and not frame.guideFooter:IsShown(), "Debug opens without the planner footer")
-click(wow.button("Crafting time (-23s)"))
-equal(frame.craftingFeedback:GetText(), "-23 seconds", "Debug craft duration preview")
-addon.IsAnimationDebugAccount = hasDebugAccess
-event("BN_INFO_CHANGED")
-assert(not frame.debugTab:IsShown() and frame.planPage:IsShown(), "Losing debug access restores the plan")
-print("PASS account-scoped debug navigation and crafting animation preview")
+slash("")
+startSilk("skill-119")
+finishSilk(119)
+slash("")
+equal(displayedNumbers(), originalNumbers, "Reopening preserves the snapshot")
+startSilk("skill-120")
+finishSilk(120)
+assert(silkStep.check:IsShown() and silkStep.made:IsShown(), "Show Made on the completed row")
+equal(silkStep.made:GetText(), "Made ×4", "Count successful crafts across skill-ups and while hidden")
+equal(displayedNumbers(), originalNumbers, "Completion adds Made and keeps the estimates")
+
+wow.prices[4305] = 5000
+click(wow.button("Update plan"))
+equal(lastPlan.from, 120, "Updating starts at current skill")
+assert(displayedNumbers() ~= originalNumbers, "Updating recalculates the estimates and shopping list")
+originalNumbers = displayedNumbers()
+
+local silkPrep, prepCrafts
+for i, row in ipairs(frame.steps) do
+  if row:IsShown() and row.skill:GetText() == "Prep" and row.recipe:GetText() == "Bolt of Silk Cloth" then
+    silkPrep = row
+    prepCrafts = tonumber(row.crafts:GetText():match("%d+"))
+    break
+  end
+end
+assert(silkPrep and prepCrafts, "Remaining route has silk prep")
+for i = 1, prepCrafts do
+  startSilk("prep-" .. i)
+  finishSilk(120)
+end
+assert(silkPrep.check:IsShown() and silkPrep.made:IsShown(), "Prep can finish ahead of its skill range")
+equal(silkPrep.made:GetText(), "Made ×" .. prepCrafts, "Extra bolts are counted on the prep row")
+equal(displayedNumbers(), originalNumbers, "Finishing prep preserves the plan numbers")
+
+slider:SetValue(125)
+local finalNumbers = displayedNumbers()
+tailoring.rank = 126
+event("SKILL_LINES_CHANGED")
+equal(lastPlan.cap, 125, "A skill-up past the target keeps the selected plan target")
+equal(displayedNumbers(), finalNumbers, "Passing the target leaves its plan numbers visible")
+print("PASS fixed plan numbers, stable export, and successful crafts on completed rows")
+
+slash("cooking")
+expectTarget(75)
+equal(lastPlan.steps[1].recipe, "Brilliant Smallfish", "Cooking preview recipe")
+assert(not frame.tabs[7].skill, "Cooking starts unlearned")
+wow.professions[4] = { name = "Cooking", rank = 150, maximum = 150, skillLine = 185 }
+slash("cooking")
+expectTarget(225)
+equal(frame.tabs[7].skill.slot, 4, "Cooking is read from a secondary slot")
+equal(frame.cappedTitle:GetText(), "Read Expert Cookbook", "Cooking Expert rank action")
+equal(frame.cappedMapLink.trainer.name, "Shandrina", "Alliance cookbook vendor")
+equal(frame.cappedRequirements:GetText(), "Skill cap reached at 150", "Expert Cooking level requirement")
+click(wow.button("View plan"))
+equal(lastPlan.vendor[1].name, "Expert Cookbook", "Shopping ahead includes the Expert book")
+wow.professions[4].rank, wow.professions[4].maximum = 225, 225
+slash("cooking")
+expectTarget(300)
+equal(frame.cappedTitle:GetText(), "Complete Clamlette Surprise", "Cooking Artisan rank action")
+equal(frame.cappedMapLink.trainer.name, "Dirge Quikcleave", "Artisan quest giver")
+click(wow.button("View plan"))
+assert(addon.ImportString(lastPlan):find("Giant Egg", 1, true), "Shopping ahead includes quest items")
+wow.professions[4].maximum = 300
+event("SKILL_LINES_CHANGED")
+assert(addon.ImportString(lastPlan):find("Giant Egg", 1, true), "Training preserves the selected shopping plan")
+click(wow.button("Update plan"))
+equal(#lastPlan.vendor, 0, "Updating after Artisan unlock removes vendor turn-in items")
+equal(#lastPlan.auction, 1, "Artisan unlock removes Auction House turn-in items at the same skill")
+print("PASS Cooking preview, learned secondary slot, rank directions, and training refresh")

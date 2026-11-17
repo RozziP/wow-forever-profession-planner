@@ -214,4 +214,27 @@ module.exports = {
       },
     ],
   },
+  Cooking: {
+    steps: [
+      [1, 50, 'Brilliant Smallfish', 55, 55, 1, 45, 85],
+      [50, 100, 'Longjaw Mud Snapper', 55, 55, 1, 90, 130],
+      [100, 130, 'Bristle Whisker Catfish', 30, 30, 4, 140, 180],
+      [130, 150, 'Bristle Whisker Catfish', 25, 25, 4, 140, 180],
+      [150, 175, 'Goblin Deviled Clams', 30, 30, 95, 165, 205],
+      [175, 225, 'Roast Raptor', 55, 55, 300, 215, 255],
+      [225, 300, 'Spotted Yellowtail', 140, 140, 5, 265, 305],
+    ],
+    auction: [
+      ['Raw Brilliant Smallfish', 6291, 55], ['Raw Longjaw Mud Snapper', 6289, 55],
+      ['Raw Bristle Whisker Catfish', 6308, 55], ['Tangy Clam Meat', 5504, 30],
+      ['Raptor Flesh', 12184, 55], ['Raw Spotted Yellowtail', 4603, 140],
+      ['Giant Egg', 12207, 12], ['Zesty Clam Meat', 7974, 10],
+    ],
+    vendor: [['Hot Spices', 85, 40, 2692], ['Expert Cookbook', 1, 10000, 16072], ['Alterac Swiss', 20, 800, 8932]],
+    rankMaterials: {
+      150: { 'Expert Cookbook': 1 },
+      225: { 'Giant Egg': 12, 'Zesty Clam Meat': 10, 'Alterac Swiss': 20 },
+    },
+    notes: 'Cook at a campfire. Buy the fish recipes from fishing supplies vendors and Roast Raptor from a cooking vendor. Learn Goblin Deviled Clams from a trainer and buy Spotted Yellowtail from Gikkix in Tanaris.',
+  },
 };

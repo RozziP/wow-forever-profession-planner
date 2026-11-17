@@ -46,4 +46,113 @@ for _, pricesAvailable in ipairs({ false, true }) do
     end
   end
 end
-print(string.format("PASS %d plans and shopping exports across all six professions", planCount))
+print(string.format("PASS %d plans and shopping exports across all %d professions", planCount, #addon.routes))
+
+local function quantity(items, name)
+  for _, item in ipairs(items) do
+    if item.name == name then return item.quantity end
+  end
+  return 0
+end
+
+for _, profession in ipairs(addon.routes) do
+  for _, source in ipairs({ profession.full, profession.rush }) do
+    for _, item in ipairs(source.vendor) do
+      assert(item.id, "Vendor item needs an ID for bag accounting: " .. item.name)
+    end
+  end
+end
+
+local emptyBags = addon.GetPlan(alchemy, 75, false, 1)
+local neededVials = quantity(emptyBags.vendor, "Empty Vial")
+assert(neededVials > 0, "Alchemy needs vendor vials")
+wow.bags[3371] = 5
+local someVials = addon.GetPlan(alchemy, 75, false, 1)
+equal(quantity(someVials.vendor, "Empty Vial"), neededVials - 5, "Subtract owned vendor supplies")
+wow.bags[3371] = neededVials
+local enoughVials = addon.GetPlan(alchemy, 75, false, 1)
+equal(quantity(enoughVials.vendor, "Empty Vial"), 0, "Do not buy vendor supplies already owned")
+wow.bags[3371] = nil
+print("PASS partial and complete vendor supplies in bags")
+
+wow.defaultPrice = nil
+local skipSource = addon.routes[tailoring].rush
+local rawSkip150 = addon.GetPlan(tailoring, 150, false, 1, nil, true)
+for _, category in ipairs({ "auction", "vendor" }) do
+  equal(#rawSkip150[category], #skipSource[category], "Generated Less wool shopping categories")
+  for _, item in ipairs(skipSource[category]) do
+    equal(quantity(rawSkip150[category], item.name), item.quantity, "Generated quantity for " .. item.name)
+  end
+end
+
+for _, skip in ipairs({ false, true }) do
+  for skill = 1, 149 do
+    local plan = addon.GetPlan(tailoring, skill + 1, true, skill, nil, skip)
+    local step = plan.steps[#plan.steps]
+    assert(step and not step.prep and step.crafts >= 1, "Missing Tailoring skill-up at " .. skill)
+    equal(step.from, skill, "Clipped Tailoring step start")
+    equal(step.to, skill + 1, "Clipped Tailoring step end")
+  end
+end
+
+local normal150 = addon.GetPlan(tailoring, 150, true, 1)
+local skip150 = addon.GetPlan(tailoring, 150, true, 1, nil, true)
+equal(quantity(normal150.auction, "Wool Cloth"), 459, "Normal guide uses wool")
+equal(quantity(skip150.auction, "Wool Cloth"), 78, "Less wool budgets 26 wool bolts")
+equal(quantity(skip150.auction, "Elixir of Wisdom"), 0, "Less wool avoids Gloves of Meditation")
+local woolExport = '^"Wool Cloth"' .. string.rep(";", 11) .. "#;;78^"
+assert((addon.ImportString(skip150) .. "^"):find(woolExport, 1, true), "Export the limited wool quantity")
+equal(quantity(addon.GetPlan(tailoring, 75, true, 1, nil, true).auction, "Wool Cloth"), 0, "Wool starts after 75")
+equal(quantity(addon.GetPlan(tailoring, 150, true, 100, skip150).auction, "Wool Cloth"), 0, "Wool ends at 100")
+equal(skip150.steps[#skip150.steps].recipe, "Small Silk Pack", "Less wool levels with silk through 150")
+equal(quantity(skip150.auction, "Mageweave Cloth"), 0, "Less wool defers Mageweave")
+equal(addon.GetPlan(tailoring, 120, true, 119).steps[1].crafts, 13, "Silk bolt estimate spread across the normal range")
+equal(addon.GetPlan(tailoring, 150, true, 149, normal150).steps[1].crafts, 7, "Normal Mageweave estimate after resuming")
+
+local skip200 = addon.GetPlan(tailoring, 200, true, 1, nil, true)
+local normal200 = addon.GetPlan(tailoring, 200, true, 1)
+local resumed = addon.GetPlan(tailoring, 200, true, 190, skip200)
+equal(addon.ImportString(resumed), addon.ImportString(addon.GetPlan(tailoring, 200, true, 190, normal200)),
+  "Pinned routes have the same Mageweave shopping after 190")
+equal(resumed.steps[1].recipe, "Bolt of Mageweave", "Known Mageweave recipe can supply prep")
+equal(resumed.steps[1].keep, 38, "Reserve the bolts for leggings")
+wow.bags[4339] = 8
+local withBolts = addon.GetPlan(tailoring, 200, true, 190, skip200)
+equal(withBolts.steps[1].crafts, 30, "Existing Mageweave bolts replace prep")
+equal(quantity(withBolts.auction, "Mageweave Cloth"), 150, "Export only remaining Mageweave cloth")
+wow.bags[4339] = nil
+
+wow.defaultPrice = 100
+local pricedSkip = addon.GetPlan(tailoring, 150, true, 1, nil, true)
+equal(quantity(pricedSkip.auction, "Bolt of Woolen Cloth"), 4, "Buy the remaining four cheap wool bolts")
+equal(quantity(pricedSkip.auction, "Wool Cloth"), 66, "Craft the first 22 bolts for skill")
+equal(quantity(pricedSkip.auction, "Bolt of Silk Cloth"), 41, "Buy remaining cheap silk bolts")
+wow.bags[2997] = 4
+local ownedWool = addon.GetPlan(tailoring, 150, true, 1, pricedSkip)
+equal(quantity(ownedWool.auction, "Bolt of Woolen Cloth"), 0, "Use owned wool bolts for capes")
+equal(quantity(ownedWool.auction, "Wool Cloth"), 66, "Keep raw wool for the skill-up crafts")
+wow.bags[2997] = nil
+equal(pricedSkip.cost.net, pricedSkip.cost.gross - pricedSkip.revenue, "Less wool quote uses its own materials and proceeds")
+wow.defaultPrice = 50
+print("PASS Less wool shopping, 298 partial routes, Mageweave handoff, and intermediate buying")
+
+local cooking = 7
+local plan = addon.GetPlan(cooking, 300, false, 1)
+local materials = {}
+for _, items in ipairs({ plan.auction, plan.vendor }) do
+  for _, item in ipairs(items) do materials[item.name] = item.quantity end
+end
+for name, quantity in pairs({
+  ["Raw Brilliant Smallfish"] = 55, ["Raw Longjaw Mud Snapper"] = 55, ["Raw Bristle Whisker Catfish"] = 55,
+  ["Tangy Clam Meat"] = 30, ["Raptor Flesh"] = 55, ["Raw Spotted Yellowtail"] = 140,
+  ["Hot Spices"] = 85, ["Expert Cookbook"] = 1, ["Giant Egg"] = 12, ["Zesty Clam Meat"] = 10, ["Alterac Swiss"] = 20,
+}) do
+  equal(materials[name], quantity, "Full Cooking route quantity for " .. name)
+end
+wow.bags[12207], wow.bags[8932] = 5, 20
+local capped = addon.GetPlan(cooking, 300, true, 225, plan, nil, 225)
+equal(capped.auction[1].quantity, 7, "Count Giant Eggs already in bags")
+equal(#capped.vendor, 0, "Count Alterac Swiss already in bags")
+assert(not addon.ImportString(addon.GetPlan(cooking, 225, true, 1)):find("Giant Egg", 1, true),
+  "A target of 225 should omit Artisan turn-in items")
+print("PASS published Cooking materials and bag-aware Artisan shopping")
