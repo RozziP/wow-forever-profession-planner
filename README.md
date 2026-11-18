@@ -1,5 +1,7 @@
 # Forever Profession Trainer
 
+<p><img src="branding/icon.png" width="96" height="96" alt="Forever Profession Trainer icon"></p>
+
 Plan profession leveling in WoW Forever through skill 300. Forever Profession Trainer reads your character’s current skill, shows what to craft, estimates the cost, and builds an Auctionator shopping list.
 
 Supports Alchemy, Blacksmithing, Cooking, Enchanting, Engineering, Leatherworking, and Tailoring. Install and enable Auctionator for WoW Forever alongside the addon.
