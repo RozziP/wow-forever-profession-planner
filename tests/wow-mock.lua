@@ -34,7 +34,15 @@ methods.UpdateScrollChildRect = noop
 methods.ClearAllPoints = noop
 methods.ClearFocus = noop
 methods.HighlightText = noop
-function methods:IsOwned() return false end
+methods.AddLine = noop
+function methods:SetOwner(owner)
+  assert(type(owner) == "table", "Tooltip owner must be a frame")
+  self.owner = owner
+end
+function methods:IsOwned(owner)
+  assert(type(owner) == "table", "Tooltip ownership check requires a frame")
+  return self.owner == owner
+end
 
 function methods:SetScript(event, callback) self.scripts[event] = callback end
 function methods:GetScript(event) return self.scripts[event] end

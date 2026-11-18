@@ -412,6 +412,8 @@ local function scrollArea(parent, x, y, width, height)
   return scroll, content
 end
 
+local searchRecipe
+
 local function addStepRow()
   local index = #frame.steps + 1
   local y = (index - 1) * stepRowHeight
@@ -468,7 +470,13 @@ local function addStepRow()
     GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
     GameTooltip:SetText(self.recipe:GetText())
     if self.keep:IsShown() then GameTooltip:AddLine(self.keep:GetText()) end
+    GameTooltip:AddLine(self.professionLearned and ("Click to search in " .. self.profession .. ".")
+      or ("Learn " .. self.profession .. " to search its recipes."), 1, 0.82, 0.52, true)
     GameTooltip:Show()
+  end)
+  row:SetScript("OnClick", function(self)
+    hideTooltip(self)
+    searchRecipe(self.profession, self.recipe:GetText())
   end)
   row:SetScript("OnLeave", hideTooltip)
   row:SetScript("OnHide", hideTooltip)
@@ -539,6 +547,52 @@ local function learnedProfessions()
     end
   end
   return learned
+end
+
+local recipeSearchRequest = 0
+searchRecipe = function(profession, recipe)
+  recipeSearchRequest = recipeSearchRequest + 1
+  local request = recipeSearchRequest
+  local skillLine = professionSkillLines[profession]
+  if not skillLine or not learnedProfessions()[skillLine] then
+    print(plannerTitle .. ": Learn " .. profession .. " before searching its recipes.")
+    return
+  end
+  if InCombatLockdown and InCombatLockdown() then
+    print(plannerTitle .. ": Wait until combat ends to open the profession window.")
+    return
+  end
+  if not OpenProfessionUIToSkillLine or not C_TradeSkillUI or not C_TradeSkillUI.GetBaseProfessionInfo then
+    print(plannerTitle .. ": The profession search is unavailable.")
+    return
+  end
+
+  OpenProfessionUIToSkillLine(skillLine)
+  local attempts = 0
+  local function applySearch()
+    if request ~= recipeSearchRequest then return end
+    local professions = ProfessionsFrame
+    if not professions or not professions:IsShown() then return end
+    local page = professions.CraftingPage
+    local info = page and page.professionInfo
+    local baseInfo = C_TradeSkillUI.GetBaseProfessionInfo()
+    local changing = C_TradeSkillUI.IsDataSourceChanging and C_TradeSkillUI.IsDataSourceChanging()
+    -- SetProfessionInfo clears the old search when switching professions. Wait for that refresh.
+    if not changing and baseInfo and baseInfo.professionID == skillLine
+      and info and (info.parentProfessionID or info.professionID) == skillLine
+      and page:IsShown() and page.RecipeList and page.RecipeList.SearchBox then
+      page.RecipeList.SearchBox:SetText(recipe)
+      page.RecipeList.SearchBox:ClearFocus()
+      return
+    end
+    attempts = attempts + 1
+    if attempts < 20 then
+      C_Timer.After(0.1, applySearch)
+    else
+      print(plannerTitle .. ": The profession window is not ready. Click the recipe again.")
+    end
+  end
+  C_Timer.After(0, applySearch)
 end
 
 local function trackCraftingCast(self)
@@ -826,6 +880,7 @@ local function showRoute(index, keepScroll, resetPlan)
     row.made:SetShown(not not (complete and made))
     if step and rank >= step.to then latestCompletedRow = i end
     if step then
+      row.profession, row.professionLearned = profession, skill ~= nil
       if current then
         row.background:SetColorTexture(0.78, 0.52, 0.20, 0.16)
       else

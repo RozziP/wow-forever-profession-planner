@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.4.3
+
+- Click a recipe row to open its profession and search for that recipe.
+- Recipe searches wait for profession changes to finish and keep the latest clicked recipe.
+- Added clear feedback for unlearned professions and attempts during combat.
+- Fixed tooltip cleanup that prevented recipe clicks from reaching the search.
+
 ## 0.4.2
 
 - Added Cooking through skill 300, including the Expert Cookbook and Clamlette Surprise shopping requirements, rank directions, and `/fpt cooking`.

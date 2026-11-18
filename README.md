@@ -18,6 +18,8 @@ Drag the bottom-right corner to resize the planner. It remembers your chosen siz
 
 Follow the highlighted recipe and switch at the skill shown. Completed steps stay in the guide with checkmarks. Save crafts marked **Keep ×N** for later recipes. The planned craft and **Keep** counts stay fixed as you gain skill. A completed row shows **Made** for successful crafts recorded on the current plan, including crafts that gave no skill point.
 
+Click a recipe row to open its profession and fill the recipe search. You must know the profession and be out of combat. The search keeps Blizzard's existing filters; a recipe you have not learned may not appear. Clear the search in the profession window to return to the full list.
+
 **Est. crafting** shows the time estimated when the plan was calculated. It uses recipe cast times when available, with a fallback of three seconds per craft. The floating number shows how long the completed cast took. Budget separate time for shopping, travel, and training.
 
 At a trainable skill cap, selecting the profession tab opens the trainer screen. It names the rank you need to unlock further skill gains, shows the required character level, and gives directions for your faction. Click **View plan** to plan or shop ahead. Click **Training** to return, or select the profession tab again to return and reset your target. Click a named trainer to open the map and place a waypoint where supported. Annora’s pin marks the rear entrance to Uldaman.
