@@ -22,7 +22,13 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           $package = ./scripts/package-addon.ps1 -Tag $env:GITHUB_REF_NAME
-          gh release create $env:GITHUB_REF_NAME $package --verify-tag --generate-notes
+          $version = [regex]::Escape($env:GITHUB_REF_NAME.TrimStart('v'))
+          $changelog = Get-Content ./CHANGELOG.md -Raw
+          $notes = [regex]::Match($changelog, "(?ms)^## $version\s*\r?\n(.*?)(?=^## |\z)").Groups[1].Value.Trim()
+          if (!$notes) { throw "Missing changelog for $env:GITHUB_REF_NAME" }
+          $notesPath = Join-Path $env:RUNNER_TEMP 'release-notes.md'
+          Set-Content -LiteralPath $notesPath -Value $notes -Encoding utf8
+          gh release create $env:GITHUB_REF_NAME $package --verify-tag --notes-file $notesPath
 
   curseforge:
     needs: release

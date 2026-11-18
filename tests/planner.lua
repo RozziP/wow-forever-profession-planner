@@ -288,3 +288,92 @@ click(wow.button("Update plan"))
 equal(#lastPlan.vendor, 0, "Updating after Artisan unlock removes vendor turn-in items")
 equal(#lastPlan.auction, 1, "Artisan unlock removes Auction House turn-in items at the same skill")
 print("PASS Cooking preview, learned secondary slot, rank directions, and training refresh")
+
+-- Exercise real row clicks with a profession UI that loads and switches asynchronously.
+local openCount, openedSkillLine, baseInfo, changing = 0, nil, nil, false
+local searchBox = CreateFrame("EditBox")
+local searchChanges = 0
+function searchBox:SetText(text)
+  self.text = text
+  searchChanges = searchChanges + 1
+end
+C_TradeSkillUI = {
+  GetBaseProfessionInfo = function() return baseInfo end,
+  IsDataSourceChanging = function() return changing end,
+}
+OpenProfessionUIToSkillLine = function(skillLine)
+  openCount, openedSkillLine = openCount + 1, skillLine
+  if not ProfessionsFrame then
+    ProfessionsFrame = CreateFrame("Frame")
+    ProfessionsFrame.CraftingPage = CreateFrame("Frame", nil, ProfessionsFrame)
+    ProfessionsFrame.CraftingPage.RecipeList = { SearchBox = searchBox }
+  end
+  ProfessionsFrame:Show()
+end
+local function readyProfession(skillLine)
+  baseInfo = { professionID = skillLine }
+  ProfessionsFrame.CraftingPage.professionInfo = { professionID = skillLine }
+  changing = false
+end
+local function firstRecipeRow()
+  for _, row in ipairs(frame.steps) do
+    if row:IsShown() then return row end
+  end
+  error("No recipe row to click")
+end
+slash("tailoring")
+local recipeRow = firstRecipeRow()
+local expectedRecipe = recipeRow.recipe:GetText()
+local beforeSearch = displayedNumbers()
+recipeRow:RunScript("OnEnter")
+assert(GameTooltip:IsOwned(recipeRow) and GameTooltip:IsShown(), "Hover owns the recipe tooltip")
+click(recipeRow)
+assert(not GameTooltip:IsShown(), "Click dismisses its recipe tooltip before opening the profession")
+equal(openedSkillLine, 197, "Recipe click opens its profession")
+wow.flushTimers()
+equal(searchChanges, 0, "Wait for first profession load before searching")
+readyProfession(197)
+wow.flushTimers()
+equal(searchBox:GetText(), expectedRecipe, "Loaded profession searches the clicked recipe")
+equal(displayedNumbers(), beforeSearch, "Searching preserves plan values")
+
+slash("cooking")
+recipeRow = firstRecipeRow()
+click(recipeRow)
+equal(openedSkillLine, 185, "Reused row opens Cooking instead of Tailoring")
+wow.flushTimers()
+equal(searchChanges, 1, "Do not search the previous profession while switching")
+readyProfession(185)
+changing = true
+wow.flushTimers()
+equal(searchChanges, 1, "Wait for Blizzard to finish replacing its data source")
+changing = false
+wow.flushTimers()
+equal(searchBox:GetText(), recipeRow.recipe:GetText(), "Search after profession switch completes")
+
+local beforeChanges = searchChanges
+click(recipeRow)
+local secondRow = assert(frame.steps[2])
+assert(secondRow:IsShown(), "Cooking has a second recipe")
+click(secondRow)
+wow.flushTimers()
+equal(searchChanges, beforeChanges + 1, "Only the newest pending click searches")
+equal(searchBox:GetText(), secondRow.recipe:GetText(), "Newest clicked recipe wins")
+
+click(recipeRow)
+ProfessionsFrame:Hide()
+wow.flushTimers()
+equal(searchChanges, beforeChanges + 1, "Closing the profession window cancels the search")
+local beforeOpen = openCount
+InCombatLockdown = function() return true end
+click(recipeRow)
+equal(openCount, beforeOpen, "Do not open professions in combat")
+InCombatLockdown = nil
+slash("blacksmithing")
+click(firstRecipeRow())
+equal(openCount, beforeOpen, "Unlearned preview cannot search another profession")
+OpenProfessionUIToSkillLine = nil
+slash("tailoring")
+click(firstRecipeRow())
+equal(openCount, beforeOpen, "Missing profession API is handled without an error")
+print("PASS clickable recipes, delayed loading, profession switches, and unavailable searches")
