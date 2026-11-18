@@ -1,0 +1,28 @@
+name: Check CurseForge uploader
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/**'
+      - 'scripts/*curseforge*'
+      - 'tests/Test-CurseForgeUpload.ps1'
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/**'
+      - 'scripts/*curseforge*'
+      - 'tests/Test-CurseForgeUpload.ps1'
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          persist-credentials: false
+      - name: Check uploader without network calls or credentials
+        shell: pwsh
+        run: ./tests/Test-CurseForgeUpload.ps1
