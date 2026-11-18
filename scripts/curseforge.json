@@ -1,0 +1,7 @@
+{
+  "repository": "RozziP/wow-forever-profession-planner",
+  "projectId": 1803259,
+  "addonFolder": "ForeverProfessionPlanner",
+  "assetPrefix": "ForeverProfessionTrainer",
+  "requiredDependency": "auctionator"
+}
