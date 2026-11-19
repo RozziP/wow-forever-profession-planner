@@ -32,8 +32,7 @@ With **Tailoring** selected below skill 150, **Less wool** is on by default. It 
 
 The shopping list, **Have / Need** counts, bag space, and costs use your inventory when the plan was calculated. Click **Update plan** to rebuild it from your current skill, bags, and Auctionator prices. Auction House materials and vendor supplies have separate sections. The bag-space estimate covers both groups, counts room in partial stacks and free regular bag slots, and warns when you may need more space.
 
-- **To buy** is the estimated cost of remaining purchases. **Owned** is the value of materials already in your bags that the plan will use.
-- **All materials** combines both values, using Auctionator prices for auction materials and vendor prices for vendor supplies.
+- **All materials** includes both the estimated **To buy** amount and the value of materials **Already owned** that the plan will use. The two indented amounts show how the total is calculated, using Auctionator prices for auction materials and vendor prices for vendor supplies.
 - **Vendor sales** estimates what NPC vendors will pay for the remaining crafts available to sell.
 - **Net cost** combines those figures. A minus sign means gold spent, and a plus sign means gold gained. Budget separately for training and recipe fees.
 

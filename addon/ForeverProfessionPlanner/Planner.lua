@@ -302,14 +302,15 @@ local function money(value)
   return string.format("%s%dc", sign, copper)
 end
 
-local function showMoney(region, value, net)
+local function showMoney(region, value, net, component)
   local text = value and money(value) or "—"
+  if component then text = text:gsub("^%+", "") end
   if value and C_CurrencyInfo and C_CurrencyInfo.GetCoinTextureString then
-    local sign = value < 0 and "−" or (value > 0 and "+" or "")
-    text = sign .. C_CurrencyInfo.GetCoinTextureString(math.floor(math.abs(value) + 0.5), 12)
+    local sign = value < 0 and "−" or (value > 0 and not component and "+" or "")
+    text = sign .. C_CurrencyInfo.GetCoinTextureString(math.floor(math.abs(value) + 0.5), component and 10 or 12)
   end
   region:SetText(text)
-  paint(region, not value and colors.muted or (net and value < 0 and colors.red)
+  paint(region, (not value or component) and colors.muted or (net and value < 0 and colors.red)
     or (value > 0 and colors.green) or colors.text)
 end
 
@@ -861,9 +862,9 @@ local function showRoute(index, keepScroll, resetPlan)
     end
   end
   frame.priceStatus:SetText(source)
-  showMoney(frame.costs[1], cost.toBuy and -cost.toBuy)
-  showMoney(frame.costs[2], cost.owned and -cost.owned)
-  showMoney(frame.costs[3], cost.gross and -cost.gross)
+  showMoney(frame.costs[1], cost.gross and -cost.gross)
+  showMoney(frame.costs[2], cost.toBuy, false, true)
+  showMoney(frame.costs[3], cost.owned, false, true)
   showMoney(frame.costs[4], route.from < route.cap and route.revenue or nil)
   showMoney(frame.costs[5], cost.net and -cost.net, true)
   showShoppingBagSpace(guide.bagSpace)
@@ -1495,10 +1496,12 @@ local function createPlanner()
   local totalRule = surface(itemPanel, 12, 119, 1, 1, 0.36, 0.26, 0.15)
   totalRule:SetPoint("TOPRIGHT", -12, -119)
   frame.costs = {}
-  for i, caption in ipairs({ "To buy", "Owned", "All materials", "Vendor sales", "Net cost" }) do
+  for i, caption in ipairs({ "All materials", "To buy", "Already owned", "Vendor sales", "Net cost" }) do
     local y = i == 5 and 125 or 38 + (i - 1) * 20
-    label(itemPanel, i == 5 and fonts.body or fonts.caption, 12, y, 98):SetText(caption)
-    local value = label(itemPanel, fonts.body, 0, y, 128)
+    local component = i == 2 or i == 3
+    label(itemPanel, component and fonts.note or (i == 5 and fonts.body or fonts.caption),
+      component and 24 or 12, y, 98):SetText(caption)
+    local value = label(itemPanel, component and fonts.note or fonts.body, 0, y, component and 110 or 128)
     value:ClearAllPoints()
     value:SetPoint("TOPRIGHT", -12, -y)
     value:SetJustifyH("RIGHT")
