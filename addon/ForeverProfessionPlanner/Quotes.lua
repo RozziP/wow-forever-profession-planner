@@ -113,7 +113,7 @@ local keepTools = {
   ["Arclight Spanner"] = true, ["Gyromatic Micro-Adjustor"] = true,
 }
 
-local function sectionPlans(profession, base, start, target, market, preferBuying, bags, used, currentMaximum)
+local function sectionPlans(profession, base, start, target, market, preferBuying, bags, used, currentMaximum, anchorSkill)
   local sections, prices, vendorPrices = {}, {}, {}
   local recipes, stock = {}, {}
   for _, item in ipairs(base.intermediates) do prices[item.name] = item end
@@ -222,6 +222,10 @@ local function sectionPlans(profession, base, start, target, market, preferBuyin
       for _, step in ipairs(base.steps) do
         if step.from < to and step.to > from then
           local crafts = craftsTo(step, to) - craftsTo(step, from)
+          if anchorSkill and from == start and step.from < start then
+            local anchor = math.max(step.from, anchorSkill)
+            crafts = math.max(0, craftsTo(step, to) - craftsTo(step, anchor) - (start - anchor))
+          end
           local stepFrom, stepTo = math.max(from, step.from), math.min(to, step.to)
           if crafts > 0 then
             local firstPrep = #section.steps + 1
@@ -270,10 +274,11 @@ local function sectionPlans(profession, base, start, target, market, preferBuyin
   return sections
 end
 
-local function finishFor(recipe, start, target, bolt, market, preferBuying, bags, sectionUsed)
+local function finishFor(recipe, start, target, bolt, market, preferBuying, bags, sectionUsed, anchorSkill)
   local used = {}
   for key, quantity in pairs(sectionUsed) do used[key] = quantity end
-  local crafts = expectedCrafts(start, target, 275, 305)
+  local anchor = math.max(265, anchorSkill or start)
+  local crafts = math.max(0, expectedCrafts(anchor, target, 275, 305) - (start - anchor))
   local finish = {
     name = recipe.name, step = { from = start, to = target, recipe = recipe.name, crafts = crafts },
     auction = {}, vendor = {}, vendorSpend = 0, revenue = crafts * recipe.sell,
@@ -342,17 +347,17 @@ local function shoppingQuote(plan, market)
   return cost
 end
 
-local function buildPlan(profession, source, start, cap, market, bags, preferBuying, usePublished, finishName, currentMaximum)
+local function buildPlan(profession, source, start, cap, market, bags, preferBuying, usePublished, finishName, currentMaximum, anchorSkill)
   local used = {}
-  local sections = sectionPlans(profession.name, source, start, cap, market, preferBuying, bags, used, currentMaximum)
+  local sections = sectionPlans(profession.name, source, start, cap, market, preferBuying, bags, used, currentMaximum, anchorSkill)
   local plan = newSection(start, cap)
   plan.source = source
   plan.name, plan.url, plan.notes, plan.sections = profession.name, profession.url, source.notes, sections
   local selected, alternative
   if source.finishes and cap > 265 and start < cap then
     local finishStart = math.max(start, 265)
-    local first, firstUsed = finishFor(source.finishes[1], finishStart, cap, source.finishBolt, market, preferBuying, bags, used)
-    local second, secondUsed = finishFor(source.finishes[2], finishStart, cap, source.finishBolt, market, preferBuying, bags, used)
+    local first, firstUsed = finishFor(source.finishes[1], finishStart, cap, source.finishBolt, market, preferBuying, bags, used, anchorSkill)
+    local second, secondUsed = finishFor(source.finishes[2], finishStart, cap, source.finishBolt, market, preferBuying, bags, used, anchorSkill)
     local firstQuote, secondQuote = quote(first, market), quote(second, market)
     selected, alternative = first, second
     local selectedUsed = firstUsed
@@ -438,16 +443,16 @@ local function tailoringPlan(profession, start, cap, market, bags, preferBuying,
   return plan
 end
 
-function addon.GetPlan(index, target, preferBuying, currentSkill, pinnedPlan, skipWool, currentMaximum)
+function addon.GetPlan(index, target, preferBuying, currentSkill, pinnedPlan, skipWool, currentMaximum, anchorSkill, bagSnapshot)
   local profession = addon.routes[index]
   local maximum = 300
   local cap = math.min(maximum, math.max(1, math.floor(target or maximum)))
   local start = math.max(1, math.floor(currentSkill or 1))
   local market = makePriceReader()
-  local bags = makeBagReader()
+  local bags = bagSnapshot or makeBagReader()
   if pinnedPlan then
     return buildPlan(profession, pinnedPlan.source, start, cap, market, bags, preferBuying, false,
-      pinnedPlan.selected and pinnedPlan.selected.name, currentMaximum)
+      pinnedPlan.selected and pinnedPlan.selected.name, currentMaximum, anchorSkill)
   end
   local plan
   if profession.full.beltOption then
@@ -458,6 +463,30 @@ function addon.GetPlan(index, target, preferBuying, currentSkill, pinnedPlan, sk
   end
   plan.missingPrices = market.missing
   return plan
+end
+
+function addon.MakeBagSnapshot()
+  return makeBagReader()
+end
+
+function addon.RefreshShopping(plan)
+  local bags = makeBagReader()
+  local function refresh(rows)
+    local purchases = {}
+    for _, row in ipairs(rows) do
+      row.inBags = bags(row)
+      row.remaining = math.max(0, row.quantity - row.inBags)
+      if row.remaining > 0 then
+        purchases[#purchases + 1] = { name = row.name, id = row.id, price = row.price,
+          quantity = row.remaining, keep = row.keep }
+      end
+    end
+    return purchases
+  end
+  plan.auction, plan.vendor = refresh(plan.shoppingAuction), refresh(plan.shoppingVendor)
+  plan.vendorSpend = 0
+  for _, item in ipairs(plan.vendor) do plan.vendorSpend = plan.vendorSpend + item.quantity * item.price end
+  plan.cost = shoppingQuote(plan, makePriceReader())
 end
 
 function addon.HasNewPlanPrices(plan)
