@@ -5,6 +5,25 @@ local alchemy, tailoring = 1, 6
 equal(addon.routes[alchemy].name, "Alchemy", "Alchemy fixture")
 equal(addon.routes[tailoring].name, "Tailoring", "Tailoring fixture")
 
+wow.defaultPrice = 100
+local baseline = addon.GetPlan(7, 300, true, 225, nil, nil, 225)
+local auctionItem, vendorItem = baseline.auction[1], baseline.vendor[1]
+assert(auctionItem and vendorItem, "Owned-material fixture requires auction and vendor items")
+wow.bags[auctionItem.id] = math.floor(auctionItem.quantity / 2)
+wow.bags[vendorItem.id] = vendorItem.quantity
+local withOwned = addon.GetPlan(7, 300, true, 225, baseline, nil, 225)
+equal(withOwned.cost.owned, wow.bags[auctionItem.id] * 100 + vendorItem.quantity * vendorItem.price,
+  "Owned materials include auction and vendor value")
+equal(withOwned.cost.toBuy + withOwned.cost.owned, withOwned.cost.gross, "Material breakdown balances")
+equal(withOwned.cost.gross, baseline.cost.gross, "Owned supplies retain their cost")
+equal(withOwned.cost.net, withOwned.cost.gross - withOwned.revenue, "Net includes owned supplies")
+wow.defaultPrice = nil
+local unpriced = addon.GetPlan(7, 300, true, 225, baseline, nil, 225)
+assert(unpriced.cost.gross == nil and unpriced.cost.owned == nil and unpriced.cost.toBuy == nil,
+  "Missing prices leave the material breakdown unknown")
+wow.bags[auctionItem.id], wow.bags[vendorItem.id] = nil, nil
+print("PASS owned-material value and cost breakdown")
+
 local linen = addon.GetPlan(tailoring, 30, true, 1)
 equal(linen.steps[1].recipe, "Bolt of Linen Cloth", "Short Tailoring route")
 equal(linen.revenue, 1200, "Sell all 30 bolts when stopping at skill 30")

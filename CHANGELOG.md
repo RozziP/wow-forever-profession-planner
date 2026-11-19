@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.4.4
+
+- Include the value of owned materials in the total material cost and net cost.
+- Show the cost of materials to buy and the value of materials already owned in the shopping list.
+
 ## 0.4.3
 
 - Click a recipe row to open its profession and search for that recipe.

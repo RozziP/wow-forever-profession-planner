@@ -853,7 +853,7 @@ local function showRoute(index, keepScroll, resetPlan)
   end
   local cost = route.cost
   local source = ""
-  if cost.gross == nil and #route.auction > 0 then
+  if cost.gross == nil and #route.shoppingAuction > 0 then
     if cost.available then
       source = string.format("Auctionator prices missing for %d item%s", #cost.missing, #cost.missing == 1 and "" or "s")
     else
@@ -861,9 +861,11 @@ local function showRoute(index, keepScroll, resetPlan)
     end
   end
   frame.priceStatus:SetText(source)
-  showMoney(frame.costs[1], cost.gross and -cost.gross)
-  showMoney(frame.costs[2], route.from < route.cap and route.revenue or nil)
-  showMoney(frame.costs[3], cost.net and -cost.net, true)
+  showMoney(frame.costs[1], cost.toBuy and -cost.toBuy)
+  showMoney(frame.costs[2], cost.owned and -cost.owned)
+  showMoney(frame.costs[3], cost.gross and -cost.gross)
+  showMoney(frame.costs[4], route.from < route.cap and route.revenue or nil)
+  showMoney(frame.costs[5], cost.net and -cost.net, true)
   showShoppingBagSpace(guide.bagSpace)
   frame.importButton:SetEnabled(#route.auction > 0)
   local latestCompletedRow
@@ -1490,12 +1492,12 @@ local function createPlanner()
     frame.shoppingGroups[i] = { heading = heading, rows = {} }
   end
 
-  local totalRule = surface(itemPanel, 12, 79, 1, 1, 0.36, 0.26, 0.15)
-  totalRule:SetPoint("TOPRIGHT", -12, -79)
+  local totalRule = surface(itemPanel, 12, 119, 1, 1, 0.36, 0.26, 0.15)
+  totalRule:SetPoint("TOPRIGHT", -12, -119)
   frame.costs = {}
-  for i, caption in ipairs({ "Materials", "Vendor sales", "Net cost" }) do
-    local y = i == 3 and 85 or 38 + (i - 1) * 20
-    label(itemPanel, i == 3 and fonts.body or fonts.caption, 12, y, 98):SetText(caption)
+  for i, caption in ipairs({ "To buy", "Owned", "All materials", "Vendor sales", "Net cost" }) do
+    local y = i == 5 and 125 or 38 + (i - 1) * 20
+    label(itemPanel, i == 5 and fonts.body or fonts.caption, 12, y, 98):SetText(caption)
     local value = label(itemPanel, fonts.body, 0, y, 128)
     value:ClearAllPoints()
     value:SetPoint("TOPRIGHT", -12, -y)
@@ -1503,10 +1505,10 @@ local function createPlanner()
     value:SetMaxLines(1)
     frame.costs[i] = value
   end
-  frame.priceStatus = label(itemPanel, fonts.note, 12, 106, 1)
+  frame.priceStatus = label(itemPanel, fonts.note, 12, 146, 1)
   frame.priceStatus:SetWordWrap(true)
   paint(frame.priceStatus, colors.muted)
-  frame.bagSpace = label(itemPanel, fonts.note, 12, 106, 1)
+  frame.bagSpace = label(itemPanel, fonts.note, 12, 146, 1)
   frame.bagSpace:SetWordWrap(true)
   local shoppingRule = surface(itemPanel, 12, 0, 1, 1, 0.38, 0.28, 0.15)
 
@@ -1682,7 +1684,7 @@ local function createPlanner()
     local itemWidth, panelHeight = itemPanel:GetSize()
     frame.priceStatus:SetWidth(itemWidth - 24)
     frame.bagSpace:SetWidth(itemWidth - 24)
-    local y = 106
+    local y = 146
     local priceStatus = frame.priceStatus:GetText()
     if priceStatus and priceStatus ~= "" then
       y = y + math.max(12, math.ceil(frame.priceStatus:GetStringHeight())) + 5

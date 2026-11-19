@@ -10,13 +10,21 @@ local function makeBagReader()
   end
 end
 
-local function useBags(bags, used, item, quantity, vendor)
+local function useBags(bags, used, item, quantity, vendor, costRoute)
   if not item then return quantity end
   local key = item.id or item.name
   local alreadyUsed = used[key] and used[key].quantity or 0
   local available = math.max(0, bags(item) - alreadyUsed)
   local taken = math.min(quantity, available)
   if taken > 0 then used[key] = { item = item, quantity = alreadyUsed + taken, vendor = vendor } end
+  if taken > 0 and costRoute then
+    if vendor then
+      costRoute.ownedVendorSpend = (costRoute.ownedVendorSpend or 0) + taken * item.price
+    else
+      costRoute.ownedAuction = costRoute.ownedAuction or {}
+      costRoute.ownedAuction[#costRoute.ownedAuction + 1] = { name = item.name, id = item.id, quantity = taken }
+    end
+  end
   return quantity - taken
 end
 
@@ -40,13 +48,17 @@ end
 local function quote(route, market)
   local cost = { missing = {}, available = market.available }
   if route.from and route.from >= route.cap then return cost end
-  local gross = route.vendorSpend
-  for _, item in ipairs(route.auction) do
-    local price = market.get(item)
-    if price then
-      gross = gross + price * item.quantity
-    else
-      cost.missing[#cost.missing + 1] = item.name
+  local gross = route.vendorSpend + (route.ownedVendorSpend or 0)
+  local missing = {}
+  for _, items in ipairs({ route.auction, route.ownedAuction or {} }) do
+    for _, item in ipairs(items) do
+      local price = market.get(item)
+      if price then
+        gross = gross + price * item.quantity
+      elseif not missing[item.name] then
+        missing[item.name] = true
+        cost.missing[#cost.missing + 1] = item.name
+      end
     end
   end
   if #cost.missing == 0 then
@@ -152,7 +164,7 @@ local function sectionPlans(profession, base, start, target, market, preferBuyin
     end
 
     local vendor = vendorPrices[name]
-    remaining = useBags(bags, used, vendor or prices[name], remaining, vendor ~= nil)
+    remaining = useBags(bags, used, vendor or prices[name], remaining, vendor ~= nil, section)
     if remaining <= 0 then return end
 
     local ingredients, yield, action = prepFor(name)
@@ -229,7 +241,7 @@ local function sectionPlans(profession, base, start, target, market, preferBuyin
         end
       end
       local hammer = vendorPrices["Blacksmith Hammer"]
-      if from == 1 and hammer and useBags(bags, used, hammer, 1, true) > 0 then shopping[hammer.name] = 1 end
+      if from == 1 and hammer and useBags(bags, used, hammer, 1, true, section) > 0 then shopping[hammer.name] = 1 end
       for name, quantity in pairs(shopping) do
         local item = vendorPrices[name] or prices[name]
         assert(item, "Missing shopping-list item: " .. name)
@@ -272,26 +284,26 @@ local function finishFor(recipe, start, target, bolt, market, preferBuying, bags
     end
   end
 
-  addAuction(recipe.pattern, useBags(bags, used, recipe.pattern, recipe.pattern.quantity))
+  addAuction(recipe.pattern, useBags(bags, used, recipe.pattern, recipe.pattern.quantity, false, finish))
   for _, item in ipairs(recipe.auction) do
     local quantity = item.quantity * crafts
     if item.name == "Runecloth" then
-      local boltsNeeded = useBags(bags, used, bolt, quantity / 5)
+      local boltsNeeded = useBags(bags, used, bolt, quantity / 5, false, finish)
       local clothPrice, boltPrice = market.get(item), market.get(bolt)
       if preferBuying and boltPrice and (not clothPrice or boltPrice <= clothPrice * 5 * 1.10) then
         addAuction(bolt, boltsNeeded)
       else
-        addAuction(item, useBags(bags, used, item, boltsNeeded * 5))
+        addAuction(item, useBags(bags, used, item, boltsNeeded * 5, false, finish))
         if boltsNeeded > 0 then
           finish.prep = { recipe = bolt.name, from = start, to = target, crafts = boltsNeeded, prep = true, keep = boltsNeeded }
         end
       end
     else
-      addAuction(item, useBags(bags, used, item, quantity))
+      addAuction(item, useBags(bags, used, item, quantity, false, finish))
     end
   end
   for _, item in ipairs(recipe.vendor) do
-    local quantity = useBags(bags, used, item, item.quantity * crafts, true)
+    local quantity = useBags(bags, used, item, item.quantity * crafts, true, finish)
     if quantity > 0 then
       finish.vendor[#finish.vendor + 1] = { name = item.name, id = item.id, quantity = quantity, price = item.price }
       finish.vendorSpend = finish.vendorSpend + quantity * item.price
@@ -311,6 +323,23 @@ local function shoppingProgress(purchases, matsInUse, bags)
     row.quantity = math.ceil(row.quantity - 1e-9)
   end
   return rows
+end
+
+local function shoppingQuote(plan, market)
+  local vendorValue, ownedValue = 0, 0
+  for _, item in ipairs(plan.shoppingVendor) do
+    vendorValue = vendorValue + item.quantity * item.price
+    ownedValue = ownedValue + math.min(item.quantity, item.inBags) * item.price
+  end
+  local cost = quote({ from = plan.from, cap = plan.cap, auction = plan.shoppingAuction,
+    vendorSpend = vendorValue, revenue = plan.revenue }, market)
+  if cost.gross then
+    for _, item in ipairs(plan.shoppingAuction) do
+      ownedValue = ownedValue + math.min(item.quantity, item.inBags) * market.get(item)
+    end
+    cost.owned, cost.toBuy = ownedValue, cost.gross - ownedValue
+  end
+  return cost
 end
 
 local function buildPlan(profession, source, start, cap, market, bags, preferBuying, usePublished, finishName, currentMaximum)
@@ -340,6 +369,8 @@ local function buildPlan(profession, source, start, cap, market, bags, preferBuy
     last.auction = mergeItems(last.auction, selected.auction)
     last.vendor = mergeItems(last.vendor, selected.vendor)
     last.vendorSpend = last.vendorSpend + selected.vendorSpend
+    last.ownedAuction = mergeItems(last.ownedAuction or {}, selected.ownedAuction)
+    last.ownedVendorSpend = (last.ownedVendorSpend or 0) + (selected.ownedVendorSpend or 0)
     last.revenue = last.revenue + selected.revenue
     plan.selected, plan.alternative = last.selected, last.alternative
     used = selectedUsed
@@ -359,15 +390,15 @@ local function buildPlan(profession, source, start, cap, market, bags, preferBuy
     plan.auction = mergeItems(published, selected and selected.auction)
     plan.published = true
   end
-  plan.cost = quote(plan, market)
   local ownedAuction, ownedVendor = {}, {}
   for _, entry in pairs(used) do
     local rows = entry.vendor and ownedVendor or ownedAuction
     local item = entry.item
-    rows[#rows + 1] = { name = item.name, id = item.id, quantity = entry.quantity, keep = item.name == "Blacksmith Hammer" }
+    rows[#rows + 1] = { name = item.name, id = item.id, price = item.price, quantity = entry.quantity, keep = item.name == "Blacksmith Hammer" }
   end
   plan.shoppingAuction = shoppingProgress(plan.auction, ownedAuction, bags)
   plan.shoppingVendor = shoppingProgress(plan.vendor, ownedVendor, bags)
+  plan.cost = shoppingQuote(plan, market)
   return plan
 end
 
