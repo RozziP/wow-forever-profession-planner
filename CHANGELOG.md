@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.4.5
+
+- Clarified the shopping cost summary by showing the amounts to buy and already owned as a breakdown of all materials.
+
 ## 0.4.4
 
 - Include the value of owned materials in the total material cost and net cost.

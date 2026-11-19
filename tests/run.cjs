@@ -47,7 +47,7 @@ try {
   if (!addonFiles.length) throw new Error('The addon TOC has no load entries.');
   for (const file of addonFiles) checkLua(file);
   console.log('PASS Lua 5.1 syntax for ' + addonFiles.length + ' TOC entries');
-  for (const name of ['quotes.lua', 'planner.lua']) runSuite(name, addonFiles);
+  for (const name of ['quotes.lua', 'planner.lua', 'cost-display.lua']) runSuite(name, addonFiles);
 } catch (error) {
   console.error(error.message);
   process.exitCode = 1;
