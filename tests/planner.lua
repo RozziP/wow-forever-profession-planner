@@ -101,11 +101,10 @@ tailoring.rank = 75
 event("SKILL_LINES_CHANGED")
 assert(frame.cappedBanner:IsShown(), "Training is still required at the rank cap")
 click(wow.button("View plan"))
-expectWoolStep(45)
+expectWoolStep(25)
 tailoring.maximum = 150
 event("SKILL_LINES_CHANGED")
-click(wow.button("Update plan"))
-expectWoolStep(14)
+expectWoolStep(25)
 print("PASS one wool leveling row across training and after recalculation")
 
 alchemy.rank, alchemy.maximum = 75, 75
@@ -141,10 +140,10 @@ slash("")
 slash("")
 expectTarget(225)
 equal(nextLevelingRecipe(), "Mageweave Bag", "Reopening preserves the provisional plan")
-click(wow.button("Update plan"))
-equal(nextLevelingRecipe(), "Runecloth Belt", "Updating the plan applies late quotes")
+clickTab(6)
+equal(nextLevelingRecipe(), "Runecloth Belt", "Reselecting applies late quotes")
 equal(frame.priceStatus:GetText(), "", "Missing-price warning clears")
-print("PASS explicit plan update applies late Auctionator quotes")
+print("PASS profession selection applies late Auctionator quotes")
 
 tailoring.rank, tailoring.maximum = 117, 150
 wow.bags[4306], wow.bags[4305] = 92, 59
@@ -157,14 +156,10 @@ C_Container = {
 C_Item.GetItemInfo = function() return nil, nil, nil, nil, nil, nil, nil, 20 end
 slash("tailoring")
 local originalPlan = lastPlan
-
 local function displayedNumbers()
-  local values = { frame.craftingTime:GetText(), frame.bagSpace:GetText() }
-  for _, cost in ipairs(frame.costs) do values[#values + 1] = cost:GetText() end
+  local values = {}
   for _, row in ipairs(frame.steps) do
-    if row:IsShown() then
-      values[#values + 1] = row.recipe:GetText() .. row.crafts:GetText() .. row.keep:GetText()
-    end
+    if row:IsShown() then values[#values + 1] = row.recipe:GetText() .. row.crafts:GetText() end
   end
   for _, group in ipairs(frame.shoppingGroups) do
     for _, row in ipairs(group.rows) do
@@ -173,93 +168,71 @@ local function displayedNumbers()
   end
   return table.concat(values, "\n")
 end
-
-local silkStep
-for _, row in ipairs(frame.steps) do
-  if row:IsShown() and row.recipe:GetText() == "Bolt of Silk Cloth" and row.marker:IsShown() then
-    silkStep = row
-    break
+local tracked = assert(originalPlan.shoppingAuction[1], "Shopping has an auction item")
+local itemID, needed = tracked.id, tracked.quantity
+wow.bags[itemID] = 0
+event("BAG_UPDATE_DELAYED")
+local before = tracked.remaining
+wow.bags[itemID] = 3
+event("BAG_UPDATE_DELAYED")
+equal(tracked.inBags, 3, "Bag event updates owned count")
+equal(tracked.quantity, needed, "Bag event preserves total need")
+equal(tracked.remaining, math.max(0, needed - 3), "Bag event updates remaining purchase")
+assert(tracked.remaining <= before, "Buying materials does not increase purchases")
+local currentRecipe
+for _, step in ipairs(lastPlan.steps) do
+  if not step.prep and step.from <= 117 and step.to > 117 then currentRecipe = step.recipe; break end
+end
+assert(currentRecipe, "Found the tracked recipe")
+wow.cast = { name = currentRecipe, id = "no-skill", startTime = wow.now * 1000 }
+event("UNIT_SPELLCAST_START", "player")
+wow.now = wow.now + 5
+wow.bags[itemID] = 1
+event("UNIT_SPELLCAST_SUCCEEDED", "player", "no-skill")
+event("UNIT_SPELLCAST_SUCCEEDED", "player", "no-skill")
+equal(frame.craftingFeedbackAnimation.plays, 1, "Duplicate craft success is ignored")
+local lossShown = false
+for _, group in ipairs(frame.shoppingGroups) do
+  for _, row in ipairs(group.rows) do
+    if row.itemKey == itemID and row:IsShown() and row.loss:IsShown() and row.loss:GetText() == "−2" then
+      lossShown = true
+    end
   end
 end
-assert(silkStep and silkStep.keep:IsShown(), "Select the current silk step with its keep count")
-local originalNumbers = displayedNumbers()
-local originalExport = addon.ImportString(originalPlan)
-click(frame.importButton)
-equal(frame.copyBox:GetText(), originalExport, "Export contains the displayed plan")
-
-local function startSilk(id)
-  wow.cast = { name = "Bolt of Silk Cloth", id = id, startTime = wow.now * 1000, spellID = 3839 }
+assert(lossShown, "A failed skill-up shows consumed materials")
+equal(tracked.quantity, needed, "A failed skill-up keeps material need unchanged")
+local priorCrafts
+for _, step in ipairs(lastPlan.steps) do
+  if not step.prep and step.from <= 117 and step.to > 117 then priorCrafts = step.crafts; break end
+end
+assert(priorCrafts, "Found current leveling recipe")
+tailoring.rank = 118
+event("SKILL_LINES_CHANGED")
+equal(lastPlan.from, 118, "Skill change refreshes the plan")
+local nextCrafts
+for _, step in ipairs(lastPlan.steps) do
+  if not step.prep and step.to > 118 then nextCrafts = step.crafts; break end
+end
+equal(nextCrafts, priorCrafts - 1, "One skill gain removes one estimated craft")
+for rank = 119, 120 do
+  wow.cast = { name = currentRecipe, id = "skill-" .. rank, startTime = wow.now * 1000 }
   event("UNIT_SPELLCAST_START", "player")
-  equal(displayedNumbers(), originalNumbers, "Numbers stay fixed during casts")
-end
-local function finishSilk(newRank)
-  local id = wow.cast.id
-  wow.now = wow.now + 5.125
-  wow.cast, tailoring.rank = nil, newRank
+  wow.now = wow.now + 5
+  tailoring.rank = rank
   event("SKILL_LINES_CHANGED")
-  event("UNIT_SPELLCAST_SUCCEEDED", "player", id, 3839)
+  event("UNIT_SPELLCAST_SUCCEEDED", "player", "skill-" .. rank)
 end
-
-startSilk("interrupted")
-wow.cast = nil
-event("TRADE_SKILL_DETAILS_UPDATE")
-
-startSilk("no-skill-up")
-finishSilk(117)
-equal(frame.craftingFeedback:GetText(), "-5.1 seconds", "Feedback shows the actual cast duration")
-event("UNIT_SPELLCAST_SUCCEEDED", "player", "no-skill-up", 3839)
-equal(frame.craftingFeedbackAnimation.plays, 1, "Duplicate success is ignored")
-assert(not silkStep.made:IsShown(), "Made count stays hidden on the active step")
-
-startSilk("skill-118")
-finishSilk(118)
-wow.bags[4306], wow.bags[4305], wow.freeBagSlots = 84, 61, 23
-event("TRADE_SKILL_ITEM_CRAFTED_RESULT")
-equal(displayedNumbers(), originalNumbers, "Skill, bag, and craft refreshes preserve all plan numbers")
-equal(lastPlan, originalPlan, "Passive refresh retains the plan")
-equal(frame.copyBox:GetText(), originalExport, "Shopping payload stays fixed")
-
-slash("")
-startSilk("skill-119")
-finishSilk(119)
-slash("")
-equal(displayedNumbers(), originalNumbers, "Reopening preserves the snapshot")
-startSilk("skill-120")
-finishSilk(120)
-assert(silkStep.check:IsShown() and silkStep.made:IsShown(), "Show Made on the completed row")
-equal(silkStep.made:GetText(), "Made ×4", "Count successful crafts across skill-ups and while hidden")
-equal(displayedNumbers(), originalNumbers, "Completion adds Made and keeps the estimates")
-
-wow.prices[4305] = 5000
-click(wow.button("Update plan"))
-equal(lastPlan.from, 120, "Updating starts at current skill")
-assert(displayedNumbers() ~= originalNumbers, "Updating recalculates the estimates and shopping list")
-originalNumbers = displayedNumbers()
-
-local silkPrep, prepCrafts
-for i, row in ipairs(frame.steps) do
-  if row:IsShown() and row.skill:GetText() == "Prep" and row.recipe:GetText() == "Bolt of Silk Cloth" then
-    silkPrep = row
-    prepCrafts = tonumber(row.crafts:GetText():match("%d+"))
-    break
-  end
+local completed
+for _, row in ipairs(frame.steps) do
+  if row:IsShown() and row.recipe:GetText() == currentRecipe and row.check:IsShown() then completed = row end
 end
-assert(silkPrep and prepCrafts, "Remaining route has silk prep")
-for i = 1, prepCrafts do
-  startSilk("prep-" .. i)
-  finishSilk(120)
-end
-assert(silkPrep.check:IsShown() and silkPrep.made:IsShown(), "Prep can finish ahead of its skill range")
-equal(silkPrep.made:GetText(), "Made ×" .. prepCrafts, "Extra bolts are counted on the prep row")
-equal(displayedNumbers(), originalNumbers, "Finishing prep preserves the plan numbers")
-
+assert(completed and completed.made:IsShown(), "Completed recipe retains successful craft count across skill refreshes")
+equal(completed.made:GetText(), "Made ×3", "Count failed and successful skill-ups")
 slider:SetValue(125)
-local finalNumbers = displayedNumbers()
 tailoring.rank = 126
 event("SKILL_LINES_CHANGED")
-equal(lastPlan.cap, 125, "A skill-up past the target keeps the selected plan target")
-equal(displayedNumbers(), finalNumbers, "Passing the target leaves its plan numbers visible")
-print("PASS fixed plan numbers, stable export, and successful crafts on completed rows")
+equal(lastPlan.cap, 125, "Passing the target keeps the selected target")
+print("PASS automatic bag counts and skill-up craft estimates")
 
 slash("cooking")
 expectTarget(75)
@@ -284,8 +257,8 @@ assert(addon.ImportString(lastPlan):find("Giant Egg", 1, true), "Shopping ahead 
 wow.professions[4].maximum = 300
 event("SKILL_LINES_CHANGED")
 assert(addon.ImportString(lastPlan):find("Giant Egg", 1, true), "Training preserves the selected shopping plan")
-click(wow.button("Update plan"))
-equal(#lastPlan.vendor, 0, "Updating after Artisan unlock removes vendor turn-in items")
+clickTab(7)
+equal(#lastPlan.vendor, 0, "Reselecting removes vendor turn-in items")
 equal(#lastPlan.auction, 1, "Artisan unlock removes Auction House turn-in items at the same skill")
 print("PASS Cooking preview, learned secondary slot, rank directions, and training refresh")
 
@@ -377,3 +350,16 @@ slash("tailoring")
 click(firstRecipeRow())
 equal(openCount, beforeOpen, "Missing profession API is handled without an error")
 print("PASS clickable recipes, delayed loading, profession switches, and unavailable searches")
+
+addon.IsAnimationDebugAccount = function() return true end
+slash("debug")
+local debugPage = assert(frame.debugPage, "Debug page opens")
+local previews = assert(debugPage.previewButtons, "Craft previews exist")
+click(previews[1])
+equal(debugPage.sampleGroup.rows[1].count:GetText(), "16 / 20", "No-skill craft keeps material need")
+equal(debugPage.sampleGroup.rows[1].loss:GetText(), "−4", "No-skill craft shows material loss")
+click(previews[2])
+equal(debugPage.sampleGroup.rows[1].count:GetText(), "16 / 16", "Skill-up craft reduces material need")
+click(previews[3])
+assert(frame.craftingFeedback:IsShown(), "Craft previews show duration")
+print("PASS debug craft previews")

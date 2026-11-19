@@ -16,11 +16,11 @@ Drag the bottom-right corner to resize the planner. It remembers your chosen siz
 
 ## Crafting and training
 
-Follow the highlighted recipe and switch at the skill shown. Completed steps stay in the guide with checkmarks. Save crafts marked **Keep ×N** for later recipes. The planned craft and **Keep** counts stay fixed as you gain skill. A completed row shows **Made** for successful crafts recorded on the current plan, including crafts that gave no skill point.
+Follow the highlighted recipe and switch at the skill shown. Completed steps stay in the guide with checkmarks. Save crafts marked **Keep ×N** for later recipes. As you gain skill, the active recipe’s estimated remaining crafts and materials update. A completed row shows **Made** for successful crafts recorded on the current plan, including crafts that gave no skill point.
 
 Click a recipe row to open its profession and fill the recipe search. You must know the profession and be out of combat. The search keeps Blizzard's existing filters; a recipe you have not learned may not appear. Clear the search in the profession window to return to the full list.
 
-**Est. crafting** shows the time estimated when the plan was calculated. It uses recipe cast times when available, with a fallback of three seconds per craft. The floating number shows how long the completed cast took. Budget separate time for shopping, travel, and training.
+**Est. crafting** shows the estimated time for the remaining plan. It uses recipe cast times when available, with a fallback of three seconds per craft. The floating number shows how long the completed cast took. Budget separate time for shopping, travel, and training.
 
 At a trainable skill cap, selecting the profession tab opens the trainer screen. It names the rank you need to unlock further skill gains, shows the required character level, and gives directions for your faction. Click **View plan** to plan or shop ahead. Click **Training** to return, or select the profession tab again to return and reset your target. Click a named trainer to open the map and place a waypoint where supported. Annora’s pin marks the rear entrance to Uldaman.
 
@@ -30,7 +30,7 @@ With **Tailoring** selected below skill 150, **Less wool** is on by default. It 
 
 ## Shopping and costs
 
-The shopping list, **Have / Need** counts, bag space, and costs use your inventory when the plan was calculated. Click **Update plan** to rebuild it from your current skill, bags, and Auctionator prices. Auction House materials and vendor supplies have separate sections. The bag-space estimate covers both groups, counts room in partial stacks and free regular bag slots, and warns when you may need more space.
+The shopping list updates **Have** as your bags change. **Need** stays fixed between skill gains; a skill gain reduces the active recipe’s estimated crafts and material requirements. Costs and the export reflect the materials still needed. Click **Update plan** to rebuild the plan from your current skill, bags, and Auctionator prices. Auction House materials and vendor supplies have separate sections. The bag-space estimate covers both groups, counts room in partial stacks and free regular bag slots, and warns when you may need more space.
 
 - **All materials** includes both the estimated **To buy** amount and the value of materials **Already owned** that the plan will use. The two indented amounts show how the total is calculated, using Auctionator prices for auction materials and vendor prices for vendor supplies.
 - **Vendor sales** estimates what NPC vendors will pay for the remaining crafts available to sell.

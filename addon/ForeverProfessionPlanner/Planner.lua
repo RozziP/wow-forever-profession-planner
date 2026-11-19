@@ -497,6 +497,13 @@ local function showShoppingItems(group, items)
       row.count:SetPoint("TOPRIGHT", 0, -1)
       row.count:SetJustifyH("RIGHT")
       row.count:SetWordWrap(false)
+      row.loss = label(row, fonts.body, 0, 0, 54)
+      row.loss:ClearAllPoints()
+      row.loss:SetPoint("TOPRIGHT", row.count, "BOTTOMRIGHT", 0, 0)
+      row.loss:SetJustifyH("RIGHT")
+      paint(row.loss, colors.red)
+      row.loss:Hide()
+      row.lossAnimation = floatAndFade(row.loss, -18, 1.1, 0.35)
       row.check = row:CreateTexture(nil, "ARTWORK")
       row.check:SetPoint("TOPRIGHT", row.count, "TOPLEFT", 0, 0)
       row.check:SetSize(14, 14)
@@ -506,6 +513,11 @@ local function showShoppingItems(group, items)
       group.rows[i] = row
     end
     local ready = item.remaining == 0
+    if row.itemKey ~= (item.id or item.name) then
+      row.lossAnimation:Stop()
+      row.loss:Hide()
+      row.itemKey = item.id or item.name
+    end
     row.name:SetText(item.name .. (item.keep and "  |cff91c497Keep|r" or ""))
     row.count:SetText(string.format("%d/%d", item.inBags, item.quantity))
     row.count:SetWidth(math.ceil(row.count:GetUnboundedStringWidth()) + 2)
@@ -514,6 +526,20 @@ local function showShoppingItems(group, items)
     row:Show()
   end
   for i = #items + 1, #group.rows do group.rows[i]:Hide() end
+end
+
+local function showMaterialLosses(losses, groups)
+  for _, group in ipairs(groups or frame.shoppingGroups) do
+    for _, row in ipairs(group.rows) do
+      local quantity = row.itemKey and losses[row.itemKey]
+      if quantity and quantity > 0 and row:IsShown() then
+        row.lossAnimation:Stop()
+        row.loss:SetText("−" .. quantity)
+        row.loss:Show()
+        row.lossAnimation:Play()
+      end
+    end
+  end
 end
 
 local function showRecipeIcon(row, step, complete)
@@ -620,7 +646,18 @@ local function trackCraftingCast(self)
   end
   local step = matched or prep
   if step then
-    self.craftingCast = { id = castID, startTime = startTime, guide = guide, step = step }
+    local before = {}
+    local getCount = C_Item and C_Item.GetItemCount or GetItemCount
+    if matched and getCount then
+      for _, items in ipairs({ guide.plan.shoppingAuction, guide.plan.shoppingVendor }) do
+        for _, item in ipairs(items) do
+          local key = item.id or item.name
+          before[key] = getCount(key, false) or 0
+        end
+      end
+    end
+    self.craftingCast = { id = castID, startTime = startTime, guide = guide, step = step,
+      rank = skill.rank, before = before }
   end
 end
 
@@ -707,14 +744,36 @@ local function professionGuide(index, minimum, skill, skipWool, resetPlan)
   if not guide or resetPlan or guide.requestedTarget ~= settings.target or guide.skipWool ~= skipWool
     or guide.learned ~= (skill ~= nil) or rank < guide.plan.from then
     local target = snapTarget(settings.target, minimum)
-    local plan = addon.GetPlan(index, target, true, rank, nil, skipWool, maximum)
+    local bagSnapshot = addon.MakeBagSnapshot()
+    local plan = addon.GetPlan(index, target, true, rank, nil, skipWool, maximum,
+      nil, bagSnapshot)
     guide = {
       plan = plan, steps = addon.GetGuideSteps(index, plan), skipWool = skipWool, made = {},
+      anchorSkill = rank, bagSnapshot = bagSnapshot,
       requestedTarget = settings.target, learned = skill ~= nil,
       craftingTime = formatDuration(addon.GetCraftingMilliseconds(plan)), bagSpace = addon.GetShoppingBagSpace(plan),
     }
     anchoredPlans[index] = guide
+  elseif rank > guide.plan.from then
+    local oldSteps, oldMade = guide.steps, guide.made
+    guide.plan = addon.GetPlan(index, guide.plan.cap, true, rank, guide.plan, skipWool, maximum,
+      guide.anchorSkill, guide.bagSnapshot)
+    guide.steps, guide.made = addon.GetGuideSteps(index, guide.plan), {}
+    for _, step in ipairs(guide.steps) do
+      for _, old in ipairs(oldSteps) do
+        if old.recipe == step.recipe and old.from == step.from and old.to == step.to and old.prep == step.prep then
+          guide.made[step] = oldMade[old]
+          if frame.craftingCast and frame.craftingCast.guide == guide and frame.craftingCast.step == old then
+            frame.craftingCast.step = step
+          end
+          break
+        end
+      end
+    end
   end
+  addon.RefreshShopping(guide.plan)
+  guide.craftingTime = formatDuration(addon.GetCraftingMilliseconds(guide.plan))
+  guide.bagSpace = addon.GetShoppingBagSpace(guide.plan)
   return guide
 end
 
@@ -947,7 +1006,7 @@ local function showDebugPage()
     page:ClearAllPoints()
     page:SetPoint("TOPLEFT", frame.targetControls, "BOTTOMLEFT", 0, -10)
     page:SetPoint("TOPRIGHT", frame.targetControls, "BOTTOMRIGHT", 0, -10)
-    page:SetHeight(112)
+    page:SetHeight(290)
     local skill = button(page, "Skill up (+1)", 14, 12, 174)
     skill:SetScript("OnClick", function() frame.previewSkillFeedback(true, false) end)
     local milestone = button(page, "Slider slide and splash", 196, 12, 174)
@@ -958,6 +1017,48 @@ local function showDebugPage()
     craft:SetScript("OnClick", function() showCraftingFeedback(frame, 23000) end)
     local balto = button(page, "Play Balto entrance", 14, 76, 174)
     balto:SetScript("OnClick", function() addon.PlayBaltoEntrance(frame) end)
+    local heading = label(page, fonts.heading, 14, 148, 350)
+    heading:SetText("Sample materials  ·  Have / Need")
+    local sampleGroup = { rows = {} }
+    for i, name in ipairs({ "Cloth", "Thread" }) do
+      local row = CreateFrame("Frame", nil, page)
+      row:SetPoint("TOPLEFT", 14, -172 - (i - 1) * 32)
+      row:SetSize(350, 28)
+      row.itemKey = name
+      row.name = label(row, fonts.body, 0, 0, 180)
+      row.name:SetText(name)
+      row.count = label(row, fonts.caption, 190, 0, 80)
+      row.count:SetText("20 / 20")
+      row.loss = label(row, fonts.body, 285, 0, 54)
+      paint(row.loss, colors.red)
+      row.loss:Hide()
+      row.lossAnimation = floatAndFade(row.loss, -18, 1.1, 0.35)
+      sampleGroup.rows[i] = row
+    end
+    local function previewCraft(skillUp, milestone)
+      for i, row in ipairs(sampleGroup.rows) do
+        row.lossAnimation:Stop()
+        row.loss:Hide()
+        local used = i == 1 and 4 or 1
+        row.count:SetText(string.format("%d / %d", 20 - used, skillUp and 20 - used or 20))
+      end
+      showCraftingFeedback(frame, 23000)
+      if skillUp then
+        frame.previewSkillFeedback(true, milestone)
+      else
+        frame.clearSkillFeedback()
+        frame.syncTarget(100, 74, 74)
+        showMaterialLosses({ Cloth = 4, Thread = 1 }, { sampleGroup })
+      end
+    end
+    local noSkill = button(page, "Craft: no skill up", 196, 76, 174)
+    noSkill:SetScript("OnClick", function() previewCraft(false, false) end)
+    local withSkill = button(page, "Craft: skill up", 14, 108, 174)
+    withSkill:SetScript("OnClick", function() previewCraft(true, false) end)
+    local milestoneCraft = button(page, "Craft: milestone", 196, 108, 174)
+    milestoneCraft:SetScript("OnClick", function() previewCraft(true, true) end)
+    page.previewButtons = { noSkill, withSkill, milestoneCraft }
+    page.sampleGroup = sampleGroup
     frame.debugPage = page
   end
 
@@ -1385,6 +1486,7 @@ local function createPlanner()
       updatingTarget = false
     end
   end)
+  frame:RegisterEvent("BAG_UPDATE_DELAYED")
   frame:RegisterEvent("SKILL_LINES_CHANGED")
   frame:RegisterEvent("CHAT_MSG_SKILL")
   frame:RegisterEvent("TRADE_SKILL_DETAILS_UPDATE")
@@ -1409,6 +1511,22 @@ local function createPlanner()
       local elapsed = GetTime() * 1000 - cast.startTime
       if elapsed > 0 and self:IsShown() and not debugSelected and anchoredPlans[active] == cast.guide then
         showCraftingFeedback(self, elapsed)
+      end
+      if not cast.step.prep and next(cast.before) then
+        C_Timer.After(0.5, function()
+          if not self:IsShown() or debugSelected or anchoredPlans[active] ~= cast.guide then return end
+          local current = learnedProfessions()[professionSkillLines[cast.guide.plan.name]]
+          if not current or current.rank ~= cast.rank then return end
+          local getCount = C_Item and C_Item.GetItemCount or GetItemCount
+          if not getCount then return end
+          local losses = {}
+          for key, count in pairs(cast.before) do
+            local difference = count - (getCount(key, false) or 0)
+            if difference > 0 then losses[key] = difference end
+          end
+          showRoute(active, true)
+          showMaterialLosses(losses)
+        end)
       end
     end
     if not self:IsShown() then return end
