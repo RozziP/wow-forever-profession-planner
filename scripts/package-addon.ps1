@@ -38,6 +38,7 @@ $packageFiles = [ordered]@{ $foreverTocName = $tocPath }
 $media = @(
     'BaltoTheme/McQueenDriveBy.tga'
     'BaltoTheme/KaChow.mp3'
+    'Media/AddonIcon.tga'
 )
 foreach ($path in ($entries + $media)) {
     if ($relativePaths -cnotcontains $path) {
