@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.4.6
+
+- Refreshed all seven 1–300 leveling guides for WoW Forever. Cooking now uses Nightfin Soup from 285 to 300, and Tailoring includes Runecloth Cuffs and alternatives for players without the pattern.
+- Added selectable recipes for supported skill ranges in Blacksmithing, Tailoring, and Cooking. Changing the recipe updates material costs and the Auctionator export. Hover over **WoW Professions** for recipe acquisition notes.
+- Shopping lists now update when bag quantities change. Skill gains reduce the remaining craft estimates, material requirements, and crafting time.
+- Added the Forever Profession Trainer icon to the in-game AddOns list.
+
 ## 0.4.5
 
 - Clarified the shopping cost summary by showing the amounts to buy and already owned as a breakdown of all materials.
