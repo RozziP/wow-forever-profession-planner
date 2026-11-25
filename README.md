@@ -20,6 +20,8 @@ Follow the highlighted recipe and switch at the skill shown. Completed steps sta
 
 Click a recipe row to open its profession and fill the recipe search. You must know the profession and be out of combat. The search keeps Blizzard's existing filters; a recipe you have not learned may not appear. Clear the search in the profession window to return to the full list.
 
+Some skill ranges show two recipe panels. Left-click a panel to choose that recipe and rebuild the plan, costs, and shopping list. Right-click either panel to search for its recipe. The selected recipe is highlighted and saved. Blacksmithing offers Mithril Spurs and Imperial Plate alternatives. Tailoring offers Runecloth Gloves and Shoulders if you cannot acquire the Runecloth Cuffs pattern. Cooking lets you choose between Spotted Yellowtail and Filet of Redgill. Craft counts are estimates. Budget separately for recipe acquisition.
+
 **Est. crafting** shows the estimated time for the remaining plan. It uses recipe cast times when available, with a fallback of three seconds per craft. The floating number shows how long the completed cast took. Budget separate time for shopping, travel, and training.
 
 At a trainable skill cap, selecting the profession tab opens the trainer screen. It names the rank you need to unlock further skill gains, shows the required character level, and gives directions for your faction. Click **View plan** to plan or shop ahead. Click **Training** to return, or select the profession tab again to return and reset your target. Click a named trainer to open the map and place a waypoint where supported. Annora’s pin marks the rear entrance to Uldaman.
@@ -47,7 +49,7 @@ Edit `CharacterScripts.lua` in the `ForeverProfessionPlanner` addon folder to ad
 
 ## Guide credits
 
-The routes are based on WoW Professions’ WoW Forever guides. Click **WoW Professions** in the planner footer to copy the selected guide’s link. [WoW Professions guides](https://www.wow-professions.com/forever)
+The routes use the WoW Professions guides reviewed on November 25, 2026, with recipe data checked against WoW Forever build 1.60.1.71091. Hover over **WoW Professions** in the planner footer for recipe acquisition notes, or click it to copy the guide link. [WoW Professions guides](https://www.wow-professions.com/forever)
 
 
 ## Development checks

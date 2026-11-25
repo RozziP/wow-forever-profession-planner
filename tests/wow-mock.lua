@@ -30,6 +30,7 @@ methods.Raise = noop
 methods.EnableMouse = noop
 methods.EnableMouseWheel = noop
 methods.RegisterForDrag = noop
+methods.RegisterForClicks = noop
 methods.UpdateScrollChildRect = noop
 methods.ClearAllPoints = noop
 methods.ClearFocus = noop

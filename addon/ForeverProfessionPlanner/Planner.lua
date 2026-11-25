@@ -413,7 +413,7 @@ local function scrollArea(parent, x, y, width, height)
   return scroll, content
 end
 
-local searchRecipe
+local searchRecipe, showRoute
 
 local function addStepRow()
   local index = #frame.steps + 1
@@ -467,6 +467,74 @@ local function addStepRow()
   check:Hide()
   row.skill, row.recipe, row.crafts, row.keep, row.made = skill, recipe, crafts, keep, made
   row.icon, row.marker, row.check = icon, marker, check
+  row.choicePanels = {}
+  for option = 1, 2 do
+    local panel = CreateFrame("Button", nil, row)
+    panel:SetHeight(stepRowHeight - 4)
+    local fill = panel:CreateTexture(nil, "BACKGROUND")
+    fill:SetAllPoints()
+    panel.fill = fill
+    local selection = panel:CreateTexture(nil, "ARTWORK")
+    selection:SetPoint("BOTTOMLEFT", 1, 0)
+    selection:SetPoint("BOTTOMRIGHT", -1, 0)
+    selection:SetHeight(2)
+    selection:SetColorTexture(0.95, 0.73, 0.34, 1)
+    panel.selection = selection
+    local icon = panel:CreateTexture(nil, "ARTWORK")
+    icon:SetPoint("LEFT", 5, 0)
+    icon:SetSize(20, 20)
+    panel.icon = icon
+    local name = label(panel, fonts.note, 30, 1, 1)
+    name:SetHeight(stepRowHeight - 6)
+    name:SetJustifyV("MIDDLE")
+    name:SetWordWrap(true)
+    name:SetMaxLines(2)
+    panel.name = name
+    local count = label(panel, fonts.note, 0, 0, 28)
+    count:ClearAllPoints()
+    count:SetPoint("RIGHT", -4, 0)
+    count:SetJustifyH("RIGHT")
+    panel.count = count
+    local completedCheck = panel:CreateTexture(nil, "ARTWORK")
+    completedCheck:SetPoint("RIGHT", -5, 0)
+    completedCheck:SetSize(14, 14)
+    completedCheck:SetTexture("Interface\\Buttons\\UI-CheckBox-Check")
+    completedCheck:SetDesaturated(true)
+    completedCheck:SetVertexColor(unpack(colors.complete))
+    panel.completedCheck = completedCheck
+    panel:RegisterForClicks("LeftButtonUp", "RightButtonUp")
+    panel:SetScript("OnEnter", function(self)
+      GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+      GameTooltip:SetText(self.optionName)
+      if self.isSelected then GameTooltip:AddLine("Selected for this plan", 1, 0.82, 0.52, true) end
+      if self.completed then
+        if self.made then GameTooltip:AddLine("Made ×" .. self.made) end
+      else
+        GameTooltip:AddLine("Left-click to select this recipe and update the plan.", 1, 0.82, 0.52, true)
+      end
+      if self.optionName == "Mithril Spurs" then
+        GameTooltip:AddLine("Requires Plans: Mithril Spurs. Craft counts are estimates.", 1, 1, 1, true)
+      end
+      GameTooltip:AddLine("Right-click to search your profession recipes.", 1, 1, 1, true)
+      GameTooltip:Show()
+    end)
+    panel:SetScript("OnLeave", hideTooltip)
+    panel:SetScript("OnHide", hideTooltip)
+    panel:SetScript("OnClick", function(self, mouseButton)
+      hideTooltip(self)
+      if mouseButton == "RightButton" then
+        searchRecipe(row.profession, self.optionName)
+      elseif not self.completed then
+        settings.recipeChoices[row.profession] = settings.recipeChoices[row.profession] or {}
+        settings.recipeChoices[row.profession][self.choiceId] = self.optionName
+        if self.optionName ~= self.selectedName then
+          anchoredPlans[active] = nil
+          showRoute(active, true)
+        end
+      end
+    end)
+    row.choicePanels[option] = panel
+  end
   row:SetScript("OnEnter", function(self)
     GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
     GameTooltip:SetText(self.recipe:GetText())
@@ -669,6 +737,13 @@ local function updateScrollAreas()
   for _, row in ipairs(frame.steps) do
     row.recipe:SetWidth(recipeWidth)
     row.keep:SetWidth(recipeWidth)
+    local panelWidth = math.max(1, (stepWidth - stepColumns.icon - 8) / 2)
+    for option, panel in ipairs(row.choicePanels) do
+      panel:ClearAllPoints()
+      panel:SetPoint("LEFT", row, "LEFT", stepColumns.icon + (option - 1) * panelWidth, 0)
+      panel:SetWidth(panelWidth - 3)
+      panel.name:SetWidth(math.max(1, panelWidth - (panel.reserveRight and 62 or 35)))
+    end
   end
   frame.itemContent:SetWidth(itemWidth)
   local y = 0
@@ -746,7 +821,7 @@ local function professionGuide(index, minimum, skill, skipWool, resetPlan)
     local target = snapTarget(settings.target, minimum)
     local bagSnapshot = addon.MakeBagSnapshot()
     local plan = addon.GetPlan(index, target, true, rank, nil, skipWool, maximum,
-      nil, bagSnapshot)
+      settings.recipeChoices[routes[index].name], nil, bagSnapshot)
     guide = {
       plan = plan, steps = addon.GetGuideSteps(index, plan), skipWool = skipWool, made = {},
       anchorSkill = rank, bagSnapshot = bagSnapshot,
@@ -757,7 +832,7 @@ local function professionGuide(index, minimum, skill, skipWool, resetPlan)
   elseif rank > guide.plan.from then
     local oldSteps, oldMade = guide.steps, guide.made
     guide.plan = addon.GetPlan(index, guide.plan.cap, true, rank, guide.plan, skipWool, maximum,
-      guide.anchorSkill, guide.bagSnapshot)
+      nil, guide.anchorSkill, guide.bagSnapshot)
     guide.steps, guide.made = addon.GetGuideSteps(index, guide.plan), {}
     for _, step in ipairs(guide.steps) do
       for _, old in ipairs(oldSteps) do
@@ -814,7 +889,7 @@ local function updateProfessionTabs(index)
   end
 end
 
-local function showRoute(index, keepScroll, resetPlan)
+showRoute = function(index, keepScroll, resetPlan)
   keepScroll = keepScroll and active == index
   if debugSelected then
     debugSelected = nil
@@ -943,6 +1018,37 @@ local function showRoute(index, keepScroll, resetPlan)
     if step and rank >= step.to then latestCompletedRow = i end
     if step then
       row.profession, row.professionLearned = profession, skill ~= nil
+      local hasChoice = not step.prep and step.choice ~= nil
+      row.icon:SetShown(not hasChoice and row.iconName ~= nil)
+      row.recipe:SetShown(not hasChoice)
+      row.crafts:SetShown(not hasChoice)
+      row.check:SetShown(not hasChoice and not not complete)
+      row.made:SetShown(not hasChoice and not not (complete and made))
+      for option, panel in ipairs(row.choicePanels) do
+        panel:SetShown(hasChoice)
+        if hasChoice then
+          local name = step.choice.options[option]
+          local selected = name == step.recipe
+          panel.optionName, panel.selectedName, panel.choiceId = name, step.recipe, step.choice.id
+          panel.completed, panel.isSelected = complete, selected
+          panel.made = selected and made
+          panel.fill:SetColorTexture(selected and 0.38 or 0.16, selected and 0.27 or 0.12,
+            selected and 0.14 or 0.08, selected and 0.55 or 0.40)
+          panel.selection:SetShown(selected)
+          panel.selection:SetColorTexture(complete and 0.57 or 0.95, complete and 0.77 or 0.73,
+            complete and 0.59 or 0.34, 1)
+          local icon = addon.recipeIcons[name] or (name == "Mithril Spurs" and "ability_rogue_sprint")
+          panel.icon:SetTexture(icon and ("Interface\\Icons\\" .. icon) or "Interface\\Icons\\INV_Misc_QuestionMark")
+          panel.icon:SetDesaturated(not not complete)
+          panel.name:SetText(name)
+          local showCount = selected and not complete and step.to > route.from
+          panel.reserveRight = showCount or (selected and complete)
+          panel.count:SetShown(showCount)
+          panel.completedCheck:SetShown(selected and complete)
+          if showCount then panel.count:SetText("×" .. step.crafts) end
+          paint(panel.name, complete and colors.recipeComplete or (selected and colors.recipeCurrent or colors.text))
+        end
+      end
       if current then
         row.background:SetColorTexture(0.78, 0.52, 0.20, 0.16)
       else
@@ -963,7 +1069,7 @@ local function showRoute(index, keepScroll, resetPlan)
       row.crafts:SetText(step.to <= route.from and "" or ("×" .. step.crafts))
       if showMade then row.made:SetText("Made ×" .. made) end
       row.keep:SetText(step.keep and ("Keep ×" .. step.keep) or "")
-      row.keep:SetShown(step.keep ~= nil)
+      row.keep:SetShown(not hasChoice and step.keep ~= nil)
       row.recipe:SetPoint("TOPLEFT", stepColumns.recipe, step.keep and -3 or 0)
       row.recipe:SetHeight(step.keep and 18 or stepRowHeight)
       row.recipe:SetMaxLines(step.keep and 1 or 2)
@@ -1720,6 +1826,9 @@ local function createPlanner()
     paint(linkText, colors.gold)
     GameTooltip:SetOwner(self, "ANCHOR_TOP")
     GameTooltip:SetText("Copy guide link")
+    if selectedPlan and selectedPlan.notes then
+      GameTooltip:AddLine(selectedPlan.notes, 1, 1, 1, true)
+    end
     GameTooltip:Show()
   end)
   guideLink:SetScript("OnLeave", function(self)
@@ -1849,6 +1958,10 @@ local function ensurePlanner()
   if not frame then
     if type(ForeverProfessionPlannerSettings) ~= "table" then ForeverProfessionPlannerSettings = {} end
     settings = ForeverProfessionPlannerSettings
+    if type(settings.recipeChoices) ~= "table" then settings.recipeChoices = {} end
+    for profession, choices in pairs(settings.recipeChoices) do
+      if type(choices) ~= "table" then settings.recipeChoices[profession] = nil end
+    end
     local legacyTarget = settings.stopAt150 == false and settings.fullTarget or settings.shortTarget
     local target = tonumber(settings.target) or tonumber(legacyTarget) or defaultTarget
     if settings.rush150 == true then

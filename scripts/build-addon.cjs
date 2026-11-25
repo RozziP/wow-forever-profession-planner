@@ -29,7 +29,7 @@ if (!exportPath) {
 const prices = readPrices(exportPath);
 const { output: rushRoutes, vend, sales, yields } = require('../finalroutes.cjs');
 
-function auctionItem([name, id, quantity]) {
+function auctionItem([name, id, quantity = 0]) {
   if (!id) throw new Error('Missing WoW item ID for ' + name);
   return { name, id, quantity, price: prices[name] ?? 0 };
 }
@@ -65,24 +65,13 @@ function vendorItem([name, quantity, price, explicitId]) {
   return { name, id, quantity, price };
 }
 
-function tailoringFinishes(finishes) {
-  return finishes.map(({ name, pattern, auction, sell }) => ({
-    name,
-    pattern: auctionItem(pattern),
-    auction: [
-      ...auction.map(auctionItem),
-    ],
-    vendor: [vendorItem(['Rune Thread', 1, 5000])],
-    sell,
-  }));
-}
-
 const outputs = {
-  'Fire Oil': 2, 'Blackmouth Oil': 2, 'Silver Contact': 5, 'Iron Buckle': 2,
-  'Rough Copper Bomb': 2, 'Coarse Dynamite': 2, 'Hi-Explosive Bomb': 4,
+  'Fire Oil': 2, 'Blackmouth Oil': 2, 'Stonescale Oil': 2, 'Silver Contact': 5, 'Iron Buckle': 2,
+  'Rough Copper Bomb': 2, 'Coarse Dynamite': 2, 'Iron Grenade': 3, 'Hi-Explosive Bomb': 4,
 };
 const intermediateIds = {
   'Fire Oil': 6371,
+  'Stonescale Oil': 13423,
   'Lesser Magic Essence': 10938,
   'Rough Grinding Stone': 3470,
   'Coarse Grinding Stone': 3478,
@@ -133,12 +122,15 @@ function stepsFor(name, rows, yieldsByRecipe = outputs, modeledSteps = []) {
       step.gray = data.skill[3];
     }
     if (questThorium[recipe]) step.turnIn = { 'Thorium Bar': questThorium[recipe] };
+    const pattern = guides[name].patterns?.[recipe];
+    if (pattern) step.pattern = pattern[0];
     return step;
   });
 }
 
 function intermediates(route) {
-  const used = new Set(route.steps.flatMap(step => Object.keys(step.mat)));
+  const used = new Set([...route.steps, ...Object.values(route.choices ?? {}), ...(route.finishes ?? [])]
+    .flatMap(step => Object.keys(step.mat)));
   return Object.entries(intermediateIds)
     .filter(([name]) => used.has(name))
     .map(([name, id]) => auctionItem([name, id, 0]));
@@ -149,6 +141,7 @@ const rushItemIds = {
   'Greater Magic Essence': 10939,
   Tigerseye: 818,
   'Light Leather': 2318,
+  'Medium Leather': 2319,
   'Heavy Leather': 4234,
 };
 const rushPrep = {
@@ -157,40 +150,20 @@ const rushPrep = {
   Leatherworking: { 'Cured Medium Hide': { mat: { 'Medium Hide': 1, Salt: 1 }, yield: 1 } },
 };
 
-const publishedCheckpoints = {
-  Alchemy: { 225: { Liferoot: 36, Stranglekelp: 82, "Khadgar's Whisker": 0, Sungrass: 0, Blindweed: 0, 'Stonescale Oil': 0 } },
-  Blacksmithing: {
-    150: { 'Heavy Stone': 60, 'Iron Bar': 0, 'Solid Stone': 0, 'Steel Bar': 0, 'Mithril Bar': 0,
-      'Heavy Leather': 0, Citrine: 0, 'Dense Stone': 0, 'Thick Leather': 0, 'Thorium Bar': 0,
-      'Rugged Leather': 0, 'Star Ruby': 0, Aquamarine: 0 },
-    225: { 'Mithril Bar': 436, 'Dense Stone': 0, 'Thick Leather': 0, 'Thorium Bar': 0, 'Rugged Leather': 0, 'Star Ruby': 0, Aquamarine: 0 },
-  },
-  Enchanting: {
-    225: { 'Vision Dust': 31, 'Dream Dust': 0, 'Purple Lotus': 0, 'Arcanite Rod': 0, 'Golden Pearl': 0,
-      'Illusion Dust': 0, 'Greater Eternal Essence': 0, 'Small Brilliant Shard': 0, 'Large Brilliant Shard': 0 },
-  },
-  Engineering: { 225: { 'Mithril Bar': 74, 'Dense Stone': 0, 'Thorium Bar': 0, Runecloth: 0 } },
-  Leatherworking: { 225: { 'Thick Leather': 340, 'Rugged Leather': 0, Runecloth: 0 } },
-  Tailoring: {
-    150: { 'Silk Cloth': 216, 'Mageweave Cloth': 115, Runecloth: 0, 'Rugged Leather': 0 },
-    225: { Runecloth: 115, 'Rugged Leather': 0 },
-    265: {},
-  },
-};
-
 const professions = Object.entries(guides).map(([name, guide]) => {
   const full = {
-    steps: stepsFor(name, guide.steps.map(([from, to, recipe, crafts, , sellPrice, yellow, gray]) =>
-      [from, to, recipe, crafts, sellPrice, yellow, gray])),
-    auction: guide.auction.map(auctionItem),
-    vendor: guide.vendor.map(vendorItem),
+    steps: stepsFor(name, guide.steps),
+    auction: [...guide.auction, ...Object.values(guide.patterns ?? {})].map(auctionItem),
+    vendor: guide.vendor.map(([item, price, id]) => vendorItem([item, 0, price, id])),
     notes: guide.notes,
   };
-  if (guide.finishes) {
-    full.finishes = tailoringFinishes(guide.finishes);
-    full.finishBolt = auctionItem(['Bolt of Runecloth', intermediateIds['Bolt of Runecloth'], 0]);
+  if (guide.choices) {
+    full.choices = Object.fromEntries(Object.entries(guide.choices).map(([id, row]) =>
+      [id, stepsFor(name, [row])[0]]));
   }
-  if (guide.beltOption) [full.beltOption] = stepsFor(name, [guide.beltOption]);
+  if (guide.finishes) {
+    full.finishes = stepsFor(name, guide.finishes);
+  }
   full.intermediates = intermediates(full);
   const profession = {
     name,
@@ -200,9 +173,6 @@ const professions = Object.entries(guides).map(([name, guide]) => {
   if (guide.rankMaterials) full.rankMaterials = guide.rankMaterials;
   const rushRoute = rushRoutes[name];
   if (!rushRoute) return profession;
-  full.published = Object.fromEntries(Object.entries({ ...publishedCheckpoints[name], 300: {} })
-    .map(([cap, counts]) => [cap, guide.auction.map(([item, id, quantity]) =>
-      [item, id, counts[item] ?? quantity]).filter(([, , quantity]) => quantity > 0).map(auctionItem)]));
   const ids = { ...intermediateIds, ...Object.fromEntries(guide.auction.map(([item, id]) => [item, id])), ...rushItemIds };
   profession.rush = {
     steps: stepsFor(name, rushRoute.plans.map(({ a, b, name: recipe, m }) => [a, b, recipe, m]),

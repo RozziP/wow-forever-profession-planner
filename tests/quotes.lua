@@ -116,7 +116,7 @@ end
 
 local normal150 = addon.GetPlan(tailoring, 150, true, 1)
 local skip150 = addon.GetPlan(tailoring, 150, true, 1, nil, true)
-equal(quantity(normal150.auction, "Wool Cloth"), 459, "Normal guide uses wool")
+equal(quantity(normal150.auction, "Wool Cloth"), 111, "Updated standard guide needs 37 wool bolts")
 equal(quantity(skip150.auction, "Wool Cloth"), 78, "Less wool budgets 26 wool bolts")
 equal(quantity(skip150.auction, "Elixir of Wisdom"), 0, "Less wool avoids Gloves of Meditation")
 local woolExport = '^"Wool Cloth"' .. string.rep(";", 11) .. "#;;78^"
@@ -134,11 +134,11 @@ local resumed = addon.GetPlan(tailoring, 200, true, 190, skip200)
 equal(addon.ImportString(resumed), addon.ImportString(addon.GetPlan(tailoring, 200, true, 190, normal200)),
   "Pinned routes have the same Mageweave shopping after 190")
 equal(resumed.steps[1].recipe, "Bolt of Mageweave", "Known Mageweave recipe can supply prep")
-equal(resumed.steps[1].keep, 38, "Reserve the bolts for leggings")
+equal(resumed.steps[1].keep, 32, "Reserve the bolts for leggings")
 wow.bags[4339] = 8
 local withBolts = addon.GetPlan(tailoring, 200, true, 190, skip200)
-equal(withBolts.steps[1].crafts, 30, "Existing Mageweave bolts replace prep")
-equal(quantity(withBolts.auction, "Mageweave Cloth"), 150, "Export only remaining Mageweave cloth")
+equal(withBolts.steps[1].crafts, 24, "Existing Mageweave bolts replace prep")
+equal(quantity(withBolts.auction, "Mageweave Cloth"), 120, "Export only remaining Mageweave cloth")
 wow.bags[4339] = nil
 
 wow.defaultPrice = 100
@@ -162,16 +162,60 @@ for _, items in ipairs({ plan.auction, plan.vendor }) do
   for _, item in ipairs(items) do materials[item.name] = item.quantity end
 end
 for name, quantity in pairs({
-  ["Raw Brilliant Smallfish"] = 55, ["Raw Longjaw Mud Snapper"] = 55, ["Raw Bristle Whisker Catfish"] = 55,
-  ["Tangy Clam Meat"] = 30, ["Raptor Flesh"] = 55, ["Raw Spotted Yellowtail"] = 140,
-  ["Hot Spices"] = 85, ["Expert Cookbook"] = 1, ["Giant Egg"] = 12, ["Zesty Clam Meat"] = 10, ["Alterac Swiss"] = 20,
+  ["Raw Brilliant Smallfish"] = 55, ["Raw Longjaw Mud Snapper"] = 55, ["Raw Bristle Whisker Catfish"] = 53,
+  ["Tangy Clam Meat"] = 28, ["Raptor Flesh"] = 55, ["Raw Spotted Yellowtail"] = 72,
+  ["Raw Nightfin Snapper"] = 18, ["Refreshing Spring Water"] = 18, ["Hot Spices"] = 83,
+  ["Expert Cookbook"] = 1, ["Giant Egg"] = 12, ["Zesty Clam Meat"] = 10, ["Alterac Swiss"] = 20,
 }) do
   equal(materials[name], quantity, "Full Cooking route quantity for " .. name)
 end
 wow.bags[12207], wow.bags[8932] = 5, 20
 local capped = addon.GetPlan(cooking, 300, true, 225, plan, nil, 225)
 equal(capped.auction[1].quantity, 7, "Count Giant Eggs already in bags")
-equal(#capped.vendor, 0, "Count Alterac Swiss already in bags")
+equal(quantity(capped.vendor, "Alterac Swiss"), 0, "Count Alterac Swiss already in bags")
 assert(not addon.ImportString(addon.GetPlan(cooking, 225, true, 1)):find("Giant Egg", 1, true),
   "A target of 225 should omit Artisan turn-in items")
 print("PASS published Cooking materials and bag-aware Artisan shopping")
+
+-- Branches must change the actual materials, including quest turn-ins and exports.
+wow.defaultPrice = nil
+local smith = 2
+local defaultSmith = addon.GetPlan(smith, 245, true, 235, nil, false, 300)
+local spurs = addon.GetPlan(smith, 245, true, 235, nil, false, 300,
+  { ["smith-230"] = "Mithril Spurs", ["smith-240"] = "Mithril Spurs" })
+equal(quantity(defaultSmith.auction, "Thick Leather"), 44, "Default boots materials")
+equal(quantity(spurs.auction, "Thick Leather"), 0, "Spurs replace boots materials")
+equal(quantity(spurs.auction, "Thorium Bar"), 0, "Spurs remove belt materials and quest turn-in")
+equal(quantity(spurs.auction, "Mithril Bar"), 112, "Both Spurs ranges use the guide's 28 crafts")
+equal(quantity(spurs.auction, "Solid Stone"), 336, "Spurs grinding stones are prepared")
+assert(addon.ImportString(spurs):find('"Solid Stone"', 1, true), "Export includes Spurs materials")
+local partial = addon.GetPlan(smith, 245, true, 240, nil, false, 300, { ["smith-240"] = "Mithril Spurs" })
+equal(quantity(partial.auction, "Mithril Bar"), 72, "Choice works when starting at the second range")
+wow.bags[3860] = 4
+partial = addon.GetPlan(smith, 245, true, 240, nil, false, 300, { ["smith-240"] = "Mithril Spurs" })
+equal(quantity(partial.auction, "Mithril Bar"), 68, "Choice accounts for owned materials")
+wow.bags[3860] = nil
+local belt = addon.GetPlan(tailoring, 240, true, 215, nil, false, 300, { ["tailor-215"] = "Runecloth Belt" })
+local bag = addon.GetPlan(tailoring, 240, true, 215, nil, false, 300, { ["tailor-215"] = "Mageweave Bag" })
+assert(quantity(belt.auction, "Runecloth") > quantity(bag.auction, "Runecloth"), "Belt choice changes shopping")
+local visible = addon.GetGuideSteps(tailoring, belt)
+local choicesSeen = 0
+for _, step in ipairs(visible) do if step.choice and step.choice.id == "tailor-215" then choicesSeen = choicesSeen + 1 end end
+equal(choicesSeen, 1, "Belt choice stays distinct from the next Belt range")
+local shoulders = addon.GetPlan(tailoring, 300, true, 280, nil, false, 300, { ["tailor-finish"] = "Runecloth Shoulders" })
+local turban = addon.GetPlan(tailoring, 300, true, 280, nil, false, 300, { ["tailor-finish"] = "Wizardweave Turban" })
+assert(quantity(shoulders.auction, "Ironweb Spider Silk") > 0, "Shoulders materials")
+assert(quantity(turban.auction, "Dream Dust") > 0, "Turban materials")
+equal(quantity(turban.auction, "Ironweb Spider Silk"), 0, "Turban excludes Shoulders materials")
+local cuffFallback = addon.GetPlan(tailoring, 300, false, 250, nil, false, 300, {
+  ["tailor-250"] = "Runecloth Gloves", ["tailor-260"] = "Runecloth Shoulders", ["tailor-finish"] = "Runecloth Shoulders",
+})
+equal(quantity(cuffFallback.auction, "Pattern: Runecloth Shoulders"), 1, "Repeated recipes need only one pattern")
+local redgill = addon.GetPlan(cooking, 300, false, 225, nil, false, 300, { ["cook-225"] = "Filet of Redgill" })
+equal(quantity(redgill.auction, "Raw Redgill"), 72, "Redgill option uses its own fish")
+equal(quantity(redgill.auction, "Raw Spotted Yellowtail"), 0, "Redgill replaces Yellowtail")
+equal(quantity(redgill.auction, "Raw Nightfin Snapper"), 18, "Nightfin still finishes the route")
+local oil = addon.GetPlan(alchemy, 300, false, 250)
+equal(quantity(oil.auction, "Stonescale Eel"), 47, "Buy the fish used for Stonescale Oil")
+equal(oil.steps[1].keep, 88, "Reserve brewed oil for the defense elixirs")
+print("PASS selectable recipes, partial ranges, owned materials, and exports")

@@ -65,7 +65,7 @@ assert(not lowWoolExport:find("Elixir of Wisdom", 1, true), "Default route switc
 frame.skipWool:SetChecked(false)
 click(frame.skipWool)
 equal(settings.skipWool, false, "Manual route selection")
-assert(addon.ImportString(lastPlan):find("Elixir of Wisdom", 1, true), "Normal route uses Gloves of Meditation")
+assert(addon.ImportString(lastPlan):find("Mageweave Cloth", 1, true), "Standard route starts Mageweave at 140")
 slider:SetValue(165)
 event("TRADE_SKILL_DETAILS_UPDATE")
 slash("")
@@ -96,15 +96,15 @@ local function expectWoolStep(crafts)
   equal(wool.keep:GetText(), "Keep ×" .. crafts, "Wool keep count")
 end
 
-expectWoolStep(45)
+expectWoolStep(37)
 tailoring.rank = 75
 event("SKILL_LINES_CHANGED")
 assert(frame.cappedBanner:IsShown(), "Training is still required at the rank cap")
 click(wow.button("View plan"))
-expectWoolStep(25)
+expectWoolStep(17)
 tailoring.maximum = 150
 event("SKILL_LINES_CHANGED")
-expectWoolStep(25)
+expectWoolStep(17)
 print("PASS one wool leveling row across training and after recalculation")
 
 alchemy.rank, alchemy.maximum = 75, 75
@@ -131,7 +131,7 @@ local function nextLevelingRecipe()
 end
 equal(lastPlan.steps[1].recipe, "Bolt of Mageweave", "Less wool can prep Mageweave for later recipes")
 assert(lastPlan.steps[1].prep, "Mageweave bolts at 215 should be prep")
-equal(nextLevelingRecipe(), "Mageweave Bag", "Provisional route while prices are missing")
+equal(nextLevelingRecipe(), "Red Mageweave Bag", "Provisional route while prices are missing")
 assert(frame.priceStatus:GetText():find("prices missing", 1, true), "Missing prices should be visible")
 wow.defaultPrice = 50
 wow.prices[4338] = 10000 -- Mageweave Cloth
@@ -139,7 +139,7 @@ wow.prices[4339] = 10000 -- Bolt of Mageweave
 slash("")
 slash("")
 expectTarget(225)
-equal(nextLevelingRecipe(), "Mageweave Bag", "Reopening preserves the provisional plan")
+equal(nextLevelingRecipe(), "Red Mageweave Bag", "Reopening preserves the provisional plan")
 clickTab(6)
 equal(nextLevelingRecipe(), "Runecloth Belt", "Reselecting applies late quotes")
 equal(frame.priceStatus:GetText(), "", "Missing-price warning clears")
@@ -258,8 +258,9 @@ wow.professions[4].maximum = 300
 event("SKILL_LINES_CHANGED")
 assert(addon.ImportString(lastPlan):find("Giant Egg", 1, true), "Training preserves the selected shopping plan")
 clickTab(7)
-equal(#lastPlan.vendor, 0, "Reselecting removes vendor turn-in items")
-equal(#lastPlan.auction, 1, "Artisan unlock removes Auction House turn-in items at the same skill")
+equal(lastPlan.vendor[1].name, "Refreshing Spring Water", "Only Nightfin Soup's vendor ingredient remains")
+equal(#lastPlan.vendor, 1, "Reselecting removes vendor turn-in items")
+equal(#lastPlan.auction, 2, "Only the two fish remain after the Artisan unlock")
 print("PASS Cooking preview, learned secondary slot, rank directions, and training refresh")
 
 -- Exercise real row clicks with a profession UI that loads and switches asynchronously.
@@ -350,6 +351,50 @@ slash("tailoring")
 click(firstRecipeRow())
 equal(openCount, beforeOpen, "Missing profession API is handled without an error")
 print("PASS clickable recipes, delayed loading, profession switches, and unavailable searches")
+
+slash("blacksmithing")
+slider:SetValue(245)
+local function choiceRow(id)
+  for _, row in ipairs(frame.steps) do
+    if row:IsShown() and row.choicePanels[1]:IsShown() and row.choicePanels[1].choiceId == id then return row end
+  end
+  error("Missing choice row " .. id)
+end
+local row = choiceRow("smith-240")
+equal(row.choicePanels[1].optionName, "Imperial Plate Belt", "First panel shows guide recipe")
+equal(row.choicePanels[2].optionName, "Mithril Spurs", "Second panel shows alternative")
+row.choicePanels[1]:RunScript("OnClick", "LeftButton")
+equal(settings.recipeChoices.Blacksmithing["smith-240"], "Imperial Plate Belt", "Clicking the current selection pins it")
+row.choicePanels[2]:RunScript("OnClick", "LeftButton")
+equal(settings.recipeChoices.Blacksmithing["smith-240"], "Mithril Spurs", "Selection is saved")
+equal(choiceRow("smith-240").choicePanels[2].selectedName, "Mithril Spurs", "Selected panel is shown")
+local selectedExport = addon.ImportString(lastPlan)
+slash("")
+slash("")
+equal(addon.ImportString(lastPlan), selectedExport, "Reopening keeps the selected plan")
+event("BAG_UPDATE_DELAYED")
+equal(choiceRow("smith-240").choicePanels[2].selectedName, "Mithril Spurs", "Bag updates keep the choice")
+row = choiceRow("smith-240")
+row.choicePanels[1]:RunScript("OnClick", "LeftButton")
+equal(settings.recipeChoices.Blacksmithing["smith-240"], "Imperial Plate Belt", "Can switch back")
+assert(addon.ImportString(lastPlan) ~= selectedExport, "Switching panels changes the export")
+wow.professions = { { name = "Blacksmithing", rank = 240, maximum = 300, skillLine = 164 } }
+slash("blacksmithing")
+slider:SetValue(245)
+choiceRow("smith-240").choicePanels[2]:RunScript("OnClick", "LeftButton")
+wow.professions[1].rank = 241
+event("SKILL_LINES_CHANGED")
+equal(choiceRow("smith-240").choicePanels[2].selectedName, "Mithril Spurs", "Skill gains preserve the chosen recipe")
+choiceRow("smith-240").choicePanels[1]:RunScript("OnClick", "LeftButton")
+wow.professions = { { name = "Blacksmithing", rank = 245, maximum = 300, skillLine = 164 } }
+slash("blacksmithing")
+local completedBelt
+for _, candidate in ipairs(frame.steps) do
+  if candidate:IsShown() and candidate.recipe:GetText() == "Imperial Plate Belt" then completedBelt = candidate end
+end
+assert(completedBelt and completedBelt.choicePanels[1]:IsShown(), "Completed choice keeps both panels")
+assert(completedBelt.choicePanels[1].completedCheck:IsShown(), "Completed selection has a check")
+print("PASS recipe choice panels, plan refresh, and switching back")
 
 addon.IsAnimationDebugAccount = function() return true end
 slash("debug")
