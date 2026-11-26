@@ -399,13 +399,13 @@ local function tailoringPlan(profession, start, cap, market, bags, preferBuying,
   return plan
 end
 
-function addon.GetPlan(index, target, preferBuying, currentSkill, pinnedPlan, skipWool, currentMaximum, choices, anchorSkill, bagSnapshot)
+function addon.GetPlan(index, target, preferBuying, currentSkill, pinnedPlan, skipWool, currentMaximum, choices, anchorSkill)
   local profession = addon.routes[index]
   local maximum = 300
   local cap = math.min(maximum, math.max(1, math.floor(target or maximum)))
   local start = math.max(1, math.floor(currentSkill or 1))
   local market = makePriceReader()
-  local bags = bagSnapshot or makeBagReader()
+  local bags = makeBagReader()
   if pinnedPlan then
     return buildPlan(profession, pinnedPlan.source, start, cap, market, bags, preferBuying, currentMaximum, anchorSkill)
   end
@@ -418,10 +418,6 @@ function addon.GetPlan(index, target, preferBuying, currentSkill, pinnedPlan, sk
   end
   plan.missingPrices = market.missing
   return plan
-end
-
-function addon.MakeBagSnapshot()
-  return makeBagReader()
 end
 
 function addon.RefreshShopping(plan)

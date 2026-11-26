@@ -234,6 +234,33 @@ event("SKILL_LINES_CHANGED")
 equal(lastPlan.cap, 125, "Passing the target keeps the selected target")
 print("PASS automatic bag counts and skill-up craft estimates")
 
+tailoring.rank = 117
+local silkCloth, silkBolt = 4306, 4305
+wow.bags[silkCloth], wow.bags[silkBolt] = 92, 0
+wow.prices[silkBolt] = 10000
+slash("tailoring")
+equal(nextLevelingRecipe(), "Bolt of Silk Cloth", "Leveling recipe produces a later reagent")
+local function displayedNeed(itemID)
+  for _, group in ipairs(frame.shoppingGroups) do
+    for _, row in ipairs(group.rows) do
+      if row.itemKey == itemID and row:IsShown() then
+        return tonumber(row.count:GetText():match("/(%d+)$"))
+      end
+    end
+  end
+end
+local silkNeeded = assert(displayedNeed(silkCloth), "Shopping lists Silk Cloth")
+wow.bags[silkCloth], wow.bags[silkBolt] = 88, 1
+event("BAG_UPDATE_DELAYED")
+equal(displayedNeed(silkCloth), silkNeeded, "A bag update alone preserves Need")
+tailoring.rank = 118
+event("SKILL_LINES_CHANGED")
+equal(displayedNeed(silkCloth), silkNeeded - 4, "Skill-up credits the bolt made and removes its cloth from Need")
+event("TRADE_SKILL_DETAILS_UPDATE")
+equal(displayedNeed(silkCloth), silkNeeded - 4, "Another refresh does not subtract twice")
+wow.prices[silkBolt] = nil
+print("PASS skill-up credits crafted reagents in the shopping total")
+
 slash("cooking")
 expectTarget(75)
 equal(lastPlan.steps[1].recipe, "Brilliant Smallfish", "Cooking preview recipe")

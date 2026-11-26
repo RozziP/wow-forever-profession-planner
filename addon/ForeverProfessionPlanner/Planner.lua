@@ -819,20 +819,20 @@ local function professionGuide(index, minimum, skill, skipWool, resetPlan)
   if not guide or resetPlan or guide.requestedTarget ~= settings.target or guide.skipWool ~= skipWool
     or guide.learned ~= (skill ~= nil) or rank < guide.plan.from then
     local target = snapTarget(settings.target, minimum)
-    local bagSnapshot = addon.MakeBagSnapshot()
     local plan = addon.GetPlan(index, target, true, rank, nil, skipWool, maximum,
-      settings.recipeChoices[routes[index].name], nil, bagSnapshot)
+      settings.recipeChoices[routes[index].name])
     guide = {
       plan = plan, steps = addon.GetGuideSteps(index, plan), skipWool = skipWool, made = {},
-      anchorSkill = rank, bagSnapshot = bagSnapshot,
+      anchorSkill = rank,
       requestedTarget = settings.target, learned = skill ~= nil,
       craftingTime = formatDuration(addon.GetCraftingMilliseconds(plan)), bagSpace = addon.GetShoppingBagSpace(plan),
     }
     anchoredPlans[index] = guide
   elseif rank > guide.plan.from then
     local oldSteps, oldMade = guide.steps, guide.made
+    -- A skill-up craft can put a reagent for later steps into the bags.
     guide.plan = addon.GetPlan(index, guide.plan.cap, true, rank, guide.plan, skipWool, maximum,
-      nil, guide.anchorSkill, guide.bagSnapshot)
+      nil, guide.anchorSkill)
     guide.steps, guide.made = addon.GetGuideSteps(index, guide.plan), {}
     for _, step in ipairs(guide.steps) do
       for _, old in ipairs(oldSteps) do
