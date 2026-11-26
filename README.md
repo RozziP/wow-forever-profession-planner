@@ -38,7 +38,9 @@ The shopping list updates **Have** as your bags change. **Need** stays fixed bet
 - **Vendor sales** estimates what NPC vendors will pay for the remaining crafts available to sell.
 - **Net cost** combines those figures. A minus sign means gold spent, and a plus sign means gold gained. Budget separately for training and recipe fees.
 
-If prices are missing, scan the Auction House with Auctionator and click **Update plan** to apply the new prices. Recipes, bag counts, and shopping export are usable while prices are missing. When prices are available, the planner can buy eligible intermediate materials if they cost up to 10% more than making them.
+The Shopping List uses finished tradeable reagents for prep. It includes raw materials for skill-up crafts and reserves those crafts' outputs for later recipes that use them.
+
+If prices are missing, scan the Auction House with Auctionator and click **Update plan** to apply the new prices. Recipes, bag counts, and shopping export are usable while prices are missing.
 
 1. Click **Export to Auctionator** and press **Ctrl+C** to copy the selected text. The export contains the Auction House quantities listed for purchase in the current plan.
 2. At the Auction House, open Auctionator’s **Shopping** tab, click **Import**, paste the text, and confirm with **Import**.

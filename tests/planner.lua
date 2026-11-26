@@ -60,7 +60,7 @@ clickTab(6)
 expectTarget(150)
 equal(frame.skipWool:GetChecked(), true, "Tailoring defaults to Less wool")
 local lowWoolExport = addon.ImportString(lastPlan)
-assert(lowWoolExport:find("Wool Cloth", 1, true), "Default route finishes the wool stage")
+assert(lowWoolExport:find("Bolt of Woolen Cloth", 1, true), "Default route buys bolts to finish the wool stage")
 assert(not lowWoolExport:find("Elixir of Wisdom", 1, true), "Default route switches to silk at 100")
 frame.skipWool:SetChecked(false)
 click(frame.skipWool)
@@ -129,8 +129,12 @@ local function nextLevelingRecipe()
     if not step.prep then return step.recipe end
   end
 end
-equal(lastPlan.steps[1].recipe, "Bolt of Mageweave", "Less wool can prep Mageweave for later recipes")
-assert(lastPlan.steps[1].prep, "Mageweave bolts at 215 should be prep")
+equal(lastPlan.steps[1].recipe, "Red Mageweave Bag", "Start with the skill-up recipe")
+assert(addon.ImportString(lastPlan):find('"Bolt of Mageweave"', 1, true), "Export finished bolts for prep-only materials")
+assert(not addon.ImportString(lastPlan):find('"Mageweave Cloth"', 1, true), "Skip raw cloth for prep")
+for _, row in ipairs(frame.steps) do
+  assert(not row:IsShown() or row.skill:GetText() ~= "Prep", "Prep stays out of the Recipe list")
+end
 equal(nextLevelingRecipe(), "Red Mageweave Bag", "Provisional route while prices are missing")
 assert(frame.priceStatus:GetText():find("prices missing", 1, true), "Missing prices should be visible")
 wow.defaultPrice = 50
@@ -250,12 +254,20 @@ local function displayedNeed(itemID)
   end
 end
 local silkNeeded = assert(displayedNeed(silkCloth), "Shopping lists Silk Cloth")
+local function boltsToBuy()
+  for _, item in ipairs(lastPlan.auction) do
+    if item.id == silkBolt then return item.quantity end
+  end
+  return 0
+end
+local boltPurchases = boltsToBuy()
 wow.bags[silkCloth], wow.bags[silkBolt] = 88, 1
 event("BAG_UPDATE_DELAYED")
 equal(displayedNeed(silkCloth), silkNeeded, "A bag update alone preserves Need")
 tailoring.rank = 118
 event("SKILL_LINES_CHANGED")
 equal(displayedNeed(silkCloth), silkNeeded - 4, "Skill-up credits the bolt made and removes its cloth from Need")
+equal(boltsToBuy(), boltPurchases, "Skill-up does not add the crafted bolt to purchases")
 event("TRADE_SKILL_DETAILS_UPDATE")
 equal(displayedNeed(silkCloth), silkNeeded - 4, "Another refresh does not subtract twice")
 wow.prices[silkBolt] = nil

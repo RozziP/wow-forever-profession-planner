@@ -134,7 +134,7 @@ local function choiceSource(source, choices)
   return result
 end
 
-local function sectionPlans(base, start, target, market, preferBuying, bags, used, currentMaximum, anchorSkill)
+local function sectionPlans(base, start, target, preferBuying, bags, used, currentMaximum, anchorSkill)
   local sections, prices, vendorPrices = {}, {}, {}
   local recipes, stock, patterns = {}, {}, {}
   for _, item in ipairs(base.intermediates) do prices[item.name] = item end
@@ -146,25 +146,11 @@ local function sectionPlans(base, start, target, market, preferBuying, bags, use
     recipes[step.recipe] = step
   end
 
-  local function priceOf(name)
-    if vendorPrices[name] then return vendorPrices[name].price end
-    return (prices[name] and market.get(prices[name])) or math.huge
-  end
-
   local section, shopping
   local function prepFor(name)
     if buyExtraLeather[name] then return end
     local recipe = recipes[name] or (base.prep and base.prep[name])
     if recipe then return recipe.mat, recipe.yield, recipe.action end
-  end
-
-  local function unitCost(name)
-    local ingredients, yield = prepFor(name)
-    local buying = priceOf(name)
-    if not ingredients then return buying end
-    local making = 0
-    for material, units in pairs(ingredients) do making = making + units * unitCost(material) end
-    return math.min(buying, making / yield)
   end
 
   local function addStock(name, step, quantity, sellPrice)
@@ -185,20 +171,20 @@ local function sectionPlans(base, start, target, market, preferBuying, bags, use
     end
 
     local vendor = vendorPrices[name]
-    remaining = useBags(bags, used, vendor or prices[name], remaining, vendor ~= nil, section)
+    local purchase = vendor or prices[name]
+    remaining = useBags(bags, used, purchase, remaining, vendor ~= nil, section)
     if remaining <= 0 then return end
 
-    local ingredients, yield, action = prepFor(name)
-    local buying = priceOf(name)
-    local making = 0
-    if ingredients then
-      for material, units in pairs(ingredients) do making = making + units * unitCost(material) end
-    end
-    local crafts = ingredients and math.ceil(remaining / yield)
-    if not ingredients or (preferBuying and buying < math.huge and buying * math.ceil(remaining) <= making * crafts * 1.10) then
+    if preferBuying and purchase then
       shopping[name] = (shopping[name] or 0) + remaining
       return
     end
+    local ingredients, yield, action = prepFor(name)
+    if not ingredients then
+      shopping[name] = (shopping[name] or 0) + remaining
+      return
+    end
+    local crafts = math.ceil(remaining / yield)
     for material, units in pairs(ingredients) do consume(material, units * crafts) end
     local previous = section.steps[#section.steps]
     local prep
@@ -328,7 +314,7 @@ end
 
 local function buildPlan(profession, source, start, cap, market, bags, preferBuying, currentMaximum, anchorSkill)
   local used = {}
-  local sections = sectionPlans(source, start, cap, market, preferBuying, bags, used, currentMaximum, anchorSkill)
+  local sections = sectionPlans(source, start, cap, preferBuying, bags, used, currentMaximum, anchorSkill)
   local plan = newSection(start, cap)
   plan.source = source
   plan.name, plan.url, plan.notes, plan.sections = profession.name, profession.url, source.notes, sections

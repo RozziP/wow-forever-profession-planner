@@ -28,7 +28,7 @@ local linen = addon.GetPlan(tailoring, 30, true, 1)
 equal(linen.steps[1].recipe, "Bolt of Linen Cloth", "Short Tailoring route")
 equal(linen.revenue, 1200, "Sell all 30 bolts when stopping at skill 30")
 
-local later = addon.GetPlan(alchemy, 165, true, 130)
+local later = addon.GetPlan(alchemy, 165, false, 130)
 equal(later.steps[1].recipe, "Fire Oil", "Alchemy intermediate")
 equal(later.steps[1].keep, 30, "Reserve Fire Oil for later crafts")
 equal(later.revenue, 10 * 12 + later.steps[2].crafts * 35, "Proceeds exclude the reserved oil")
@@ -41,6 +41,9 @@ for _, pricesAvailable in ipairs({ false, true }) do
     for _, target in ipairs({ 75, 150, 225, 300 }) do
       for _, skill in ipairs({ 1, target - 1, target }) do
         local plan = addon.GetPlan(index, target, true, skill)
+        for _, step in ipairs(plan.steps) do
+          assert(not step.prep, "Buy prep-only reagents for " .. profession.name)
+        end
         equal(plan.name, profession.name, "Plan profession")
         equal(plan.from, skill, "Plan starts at current skill")
         equal(plan.cap, target, "Plan ends at target")
@@ -117,9 +120,10 @@ end
 local normal150 = addon.GetPlan(tailoring, 150, true, 1)
 local skip150 = addon.GetPlan(tailoring, 150, true, 1, nil, true)
 equal(quantity(normal150.auction, "Wool Cloth"), 111, "Updated standard guide needs 37 wool bolts")
-equal(quantity(skip150.auction, "Wool Cloth"), 78, "Less wool budgets 26 wool bolts")
+equal(quantity(skip150.auction, "Wool Cloth"), 66, "Less wool crafts 22 bolts for skill")
+equal(quantity(skip150.auction, "Bolt of Woolen Cloth"), 4, "Buy the four extra bolts even without prices")
 equal(quantity(skip150.auction, "Elixir of Wisdom"), 0, "Less wool avoids Gloves of Meditation")
-local woolExport = '^"Wool Cloth"' .. string.rep(";", 11) .. "#;;78^"
+local woolExport = '^"Wool Cloth"' .. string.rep(";", 11) .. "#;;66^"
 assert((addon.ImportString(skip150) .. "^"):find(woolExport, 1, true), "Export the limited wool quantity")
 equal(quantity(addon.GetPlan(tailoring, 75, true, 1, nil, true).auction, "Wool Cloth"), 0, "Wool starts after 75")
 equal(quantity(addon.GetPlan(tailoring, 150, true, 100, skip150).auction, "Wool Cloth"), 0, "Wool ends at 100")
@@ -133,13 +137,19 @@ local normal200 = addon.GetPlan(tailoring, 200, true, 1)
 local resumed = addon.GetPlan(tailoring, 200, true, 190, skip200)
 equal(addon.ImportString(resumed), addon.ImportString(addon.GetPlan(tailoring, 200, true, 190, normal200)),
   "Pinned routes have the same Mageweave shopping after 190")
-equal(resumed.steps[1].recipe, "Bolt of Mageweave", "Known Mageweave recipe can supply prep")
-equal(resumed.steps[1].keep, 32, "Reserve the bolts for leggings")
+equal(resumed.steps[1].recipe, "Black Mageweave Leggings", "Continue leveling at the current skill")
+equal(quantity(resumed.auction, "Bolt of Mageweave"), 32, "Buy the bolts for leggings")
+equal(quantity(resumed.auction, "Mageweave Cloth"), 0, "Skip raw cloth for prep")
 wow.bags[4339] = 8
 local withBolts = addon.GetPlan(tailoring, 200, true, 190, skip200)
-equal(withBolts.steps[1].crafts, 24, "Existing Mageweave bolts replace prep")
-equal(quantity(withBolts.auction, "Mageweave Cloth"), 120, "Export only remaining Mageweave cloth")
+equal(quantity(withBolts.auction, "Bolt of Mageweave"), 24, "Subtract owned bolts from purchases")
 wow.bags[4339] = nil
+
+wow.prices[4338], wow.prices[4339] = 10, 10000
+local expensiveBolts = addon.GetPlan(tailoring, 200, true, 190, skip200)
+equal(quantity(expensiveBolts.auction, "Bolt of Mageweave"), 32, "Buy bolts even when crafting would be cheaper")
+equal(quantity(expensiveBolts.auction, "Mageweave Cloth"), 0, "Avoid crafting extra bolts for prep")
+wow.prices[4338], wow.prices[4339] = nil, nil
 
 wow.defaultPrice = 100
 local pricedSkip = addon.GetPlan(tailoring, 150, true, 1, nil, true)
@@ -154,6 +164,21 @@ wow.bags[2997] = nil
 equal(pricedSkip.cost.net, pricedSkip.cost.gross - pricedSkip.revenue, "Less wool quote uses its own materials and proceeds")
 wow.defaultPrice = 50
 print("PASS Less wool shopping, 298 partial routes, Mageweave handoff, and intermediate buying")
+
+local engineering = 4
+wow.prices[2838], wow.prices[4377] = 10, 10000
+local sheep = addon.GetPlan(engineering, 175, true, 160)
+equal(sheep.steps[1].recipe, "Explosive Sheep", "Engineering resumes with the leveling recipe")
+equal(quantity(sheep.auction, "Heavy Blasting Powder"), 30, "Buy the powder used by 15 Explosive Sheep")
+equal(quantity(sheep.auction, "Heavy Stone"), 0, "No raw stone for prep-only powder")
+assert(addon.ImportString(sheep):find('"Heavy Blasting Powder"', 1, true), "Export finished powder")
+local powderLeveling = addon.GetPlan(engineering, 175, true, 135)
+equal(powderLeveling.steps[1].recipe, "Heavy Blasting Powder", "Still make powder for skill from 135 to 140")
+equal(powderLeveling.steps[1].keep, 30, "Reserve the powder made while leveling")
+equal(quantity(powderLeveling.auction, "Heavy Blasting Powder"), 0, "Use leveling output before buying powder")
+equal(quantity(powderLeveling.auction, "Heavy Stone"), 40, "Buy stone for the skill-up crafts")
+wow.prices[2838], wow.prices[4377] = nil, nil
+print("PASS Engineering buys prep powder and reserves powder crafted for skill")
 
 local cooking = 7
 local plan = addon.GetPlan(cooking, 300, false, 1)
@@ -187,8 +212,9 @@ equal(quantity(defaultSmith.auction, "Thick Leather"), 44, "Default boots materi
 equal(quantity(spurs.auction, "Thick Leather"), 0, "Spurs replace boots materials")
 equal(quantity(spurs.auction, "Thorium Bar"), 0, "Spurs remove belt materials and quest turn-in")
 equal(quantity(spurs.auction, "Mithril Bar"), 112, "Both Spurs ranges use the guide's 28 crafts")
-equal(quantity(spurs.auction, "Solid Stone"), 336, "Spurs grinding stones are prepared")
-assert(addon.ImportString(spurs):find('"Solid Stone"', 1, true), "Export includes Spurs materials")
+equal(quantity(spurs.auction, "Solid Grinding Stone"), 84, "Buy the grinding stones used by Spurs")
+equal(quantity(spurs.auction, "Solid Stone"), 0, "Skip raw stone for prep")
+assert(addon.ImportString(spurs):find('"Solid Grinding Stone"', 1, true), "Export includes finished grinding stones")
 local partial = addon.GetPlan(smith, 245, true, 240, nil, false, 300, { ["smith-240"] = "Mithril Spurs" })
 equal(quantity(partial.auction, "Mithril Bar"), 72, "Choice works when starting at the second range")
 wow.bags[3860] = 4
@@ -197,7 +223,7 @@ equal(quantity(partial.auction, "Mithril Bar"), 68, "Choice accounts for owned m
 wow.bags[3860] = nil
 local belt = addon.GetPlan(tailoring, 240, true, 215, nil, false, 300, { ["tailor-215"] = "Runecloth Belt" })
 local bag = addon.GetPlan(tailoring, 240, true, 215, nil, false, 300, { ["tailor-215"] = "Mageweave Bag" })
-assert(quantity(belt.auction, "Runecloth") > quantity(bag.auction, "Runecloth"), "Belt choice changes shopping")
+assert(quantity(belt.auction, "Bolt of Runecloth") > quantity(bag.auction, "Bolt of Runecloth"), "Belt choice changes shopping")
 local visible = addon.GetGuideSteps(tailoring, belt)
 local choicesSeen = 0
 for _, step in ipairs(visible) do if step.choice and step.choice.id == "tailor-215" then choicesSeen = choicesSeen + 1 end end
