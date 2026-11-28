@@ -81,4 +81,8 @@ module.exports = {
   'Heavy Mageweave Bandage': { 'Mageweave Cloth': 2 },
   'Runecloth Bandage': { 'Runecloth': 1 },
   'Heavy Runecloth Bandage': { 'Runecloth': 2 },
+  'Minor Healing Potion': { 'Peacebloom': 1, 'Mild Spices': 1, 'Empty Vial': 1 },
+  'Simple Poultice': { 'Spider Ichor': 1, 'Mild Spices': 1, 'Bottle of Dalaran Noir': 1 },
+  'Healing Potion': { 'Bruiseweed': 1, 'Hot Spices': 1, 'Leaded Vial': 1 },
+  'Major Healing Potion': { 'Golden Sansam': 1, 'Soothing Spices': 3, 'Crystal Vial': 1 },
 };

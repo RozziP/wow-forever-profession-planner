@@ -68,6 +68,7 @@ function vendorItem([name, quantity, price, explicitId]) {
 const outputs = {
   'Fire Oil': 2, 'Blackmouth Oil': 2, 'Stonescale Oil': 2, 'Silver Contact': 5, 'Iron Buckle': 2,
   'Rough Copper Bomb': 2, 'Coarse Dynamite': 2, 'Iron Grenade': 3, 'Hi-Explosive Bomb': 4,
+  'Simple Poultice': 3,
 };
 const intermediateIds = {
   'Fire Oil': 6371,
@@ -174,6 +175,18 @@ const professions = Object.entries(guides).map(([name, guide]) => {
   if (guide.rankMaterials) full.rankMaterials = guide.rankMaterials;
   if (manuals.length) {
     full.manualRecipes = Object.fromEntries(manuals.map(([item, , , spell]) => [item, spell]));
+  }
+  if (guide.potionSections) {
+    profession.potionSteps = full.steps;
+    for (const rows of guide.potionSections) {
+      const from = rows[0][0];
+      const to = rows.at(-1)[1];
+      profession.potionSteps = [
+        ...profession.potionSteps.filter(step => step.to <= from),
+        ...stepsFor(name, rows),
+        ...profession.potionSteps.filter(step => step.from >= to),
+      ];
+    }
   }
   const rushRoute = rushRoutes[name];
   if (!rushRoute) return profession;

@@ -125,10 +125,14 @@ local function selectableStep(primary, alternate, id, selection)
   return step
 end
 
-local function choiceSource(source, choices)
-  if not source.choices then return source end
+local function choiceSource(source, choices, potionSteps)
+  if not source.choices and not potionSteps then return source end
   local result = {}
   for key, value in pairs(source) do result[key] = value end
+  if potionSteps then
+    result.steps = potionSteps
+    return result
+  end
   result.steps = {}
   for _, step in ipairs(source.steps) do
     for id, alternate in pairs(source.choices) do
@@ -407,7 +411,8 @@ function addon.GetPlan(index, target, preferBuying, currentSkill, pinnedPlan, sk
   if profession.full.finishes then
     plan = tailoringPlan(profession, start, cap, market, bags, preferBuying, skipWool, currentMaximum, choices)
   else
-    local source = choiceSource(profession.full, choices)
+    local potionSteps = choices and choices.potions == true and profession.potionSteps
+    local source = choiceSource(profession.full, choices, potionSteps)
     plan = buildPlan(profession, source, start, cap, market, bags, preferBuying, currentMaximum)
   end
   plan.missingPrices = market.missing

@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.4.8
+
+- Added **Potion route** to the First Aid footer. It uses potions and poultices at skill 1–75, 90–150, and 275–300, with bandages between those ranges.
+- Switching routes updates the recipe list, shopping costs, and Auctionator export. The potion route includes the Major Healing Potion manual when you still need to learn it.
+
 ## 0.4.7
 
 - Added a 1–300 First Aid bandage guide. Open it with `/fpt first aid` or the tab below Cooking.

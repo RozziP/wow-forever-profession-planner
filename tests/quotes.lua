@@ -222,6 +222,29 @@ equal(#ownedManual.vendor, 0, "A manual in the bags requires no purchase")
 wow.bags[16112] = nil
 print("PASS First Aid cloth quantities and manual purchases")
 
+local potions = { potions = true }
+local potionPlan = addon.GetPlan(firstAid, 300, true, 1, nil, nil, nil, potions)
+equal(potionPlan.steps[1].recipe, "Minor Healing Potion", "Potion route starts with Minor Healing Potion")
+equal(quantity(potionPlan.auction, "Peacebloom"), 86, "Potion route Peacebloom")
+equal(quantity(potionPlan.auction, "Linen Cloth"), 32, "Potion route retains the 75–80 bandages")
+equal(quantity(potionPlan.auction, "Wool Cloth"), 12, "Potion route retains the 80–90 bandages")
+equal(quantity(potionPlan.auction, "Spider Ichor"), 54, "Potion route Simple Poultice ingredients")
+equal(quantity(potionPlan.auction, "Bruiseweed"), 31, "Potion route Healing Potion ingredients")
+equal(quantity(potionPlan.auction, "Runecloth"), 20, "Potion route stops Runecloth Bandage at 275")
+equal(quantity(potionPlan.auction, "Golden Sansam"), 30, "Potion route finishes with Major Healing Potion")
+equal(quantity(potionPlan.vendor, "Mild Spices"), 140, "Potion route combines Mild Spices for potions and poultices")
+equal(quantity(potionPlan.vendor, "Soothing Spices"), 90, "Major Healing Potion needs three Soothing Spices")
+equal(quantity(potionPlan.vendor, "Manual: Major Healing Potion"), 1, "Potion route includes the Major Healing Potion manual")
+local beforeMajor = addon.GetPlan(firstAid, 275, true, 260, nil, nil, 300, potions)
+equal(quantity(beforeMajor.vendor, "Manual: Major Healing Potion"), 0, "Exclude the manual before its recipe is needed")
+for skill = 1, 299 do
+  local plan = addon.GetPlan(firstAid, skill + 1, true, skill, nil, nil, 300, potions)
+  equal(#plan.steps, 1, "Potion route has a skill-up craft at skill " .. skill)
+  equal(plan.steps[1].from, skill, "Potion route starts at the requested skill")
+  equal(plan.steps[1].to, skill + 1, "Potion route reaches the requested target")
+end
+print("PASS First Aid potion materials, manual, and 299 partial routes")
+
 -- Branches must change the actual materials, including quest turn-ins and exports.
 wow.defaultPrice = nil
 local smith = 2

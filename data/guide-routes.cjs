@@ -284,18 +284,36 @@ module.exports = {
       [260, 290, 'Runecloth Bandage', 47, 500, 260, 320],
       [290, 300, 'Heavy Runecloth Bandage', 12, 1000, 290, 350],
     ],
+    potionSections: [
+      [[1, 75, 'Minor Healing Potion', 86, 5, 55, 95]],
+      [
+        [90, 125, 'Simple Poultice', 54, 28, 90, 160],
+        [125, 150, 'Healing Potion', 31, 75, 135, 175],
+      ],
+      [
+        [260, 275, 'Runecloth Bandage', 20, 500, 260, 320],
+        [275, 300, 'Major Healing Potion', 30, 1000, 290, 330],
+      ],
+    ],
     auction: [
       ['Linen Cloth', 2589], ['Wool Cloth', 2592], ['Silk Cloth', 4306],
       ['Mageweave Cloth', 4338], ['Runecloth', 14047],
+      ['Peacebloom', 2447], ['Spider Ichor', 3174], ['Bruiseweed', 2453], ['Golden Sansam', 13464],
     ],
-    vendor: [['Expert First Aid - Under Wraps', 10000, 16084]],
+    vendor: [
+      ['Expert First Aid - Under Wraps', 10000, 16084],
+      ['Empty Vial', 4, 3371], ['Leaded Vial', 40, 3372], ['Crystal Vial', 500, 8925],
+      ['Mild Spices', 2, 2678], ['Hot Spices', 40, 2692], ['Soothing Spices', 160, 3713],
+      ['Bottle of Dalaran Noir', 50, 2723],
+    ],
     manuals: {
       'Heavy Silk Bandage': ['Manual: Heavy Silk Bandage', 2200, 16112, 7929],
       'Mageweave Bandage': ['Manual: Mageweave Bandage', 5000, 16113, 10840],
+      'Major Healing Potion': ['Manual: Major Healing Potion', 80000, 255729, 1244436],
     },
     rankMaterials: {
       150: { 'Expert First Aid - Under Wraps': 1 },
     },
-    notes: 'Learn Silk Bandage before leaving your city trainer. The Expert book vendor also sells the manuals for Heavy Silk Bandage at 180 and Mageweave Bandage at 210. After Triage, the same doctor teaches the last three bandages at 240, 260, and 290.',
+    notes: 'Learn Silk Bandage from a city trainer. Get the Heavy Silk and Mageweave manuals from the Expert book vendor. After Triage, the same doctor teaches bandages at 240, 260, and 290. For the potion route, see the guide for cooking and alchemy supplies and Bottle of Dalaran Noir vendors. Pexmit in Mount Hyjal sells the Major Healing Potion manual for 8g. Check the Auction House or the Horde quest reward too.',
   },
 };

@@ -194,6 +194,29 @@ local function label(parent, font, x, y, width)
   return region
 end
 
+local function footerCheckButton(parent, caption, tooltip, onClick)
+  local check = CreateFrame("CheckButton", nil, parent, "UICheckButtonTemplate")
+  check:SetSize(24, 24)
+  local title = check:CreateFontString(nil, "OVERLAY")
+  title:SetFontObject(fonts.caption)
+  title:SetPoint("LEFT", check, "RIGHT", 3, 0)
+  title:SetWordWrap(false)
+  title:SetText(caption)
+  local labelWidth = math.ceil(title:GetUnboundedStringWidth()) + 2
+  title:SetWidth(labelWidth)
+  check:SetPoint("TOPRIGHT", parent, "TOPRIGHT", -(labelWidth + 3), -1)
+  check:SetHitRectInsets(0, -(labelWidth + 3), 0, 0)
+  check:SetScript("OnEnter", function(self)
+    GameTooltip:SetOwner(self, "ANCHOR_TOP")
+    GameTooltip:SetText(tooltip)
+    GameTooltip:Show()
+  end)
+  check:SetScript("OnLeave", hideTooltip)
+  check:SetScript("OnHide", hideTooltip)
+  check:SetScript("OnClick", onClick)
+  return check
+end
+
 local function floatAndFade(region, height, duration, fadeDelay)
   local animation = region:CreateAnimationGroup()
   local rise = animation:CreateAnimation("Translation")
@@ -948,6 +971,7 @@ showRoute = function(index, keepScroll, resetPlan)
   frame.skipWool:SetChecked(skipWool)
   if not index then
     frame.skipWool:Hide()
+    frame.potionRoute:Hide()
     frame.guideFooter:Hide()
     frame.planPage:Hide()
     frame.trainPage:Show()
@@ -966,6 +990,9 @@ showRoute = function(index, keepScroll, resetPlan)
   local capped = training ~= nil and rank == maximum
   if not capped then frame.viewingCappedPlan = nil end
   local showTraining = capped and not frame.viewingCappedPlan
+  local choices = settings.recipeChoices[profession]
+  frame.potionRoute:SetChecked(choices ~= nil and choices.potions == true)
+  frame.potionRoute:SetShown(profession == "First Aid" and not showTraining)
   frame.planPage:SetShown(not showTraining)
   frame.guideFooter:SetShown(not showTraining)
   frame.trainPage:SetShown(showTraining)
@@ -1203,6 +1230,7 @@ local function showDebugPage()
   frame.trainPage:Hide()
   frame.copyPanel:Hide()
   frame.skipWool:Hide()
+  frame.potionRoute:Hide()
   frame.applyEnchant:Hide()
   clearCraftingFeedback(frame)
   frame.craftingTime:SetText("Est. crafting  |cfff7ead11m 00s|r")
@@ -1770,29 +1798,19 @@ local function createPlanner()
   footer:SetPoint("BOTTOMRIGHT", -18, 10)
   footer:SetHeight(25)
 
-  local skipWool = CreateFrame("CheckButton", nil, footer, "UICheckButtonTemplate")
-  skipWool:SetSize(24, 24)
-  local skipWoolLabel = skipWool:CreateFontString(nil, "OVERLAY")
-  skipWoolLabel:SetFontObject(fonts.caption)
-  skipWoolLabel:SetPoint("LEFT", skipWool, "RIGHT", 3, 0)
-  skipWoolLabel:SetWordWrap(false)
-  skipWoolLabel:SetText("Less wool")
-  local labelWidth = math.ceil(skipWoolLabel:GetUnboundedStringWidth()) + 2
-  skipWoolLabel:SetWidth(labelWidth)
-  skipWool:SetPoint("TOPRIGHT", footer, "TOPRIGHT", -(labelWidth + 3), -1)
-  skipWool:SetHitRectInsets(0, -(labelWidth + 3), 0, 0)
-  skipWool:SetScript("OnEnter", function(self)
-    GameTooltip:SetOwner(self, "ANCHOR_TOP")
-    GameTooltip:SetText("Use wool only from skill 75 to 100. Switch to silk until skill 150.")
-    GameTooltip:Show()
-  end)
-  skipWool:SetScript("OnLeave", hideTooltip)
-  skipWool:SetScript("OnHide", hideTooltip)
-  skipWool:SetScript("OnClick", function(self)
-    settings.skipWool = not not self:GetChecked()
-    showRoute(active, true)
-  end)
-  frame.skipWool = skipWool
+  frame.skipWool = footerCheckButton(footer, "Less wool",
+    "Use wool only from skill 75 to 100. Switch to silk until skill 150.", function(self)
+      settings.skipWool = not not self:GetChecked()
+      showRoute(active, true)
+    end)
+  frame.potionRoute = footerCheckButton(footer, "Potion route",
+    "Use potions and poultices at skill 1–75, 90–150, and 275–300.", function(self)
+      local choices = settings.recipeChoices["First Aid"] or {}
+      settings.recipeChoices["First Aid"] = choices
+      choices.potions = not not self:GetChecked()
+      anchoredPlans[active] = nil
+      showRoute(active, true)
+    end)
 
   local applyEnchant = button(footer, "Apply enchant", 0, 0, 128)
   applyEnchant:ClearAllPoints()
