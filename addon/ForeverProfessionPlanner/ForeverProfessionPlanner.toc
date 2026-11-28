@@ -2,7 +2,7 @@
 ## Title: Forever Profession Trainer
 ## IconTexture: Interface\AddOns\ForeverProfessionPlanner\Media\AddonIcon
 ## Notes: Eight profession guides with skill targets, material estimates, and Auctionator shopping lists.
-## Version: 0.4.6
+## Version: 0.4.7
 ## Dependencies: Auctionator
 ## SavedVariables: ForeverProfessionPlannerSettings
 

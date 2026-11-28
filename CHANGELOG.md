@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.4.7
+
+- Added a 1–300 First Aid bandage guide. Open it with `/fpt first aid` or the tab below Cooking.
+- First Aid shopping includes cloth, the Expert book, and any required bandage manuals. The training view points to your faction's Expert book vendor and Triage quest giver.
+- Shopping lists and Auctionator exports now list finished tradeable reagents for prep, such as Heavy Blasting Powder for Explosive Sheep.
+- Skill-ups now count newly crafted reagents that later recipes can use when updating the remaining shopping list.
+
 ## 0.4.6
 
 - Refreshed all seven 1–300 leveling guides for WoW Forever. Cooking now uses Nightfin Soup from 285 to 300, and Tailoring includes Runecloth Cuffs and alternatives for players without the pattern.
