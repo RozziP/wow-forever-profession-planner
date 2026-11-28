@@ -202,6 +202,26 @@ assert(not addon.ImportString(addon.GetPlan(cooking, 225, true, 1)):find("Giant 
   "A target of 225 should omit Artisan turn-in items")
 print("PASS published Cooking materials and bag-aware Artisan shopping")
 
+local firstAid = 8
+local firstAidPlan = addon.GetPlan(firstAid, 300, true, 1)
+equal(firstAidPlan.name, "First Aid", "First Aid is a selectable guide")
+equal(quantity(firstAidPlan.auction, "Linen Cloth"), 180, "First Aid linen rollup")
+equal(quantity(firstAidPlan.auction, "Wool Cloth"), 163, "First Aid wool rollup")
+equal(quantity(firstAidPlan.auction, "Silk Cloth"), 141, "First Aid silk rollup")
+equal(quantity(firstAidPlan.auction, "Mageweave Cloth"), 108, "First Aid mageweave rollup")
+equal(quantity(firstAidPlan.auction, "Runecloth"), 71, "First Aid runecloth rollup")
+equal(firstAidPlan.vendorSpend, 17200, "First Aid budgets the Expert book and both manuals")
+equal(quantity(addon.GetPlan(firstAid, 185, true, 150, nil, nil, 225).vendor, "Expert First Aid - Under Wraps"), 0,
+  "A character who knows Expert First Aid needs no Expert book")
+local shortFirstAid = addon.GetPlan(firstAid, 210, true, 150, nil, nil, 225)
+equal(quantity(shortFirstAid.vendor, "Manual: Heavy Silk Bandage"), 1, "Buy the manual used within the target")
+equal(quantity(shortFirstAid.vendor, "Manual: Mageweave Bandage"), 0, "Omit manuals beyond the target")
+wow.bags[16112] = 1
+local ownedManual = addon.GetPlan(firstAid, 210, true, 150, nil, nil, 225)
+equal(#ownedManual.vendor, 0, "A manual in the bags requires no purchase")
+wow.bags[16112] = nil
+print("PASS First Aid cloth quantities and manual purchases")
+
 -- Branches must change the actual materials, including quest turn-ins and exports.
 wow.defaultPrice = nil
 local smith = 2

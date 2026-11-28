@@ -277,23 +277,23 @@ slash("cooking")
 expectTarget(75)
 equal(lastPlan.steps[1].recipe, "Brilliant Smallfish", "Cooking preview recipe")
 assert(not frame.tabs[7].skill, "Cooking starts unlearned")
-wow.professions[4] = { name = "Cooking", rank = 150, maximum = 150, skillLine = 185 }
+wow.professions[5] = { name = "Cooking", rank = 150, maximum = 150, skillLine = 185 }
 slash("cooking")
 expectTarget(225)
-equal(frame.tabs[7].skill.slot, 4, "Cooking is read from a secondary slot")
+equal(frame.tabs[7].skill.slot, 5, "Cooking is read from the Forever Cooking slot")
 equal(frame.cappedTitle:GetText(), "Read Expert Cookbook", "Cooking Expert rank action")
 equal(frame.cappedMapLink.trainer.name, "Shandrina", "Alliance cookbook vendor")
 equal(frame.cappedRequirements:GetText(), "Skill cap reached at 150", "Expert Cooking level requirement")
 click(wow.button("View plan"))
 equal(lastPlan.vendor[1].name, "Expert Cookbook", "Shopping ahead includes the Expert book")
-wow.professions[4].rank, wow.professions[4].maximum = 225, 225
+wow.professions[5].rank, wow.professions[5].maximum = 225, 225
 slash("cooking")
 expectTarget(300)
 equal(frame.cappedTitle:GetText(), "Complete Clamlette Surprise", "Cooking Artisan rank action")
 equal(frame.cappedMapLink.trainer.name, "Dirge Quikcleave", "Artisan quest giver")
 click(wow.button("View plan"))
 assert(addon.ImportString(lastPlan):find("Giant Egg", 1, true), "Shopping ahead includes quest items")
-wow.professions[4].maximum = 300
+wow.professions[5].maximum = 300
 event("SKILL_LINES_CHANGED")
 assert(addon.ImportString(lastPlan):find("Giant Egg", 1, true), "Training preserves the selected shopping plan")
 clickTab(7)
@@ -301,6 +301,54 @@ equal(lastPlan.vendor[1].name, "Refreshing Spring Water", "Only Nightfin Soup's 
 equal(#lastPlan.vendor, 1, "Reselecting removes vendor turn-in items")
 equal(#lastPlan.auction, 2, "Only the two fish remain after the Artisan unlock")
 print("PASS Cooking preview, learned secondary slot, rank directions, and training refresh")
+
+slash("first aid")
+expectTarget(75)
+equal(lastPlan.steps[1].recipe, "Linen Bandage", "First Aid opens a guide before learning the skill")
+assert(not frame.tabs[8].skill, "First Aid starts unlearned")
+equal(frame.tabs[8].previousTab, frame.tabs[7], "First Aid is grouped with Cooking")
+local firstAid = { name = "First Aid", rank = 75, maximum = 75, skillLine = 129 }
+wow.professions[3] = firstAid
+slash("first aid")
+equal(frame.tabs[8].skill.slot, 3, "First Aid is read from the Forever First Aid slot")
+equal(frame.cappedTitle:GetText(), "Train Journeyman First Aid", "Journeyman First Aid uses the trainer")
+equal(frame.cappedRequirements:GetText(), "Skill cap reached at 75", "Journeyman First Aid has no character level gate")
+firstAid.rank, firstAid.maximum = 150, 150
+slash("first aid")
+equal(frame.cappedTitle:GetText(), "Read Expert First Aid - Under Wraps", "Expert First Aid uses the book")
+equal(frame.cappedMapLink.trainer.name, "Deneb Walker", "Alliance Expert First Aid vendor")
+click(wow.button("View plan"))
+equal(#lastPlan.vendor, 3, "Shopping ahead includes the Expert book and both manuals")
+firstAid.maximum = 225
+event("SKILL_LINES_CHANGED")
+equal(#lastPlan.vendor, 2, "Learning Expert First Aid removes its book from shopping")
+
+local learnt
+C_TradeSkillUI = { GetRecipeInfo = function(spellID) return { learned = spellID == learnt } end }
+firstAid.rank = 180
+event("SKILL_LINES_CHANGED")
+equal(#lastPlan.vendor, 2, "Both recipe manuals are needed before learning them")
+learnt = 7929
+event("NEW_RECIPE_LEARNED", learnt)
+equal(#lastPlan.vendor, 1, "Learning a manual removes it from shopping immediately")
+equal(lastPlan.vendor[1].name, "Manual: Mageweave Bandage", "Future manual is still listed")
+C_TradeSkillUI = nil
+firstAid.rank = 225
+slash("first aid")
+equal(frame.cappedTitle:GetText(), "Complete Triage", "Artisan First Aid uses Triage")
+equal(frame.cappedRequirements:GetText(), "Skill cap reached at 225 · Requires character level 35", "Triage level requirement")
+equal(frame.cappedMapLink.trainer.name, "Doctor Gustaf VanHowzen", "Alliance Triage quest giver")
+local allianceFaction = UnitFactionGroup
+UnitFactionGroup = function() return "Horde" end
+event("SKILL_LINES_CHANGED")
+equal(frame.cappedMapLink.trainer.name, "Doctor Gregory Victor", "Horde Triage quest giver")
+UnitFactionGroup = allianceFaction
+firstAid.maximum = 300
+event("SKILL_LINES_CHANGED")
+assert(frame.planPage:IsShown(), "Completing Triage returns to the plan")
+expectTarget(300)
+assert(addon.ImportString(lastPlan):find('"Runecloth"', 1, true), "Export includes First Aid cloth")
+print("PASS First Aid preview, secondary slot, rank unlocks, and live manual shopping")
 
 -- Exercise real row clicks with a profession UI that loads and switches asynchronously.
 local openCount, openedSkillLine, baseInfo, changing = 0, nil, nil, false
@@ -382,6 +430,13 @@ InCombatLockdown = function() return true end
 click(recipeRow)
 equal(openCount, beforeOpen, "Do not open professions in combat")
 InCombatLockdown = nil
+slash("first aid")
+click(firstRecipeRow())
+equal(openedSkillLine, 129, "First Aid recipes open the First Aid profession")
+readyProfession(129)
+wow.flushTimers()
+equal(searchBox:GetText(), firstRecipeRow().recipe:GetText(), "First Aid recipe fills the search")
+beforeOpen = openCount
 slash("blacksmithing")
 click(firstRecipeRow())
 equal(openCount, beforeOpen, "Unlearned preview cannot search another profession")

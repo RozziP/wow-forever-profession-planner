@@ -4,7 +4,7 @@
 
 Plan profession leveling in WoW Forever through skill 300. Forever Profession Trainer reads your character’s current skill, shows what to craft, estimates the cost, and builds an Auctionator shopping list.
 
-Supports Alchemy, Blacksmithing, Cooking, Enchanting, Engineering, Leatherworking, and Tailoring. Install and enable Auctionator for WoW Forever alongside the addon.
+Supports Alchemy, Blacksmithing, Cooking, Enchanting, Engineering, First Aid, Leatherworking, and Tailoring. Install and enable Auctionator for WoW Forever alongside the addon.
 
 ## Getting started
 
@@ -29,6 +29,8 @@ At a trainable skill cap, selecting the profession tab opens the trainer screen.
 With **Tailoring** selected below skill 150, **Less wool** is on by default. It uses linen through 75, wool from 75 to 100, and silk through 150. Uncheck it in the footer to use the standard route. Selecting the Tailoring tab again turns it back on.
 
 **Cooking** follows the main WoW-Professions shopping list. Cook at a campfire and use the guide link for recipe vendors. The shopping list includes the Expert Cookbook when planning past 150 and the Clamlette Surprise turn-in when planning past 225 when the plan starts before you unlock those ranks. [WoW-Professions Cooking guide](https://www.wow-professions.com/forever/cooking-leveling-guide)
+
+Open **First Aid** with `/fpt first aid` or its tab below Cooking. The guide levels through bandages and lists cloth, the Expert book, and the recipe manuals as needed. At 225, the training view points to your faction's Triage quest, which requires character level 35. The same doctor teaches later bandages at 240, 260, and 290. [WoW-Professions First Aid guide](https://www.wow-professions.com/forever/first-aid-leveling-guide)
 
 ## Shopping and costs
 

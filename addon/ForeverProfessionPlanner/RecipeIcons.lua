@@ -2,6 +2,16 @@ local _, addon = ...
 
 -- Built-in icons for crafted outputs and enchantments in the profession guides.
 addon.recipeIcons = {
+  ["Linen Bandage"] = "inv_misc_bandage_15",
+  ["Heavy Linen Bandage"] = "inv_misc_bandage_18",
+  ["Wool Bandage"] = "inv_misc_bandage_14",
+  ["Heavy Wool Bandage"] = "inv_misc_bandage_17",
+  ["Silk Bandage"] = "inv_misc_bandage_01",
+  ["Heavy Silk Bandage"] = "inv_misc_bandage_02",
+  ["Mageweave Bandage"] = "inv_misc_bandage_19",
+  ["Heavy Mageweave Bandage"] = "inv_misc_bandage_20",
+  ["Runecloth Bandage"] = "inv_misc_bandage_11",
+  ["Heavy Runecloth Bandage"] = "inv_misc_bandage_12",
   ["Arclight Spanner"] = "inv_misc_wrench_01",
   ["Azure Silk Hood"] = "inv_helmet_29",
   ["Barbaric Harness"] = "inv_chest_leather_04",

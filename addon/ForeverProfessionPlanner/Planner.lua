@@ -2,14 +2,16 @@ local _, addon = ...
 local routes = addon.routes
 local plannerTitle = "Forever Profession Trainer"
 local professionSlotCount = 7
+local secondaryTabOrder = { Cooking = 1, ["First Aid"] = 2 }
 local professionSkillLines = {
   Alchemy = 171, Blacksmithing = 164, Enchanting = 333,
-  Engineering = 202, Leatherworking = 165, Tailoring = 197, Cooking = 185,
+  Engineering = 202, Leatherworking = 165, Tailoring = 197, Cooking = 185, ["First Aid"] = 129,
 }
 local professionIcons = {
   Alchemy = "Trade_Alchemy", Blacksmithing = "Trade_BlackSmithing", Enchanting = "Trade_Engraving",
   Engineering = "Trade_Engineering", Leatherworking = "Trade_LeatherWorking", Tailoring = "Trade_Tailoring",
   Cooking = "INV_Misc_Food_15",
+  ["First Aid"] = "Spell_Holy_SealOfSacrifice",
 }
 local gameIconPath = "Interface\\Icons\\"
 local plannerIcon = gameIconPath .. "INV_Misc_Book_09"
@@ -34,6 +36,22 @@ local expertCookingVendors = {
   Horde = { name = "Wulan", location = "Shadowprey Village, Desolace", mapID = 1443, x = 26.1, y = 69.7 },
   Alliance = { name = "Shandrina", location = "Silverwind Refuge, Ashenvale", mapID = 1440, x = 49.5, y = 67.1 },
 }
+local firstAidRanks = {
+  [75] = { name = "Journeyman", skill = 50 },
+  [150] = {
+    name = "Expert", skill = 125, action = "Read Expert First Aid - Under Wraps",
+    instructions = "Buy and read Expert First Aid - Under Wraps to unlock First Aid 225.",
+  },
+  [225] = {
+    name = "Artisan", skill = 225, level = 35, action = "Complete Triage",
+    instructions = "Use the doctor's triage bandages to save 15 patients and unlock First Aid 300.",
+  },
+}
+local specialRanks = { Cooking = cookingRanks, ["First Aid"] = firstAidRanks }
+local expertFirstAidVendors = {
+  Horde = { name = "Balai Lok'Wein", location = "Brackenwall Village, Dustwallow Marsh", mapID = 1445, x = 36.5, y = 30.4 },
+  Alliance = { name = "Deneb Walker", location = "Stromgarde Keep, Arathi Highlands", mapID = 1417, x = 27.1, y = 58.8 },
+}
 local expertTrainingCities = {
   Alchemy = { Horde = "Undercity", Alliance = "Darnassus" },
   Blacksmithing = { Horde = "Orgrimmar", Alliance = "Ironforge" },
@@ -52,6 +70,10 @@ local artisanTrainers = {
   },
   Blacksmithing = { name = "Brikk Keencraft", location = "Booty Bay, Stranglethorn Vale", mapID = 1434, x = 29.0, y = 75.6 },
   Cooking = { name = "Dirge Quikcleave", location = "Gadgetzan, Tanaris", mapID = 1446, x = 52.6, y = 28.1 },
+  ["First Aid"] = {
+    Horde = { name = "Doctor Gregory Victor", location = "Hammerfall, Arathi Highlands", mapID = 1417, x = 73.4, y = 36.8 },
+    Alliance = { name = "Doctor Gustaf VanHowzen", location = "Foothold Citadel, Theramore", mapID = 1445, x = 67.8, y = 49.0 },
+  },
   Enchanting = {
     name = "Annora", location = "Inside Uldaman, Badlands", mapID = 1418, x = 65.3, y = 42.6,
     waypointLabel = "Uldaman's rear entrance",
@@ -782,6 +804,7 @@ local function nextTrainer(profession, maximum)
   local trainers = (maximum == 225 and artisanTrainers[profession])
     or (maximum == 150 and profession == "Enchanting" and expertEnchantingTrainers)
     or (maximum == 150 and profession == "Cooking" and expertCookingVendors)
+    or (maximum == 150 and profession == "First Aid" and expertFirstAidVendors)
   if trainers then
     local trainer = trainers.name and trainers or trainers[faction]
     if trainer then return trainer, trainer.location end
@@ -794,7 +817,7 @@ local function nextTrainer(profession, maximum)
 end
 
 local function nextTraining(profession, maximum)
-  local ranks = profession == "Cooking" and cookingRanks or nextRanks
+  local ranks = specialRanks[profession] or nextRanks
   return ranks[maximum]
 end
 
@@ -824,12 +847,13 @@ local function professionGuide(index, minimum, skill, skipWool, resetPlan)
     guide = {
       plan = plan, steps = addon.GetGuideSteps(index, plan), skipWool = skipWool, made = {},
       anchorSkill = rank,
-      requestedTarget = settings.target, learned = skill ~= nil,
+      requestedTarget = settings.target, learned = skill ~= nil, maximum = maximum,
       craftingTime = formatDuration(addon.GetCraftingMilliseconds(plan)), bagSpace = addon.GetShoppingBagSpace(plan),
     }
     anchoredPlans[index] = guide
-  elseif rank > guide.plan.from then
+  elseif rank > guide.plan.from or (routes[index].name == "First Aid" and maximum ~= guide.maximum) then
     local oldSteps, oldMade = guide.steps, guide.made
+    guide.maximum = maximum
     -- A skill-up craft can put a reagent for later steps into the bags.
     guide.plan = addon.GetPlan(index, guide.plan.cap, true, rank, guide.plan, skipWool, maximum,
       nil, guide.anchorSkill)
@@ -855,10 +879,11 @@ end
 local function updateProfessionTabs(index)
   local learned = learnedProfessions()
   local orderedTabs = {}
-  local cookingPosition = professionSlotCount + #frame.tabs + 1
+  local primaryEnd = professionSlotCount + #frame.tabs
   for i, tab in ipairs(frame.tabs) do
     tab.skill = learned[professionSkillLines[routes[i].name]]
-    local position = routes[i].name == "Cooking" and cookingPosition
+    local secondary = secondaryTabOrder[routes[i].name]
+    local position = secondary and primaryEnd + secondary
       or (tab.skill and tab.skill.slot or professionSlotCount + i)
     orderedTabs[position] = tab
     tab.Background:SetVertexColor(unpack(tab.skill and colors.gold or colors.tabNeutral))
@@ -869,7 +894,7 @@ local function updateProfessionTabs(index)
   end
 
   local previousTab = frame
-  for position = 1, cookingPosition do
+  for position = 1, primaryEnd + 2 do
     local tab = orderedTabs[position]
     if tab then
       local scale = tab.skill and 1 or 0.7
@@ -879,7 +904,7 @@ local function updateProfessionTabs(index)
         if previousTab == frame then
           tab:SetPoint("TOPLEFT", frame, "TOPRIGHT", 0, -60)
         else
-          local gap = position == cookingPosition and 18 or 2
+          local gap = position == primaryEnd + 1 and 18 or 2
           tab:SetPoint("TOPLEFT", previousTab, "BOTTOMLEFT", 0, -gap)
         end
         tab.previousTab = previousTab
@@ -1597,6 +1622,7 @@ local function createPlanner()
   frame:RegisterEvent("CHAT_MSG_SKILL")
   frame:RegisterEvent("TRADE_SKILL_DETAILS_UPDATE")
   frame:RegisterEvent("TRADE_SKILL_ITEM_CRAFTED_RESULT")
+  frame:RegisterEvent("NEW_RECIPE_LEARNED")
   frame:RegisterEvent("BN_CONNECTED")
   frame:RegisterEvent("BN_INFO_CHANGED")
   frame:RegisterUnitEvent("UNIT_SPELLCAST_START", "player")

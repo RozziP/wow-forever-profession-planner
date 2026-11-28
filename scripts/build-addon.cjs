@@ -122,7 +122,7 @@ function stepsFor(name, rows, yieldsByRecipe = outputs, modeledSteps = []) {
       step.gray = data.skill[3];
     }
     if (questThorium[recipe]) step.turnIn = { 'Thorium Bar': questThorium[recipe] };
-    const pattern = guides[name].patterns?.[recipe];
+    const pattern = guides[name].patterns?.[recipe] ?? guides[name].manuals?.[recipe];
     if (pattern) step.pattern = pattern[0];
     return step;
   });
@@ -151,10 +151,11 @@ const rushPrep = {
 };
 
 const professions = Object.entries(guides).map(([name, guide]) => {
+  const manuals = Object.values(guide.manuals ?? {});
   const full = {
     steps: stepsFor(name, guide.steps),
     auction: [...guide.auction, ...Object.values(guide.patterns ?? {})].map(auctionItem),
-    vendor: guide.vendor.map(([item, price, id]) => vendorItem([item, 0, price, id])),
+    vendor: [...guide.vendor, ...manuals].map(([item, price, id]) => vendorItem([item, 0, price, id])),
     notes: guide.notes,
   };
   if (guide.choices) {
@@ -171,6 +172,9 @@ const professions = Object.entries(guides).map(([name, guide]) => {
     full,
   };
   if (guide.rankMaterials) full.rankMaterials = guide.rankMaterials;
+  if (manuals.length) {
+    full.manualRecipes = Object.fromEntries(manuals.map(([item, , , spell]) => [item, spell]));
+  }
   const rushRoute = rushRoutes[name];
   if (!rushRoute) return profession;
   const ids = { ...intermediateIds, ...Object.fromEntries(guide.auction.map(([item, id]) => [item, id])), ...rushItemIds };

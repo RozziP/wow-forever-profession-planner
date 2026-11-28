@@ -164,7 +164,8 @@ function UnitCastingInfo()
   if cast then return cast.name, nil, nil, cast.startTime, cast.endTime, true, cast.id, nil, cast.spellID end
 end
 function GetProfessions()
-  return wow.professions[1] and 1, wow.professions[2] and 2, nil, wow.professions[4] and 4
+  return wow.professions[1] and 1, wow.professions[2] and 2, wow.professions[3] and 3,
+    wow.professions[4] and 4, wow.professions[5] and 5
 end
 function GetProfessionInfo(index)
   local profession = wow.professions[index]

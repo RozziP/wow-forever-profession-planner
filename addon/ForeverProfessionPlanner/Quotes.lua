@@ -98,6 +98,14 @@ local function newSection(from, cap)
   return { from = from, cap = cap, steps = {}, auction = {}, vendor = {}, vendorSpend = 0, revenue = 0 }
 end
 
+local function knowsManual(source, item)
+  local spell = source.manualRecipes and source.manualRecipes[item]
+  if not spell then return false end
+  local getRecipeInfo = C_TradeSkillUI and C_TradeSkillUI.GetRecipeInfo
+  local recipe = getRecipeInfo and getRecipeInfo(spell)
+  return (recipe and recipe.learned) or (C_SpellBook and C_SpellBook.IsSpellKnown and C_SpellBook.IsSpellKnown(spell))
+end
+
 local function lowerCost(candidate, reference)
   return candidate.net ~= nil and (reference.net == nil or candidate.net < reference.net)
 end
@@ -234,7 +242,7 @@ local function sectionPlans(base, start, target, preferBuying, bags, used, curre
           if crafts > 0 then
             local firstPrep = #section.steps + 1
             if step.pattern and not patterns[step.pattern] then
-              consume(step.pattern, 1)
+              if not knowsManual(base, step.pattern) then consume(step.pattern, 1) end
               patterns[step.pattern] = true
             end
             for material, units in pairs(step.mat) do consume(material, units * crafts) end
@@ -408,6 +416,11 @@ end
 
 function addon.RefreshShopping(plan)
   local bags = makeBagReader()
+  if plan.source.manualRecipes then
+    for i = #plan.shoppingVendor, 1, -1 do
+      if knowsManual(plan.source, plan.shoppingVendor[i].name) then table.remove(plan.shoppingVendor, i) end
+    end
+  end
   local function refresh(rows)
     local purchases = {}
     for _, row in ipairs(rows) do

@@ -267,4 +267,35 @@ module.exports = {
     },
     notes: 'Cook at a campfire. Gikkix in Steamwheedle Port sells the Spotted Yellowtail and Nightfin Soup recipes. Kelsey Yance in Booty Bay sells the Filet of Redgill recipe.',
   },
+  // WoW Professions' bandage route, checked against Forever build 1.60.1.71139.
+  'First Aid': {
+    steps: [
+      [1, 40, 'Linen Bandage', 50, 10, 30, 60],
+      [40, 75, 'Heavy Linen Bandage', 49, 20, 50, 100],
+      [75, 80, 'Heavy Linen Bandage', 16, 20, 50, 100],
+      [80, 90, 'Wool Bandage', 12, 28, 80, 150],
+      [90, 115, 'Wool Bandage', 43, 28, 80, 150],
+      [115, 150, 'Heavy Wool Bandage', 54, 57, 115, 185],
+      [150, 180, 'Silk Bandage', 47, 200, 150, 210],
+      [180, 210, 'Heavy Silk Bandage', 47, 400, 180, 240],
+      [210, 225, 'Mageweave Bandage', 19, 400, 210, 270],
+      [225, 240, 'Mageweave Bandage', 29, 400, 210, 270],
+      [240, 260, 'Heavy Mageweave Bandage', 30, 600, 240, 300],
+      [260, 290, 'Runecloth Bandage', 47, 500, 260, 320],
+      [290, 300, 'Heavy Runecloth Bandage', 12, 1000, 290, 350],
+    ],
+    auction: [
+      ['Linen Cloth', 2589], ['Wool Cloth', 2592], ['Silk Cloth', 4306],
+      ['Mageweave Cloth', 4338], ['Runecloth', 14047],
+    ],
+    vendor: [['Expert First Aid - Under Wraps', 10000, 16084]],
+    manuals: {
+      'Heavy Silk Bandage': ['Manual: Heavy Silk Bandage', 2200, 16112, 7929],
+      'Mageweave Bandage': ['Manual: Mageweave Bandage', 5000, 16113, 10840],
+    },
+    rankMaterials: {
+      150: { 'Expert First Aid - Under Wraps': 1 },
+    },
+    notes: 'Learn Silk Bandage before leaving your city trainer. The Expert book vendor also sells the manuals for Heavy Silk Bandage at 180 and Mageweave Bandage at 210. After Triage, the same doctor teaches the last three bandages at 240, 260, and 290.',
+  },
 };
